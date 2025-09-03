@@ -190,6 +190,8 @@ export function withoutExtension(filePath) {
  * @returns
  */
 export function isRelevantFile(fileName, { additionalRoots, cwd }) {
+  // Fake file handled by testem server when it runs
+  if (fileName.startsWith('/testem')) return false;
   // Private Virtual Modules
   if (fileName.startsWith('\0')) return false;
   // These are not valid userland names (or are from libraries)
