@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-09-03)
+
+* ember-scoped-css 0.24.3 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#322](https://github.com/auditboard/ember-scoped-css/pull/322) Ignore testem ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-07-18)
 
 * ember-scoped-css 0.24.2 (patch)
