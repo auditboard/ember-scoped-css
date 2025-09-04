@@ -1,0 +1,18 @@
+{
+  "extends": ["@tsconfig/strictest"],
+  "include": ["src/**/*.d.ts", "src/**/*.ts"],
+  "compilerOptions": {
+    "target": "es2022",
+    "allowJs": true,
+    // why do eslint's types always get involved?
+    "skipLibCheck": true,
+    // let JS be loose
+    "checkJs": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "inlineSourceMap": true,
+    "declarationMap": true,
+    "declarationDir": "declarations"
+  }
+}

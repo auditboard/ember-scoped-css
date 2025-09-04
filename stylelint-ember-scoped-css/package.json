@@ -1,0 +1,61 @@
+{
+  "name": "stylelint-ember-scoped-css",
+  "version": "0.1.0",
+  "description": "Stylelint plugin and config for ember-scoped-css",
+  "keywords": [
+    "stylelint",
+    "stylelint-plugin",
+    "stylelint-config",
+    "ember",
+    "ember-scoped-css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soxhub/ember-scoped-css.git",
+    "directory": "stylelint-ember-scoped-css"
+  },
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./config": "./src/config.js"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "build": "echo \"Build skipped\"",
+    "lint": "concurrently \"npm:lint:*(!fix)\" --names \"lint:\"",
+    "lint:fix": "concurrently \"npm:lint:*:fix\" --names \"fix:\"",
+    "lint:js": "eslint .",
+    "lint:js:fix": "eslint . --fix",
+    "lint:prettier:fix": "prettier . -w",
+    "lint:prettier": "prettier . -c",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@nullvoxpopuli/eslint-configs": "^4.3.0",
+    "@tsconfig/strictest": "^2.0.5",
+    "@typescript-eslint/eslint-plugin": "^8.24.1",
+    "@typescript-eslint/parser": "^8.24.1",
+    "concurrently": "^9.1.2",
+    "eslint": "^8.50.0",
+    "stylelint": "^16.23.0",
+    "postcss": "^8.5.6",
+    "postcss-selector-parser": "^6.1.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.0.6",
+    "vitest-stylelint-utils": "^2.0.0"
+  },
+  "peerDependencies": {
+    "stylelint": "^16.0.0"
+  },
+  "engines": {
+    "node": ">= 18"
+  },
+  "volta": {
+    "extends": "../package.json"
+  }
+}
