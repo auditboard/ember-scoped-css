@@ -96,7 +96,7 @@ function isScopedSelector(selectorNode) {
 function isScopedFunctionalPseudo(pseudoNode) {
   const name = pseudoNode.value;
 
-  if (name === ':global') {
+  if (name === ':global' || name === ':root') {
     return true;
   }
 
