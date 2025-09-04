@@ -11,10 +11,13 @@ testRule({
     { code: '[attr] .class {}' },
     { code: '[attr] tag {}' },
     { code: ':has(.class) {}' },
+    { code: ':has(.class, tag) {}' },
     { code: ':has(tag) {}' },
     { code: ':is(.class) {}' },
+    { code: ':is(.class, tag) {}' },
     { code: ':is(tag) {}' },
     { code: ':where(.class) {}' },
+    { code: ':where(.class, tag) {}' },
     { code: ':where(tag) {}' },
 
     // Global
@@ -24,7 +27,8 @@ testRule({
     { code: '.foo :global([bar]) {}' },
     { code: ':global(.x) [attr] {}' },
     { code: '[attr] :global(.y) {}' },
-    { code: '.foo:is(.a, [attr]) {}' },
+    { code: ':root {}' },
+    { code: ':root[attr] {}' },
 
     // At rules
     { code: '@keyframes spin { 0% {} 100% {} }' },
