@@ -2,3 +2,4 @@ packages:
   - 'test-apps/*'
   - 'ember-scoped-css'
   - 'ember-scoped-css-compat'
+  - 'stylelint-ember-scoped-css'
