@@ -1,5 +1,20 @@
 # Changelog
 
+## Release (2025-09-04)
+
+* stylelint-ember-scoped-css 0.2.0 (minor)
+
+#### :rocket: Enhancement
+* `stylelint-ember-scoped-css`
+  * [#321](https://github.com/auditboard/ember-scoped-css/pull/321) Add stylelint-ember-scoped-css package ([@mmun](https://github.com/mmun))
+
+#### :bug: Bug Fix
+* `stylelint-ember-scoped-css`
+  * [#325](https://github.com/auditboard/ember-scoped-css/pull/325) stylelint-ember-scoped-css: Consider :root to be scoped ([@mmun](https://github.com/mmun))
+
+#### Committers: 1
+- Martin Muñoz ([@mmun](https://github.com/mmun))
+
 ## Release (2025-09-03)
 
 * ember-scoped-css 0.24.3 (patch)
