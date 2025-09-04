@@ -24,5 +24,5 @@
       "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
     }
   },
-  "description": "## Release (2025-09-04)\n\n* stylelint-ember-scoped-css 0.2.0 (minor)\n\n#### :rocket: Enhancement\n* `stylelint-ember-scoped-css`\n  * [#321](https://github.com/auditboard/ember-scoped-css/pull/321) Add stylelint-ember-scoped-css package ([@mmun](https://github.com/mmun))\n\n#### :bug: Bug Fix\n* `stylelint-ember-scoped-css`\n  * [#325](https://github.com/auditboard/ember-scoped-css/pull/325) stylelint-ember-scoped-css: Consider :root to be scoped ([@mmun](https://github.com/mmun))\n\n#### Committers: 1\n- Martin Muñoz ([@mmun](https://github.com/mmun))\n"
+  "description": "## Release (2025-09-04)\n\n* stylelint-ember-scoped-css 0.2.0 (minor)\n\n#### :rocket: Enhancement\n* `stylelint-ember-scoped-css` \n  * [#321](https://github.com/auditboard/ember-scoped-css/pull/321) Add stylelint-ember-scoped-css package ([@mmun](https://github.com/mmun))\n\n#### :bug: Bug Fix\n* `stylelint-ember-scoped-css`\n  * [#325](https://github.com/auditboard/ember-scoped-css/pull/325) stylelint-ember-scoped-css: Consider :root to be scoped ([@mmun](https://github.com/mmun))\n\n#### Committers: 1\n- Martin Muñoz ([@mmun](https://github.com/mmun))\n"
 }
