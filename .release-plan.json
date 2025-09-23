@@ -7,22 +7,18 @@
       "oldVersion": "10.2.3"
     },
     "stylelint-ember-scoped-css": {
-      "impact": "minor",
-      "oldVersion": "0.1.0",
-      "newVersion": "0.2.0",
+      "impact": "patch",
+      "oldVersion": "0.2.0",
+      "newVersion": "0.2.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
           "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
+          "reason": "Appears in changelog section :memo: Documentation"
         }
       ],
       "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
     }
   },
-  "description": "## Release (2025-09-04)\n\n* stylelint-ember-scoped-css 0.2.0 (minor)\n\n#### :rocket: Enhancement\n* `stylelint-ember-scoped-css` \n  * [#321](https://github.com/auditboard/ember-scoped-css/pull/321) Add stylelint-ember-scoped-css package ([@mmun](https://github.com/mmun))\n\n#### :bug: Bug Fix\n* `stylelint-ember-scoped-css`\n  * [#325](https://github.com/auditboard/ember-scoped-css/pull/325) stylelint-ember-scoped-css: Consider :root to be scoped ([@mmun](https://github.com/mmun))\n\n#### Committers: 1\n- Martin Muñoz ([@mmun](https://github.com/mmun))\n"
+  "description": "## Release (2025-09-23)\n\n* stylelint-ember-scoped-css 0.2.1 (patch)\n\n#### :memo: Documentation\n* `stylelint-ember-scoped-css`\n  * [#326](https://github.com/auditboard/ember-scoped-css/pull/326) Improve README.md ([@mmun](https://github.com/mmun))\n\n#### Committers: 1\n- Martin Muñoz ([@mmun](https://github.com/mmun))\n"
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-09-23)
+
+* stylelint-ember-scoped-css 0.2.1 (patch)
+
+#### :memo: Documentation
+* `stylelint-ember-scoped-css`
+  * [#326](https://github.com/auditboard/ember-scoped-css/pull/326) Improve README.md ([@mmun](https://github.com/mmun))
+
+#### Committers: 1
+- Martin Muñoz ([@mmun](https://github.com/mmun))
+
 ## Release (2025-09-04)
 
 * stylelint-ember-scoped-css 0.2.0 (minor)
