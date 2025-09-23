@@ -2,105 +2,112 @@
 
 Disallows CSS selectors that cannot be properly scoped by ember-scoped-css's namespacing process.
 
-This rule ensures that every CSS selector contains at least one class selector that can be transformed during the build process to provide proper component isolation.
+This rule ensures that every CSS selector contains at least one class or tag selector that can be scoped during the build process to provide proper component isolation.
 
 ## Options
 
 ### `true`
 
-The following patterns are considered problems:
+The following are examples of patterns that are considered acceptable:
 
-<!-- prettier-ignore -->
 ```css
-/* No class selectors to scope */
-div { }
+/* Class selectors can be namespaced */
+.my-component {
+}
 ```
 
-<!-- prettier-ignore -->
 ```css
-[data-test] { }
+/* Tag selectors can be scoped */
+div {
+}
 ```
 
-<!-- prettier-ignore -->
 ```css
-:hover { }
+/* Combinations of scoped and unscoped selectors */
+.btn [data-test] {
+}
+.btn:hover {
+}
+div[data-test] {
+}
 ```
 
-<!-- prettier-ignore -->
-```css
-::before { }
-```
-
-<!-- prettier-ignore -->
-```css
-* { }
-```
-
-<!-- prettier-ignore -->
-```css
-/* Classes only inside :not() break component isolation */
-:not(.hidden) { }
-```
-
-<!-- prettier-ignore -->
-```css
-/* Mixed selectors where some parts are unscopable */
-.valid-class,
-div { }
-```
-
-The following patterns are _not_ considered problems:
-
-<!-- prettier-ignore -->
-```css
-/* Class selectors that can be namespaced */
-.my-component { }
-```
-
-<!-- prettier-ignore -->
-```css
-.btn:hover { }
-```
-
-<!-- prettier-ignore -->
-```css
-.parent > .child { }
-```
-
-<!-- prettier-ignore -->
-```css
-/* Descendant selectors with scopable classes */
-.component [data-test] { }
-```
-
-<!-- prettier-ignore -->
-```css
-div .my-class { }
-```
-
-<!-- prettier-ignore -->
-```css
-/* Classes inside scoping-safe functional pseudo-classes */
-:has(.child) { }
-```
-
-<!-- prettier-ignore -->
-```css
-:is(.primary, .secondary) { }
-```
-
-<!-- prettier-ignore -->
-```css
-:where(.variant) { }
-```
-
-<!-- prettier-ignore -->
 ```css
 /* Explicitly global selectors */
-:global([data-test]) { }
+:global([data-test]) {
+}
 ```
 
-<!-- prettier-ignore -->
 ```css
-:global(body) { }
+/* Root selectors for global styles */
+:root {
+}
+```
+
+The following are examples of patterns that are considered problems:
+
+```css
+/* Attribute selectors cannot be scoped */
+[data-test] {
+}
+```
+
+```css
+/* Element selectors cannot be scoped */
+#container {
+}
+```
+
+```css
+/* Universal selectors cannot be scoped */
+* {
+}
+```
+
+## How to Fix Violations
+
+When this rule reports an error, you have several options:
+
+1. **Add a class selector** (most common):
+
+```css
+/* ❌ Error */
+[data-test] {
+}
+
+/* ✅ Fixed */
+.my-component [data-test] {
+}
+```
+
+2. **Add a tag selector**:
+
+```css
+/* ❌ Error */
+[data-test] {
+}
+
+/* ✅ Fixed */
+div[data-test] {
+}
+```
+
+3. **Use :global() for intentionally global styles**:
+
+```css
+/* ❌ Error */
+[data-test] {
+}
+
+/* ✅ Fixed - applies globally */
+:global([data-test]) {
+}
+```
+
+4. **Use :root for root-level styles**:
+
+```css
+/* ✅ Root styles are allowed */
+:root {
+}
 ```
