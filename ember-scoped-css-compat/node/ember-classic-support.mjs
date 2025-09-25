@@ -1,27 +1,27 @@
-'use strict';
+"use strict";
 
-import { existsSync } from 'node:fs';
-import { readFile, writeFile } from 'node:fs/promises';
-import path from 'node:path';
+import { existsSync } from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 
-import Concat from 'broccoli-concat';
-import { Funnel } from 'broccoli-funnel';
-import MergeTrees from 'broccoli-merge-trees';
-import Filter from 'broccoli-persistent-filter';
-import { Preprocessor } from 'content-tag';
+import Concat from "broccoli-concat";
+import { Funnel } from "broccoli-funnel";
+import MergeTrees from "broccoli-merge-trees";
+import Filter from "broccoli-persistent-filter";
+import { Preprocessor } from "content-tag";
 
-import getClassesTagsFromCss from '../lib/getClassesTagsFromCss.js';
+import getClassesTagsFromCss from "ember-scoped-css/__private__/lib/getClassesTagsFromCss.js";
 import {
   cssHasAssociatedComponent,
   hashFromModulePath,
   packageScopedPathToModulePath,
-} from '../lib/path/utils.js';
-import rewriteCss from '../lib/rewriteCss.js';
-import rewriteHbs from '../lib/rewriteHbs.js';
+} from "ember-scoped-css/__private__/lib/path/utils.js";
+import rewriteCss from "ember-scoped-css/__private__/lib/rewriteCss.js";
+import rewriteHbs from "ember-scoped-css/__private__/lib/rewriteHbs.js";
 
 const p = new Preprocessor();
-const COMPONENT_EXTENSIONS = ['hbs', 'js', 'ts', 'gjs', 'gts'];
-const TEMPLATE_EXTENSIONS = ['hbs', 'gjs', 'gts'];
+const COMPONENT_EXTENSIONS = ["hbs", "js", "ts", "gjs", "gts"];
+const TEMPLATE_EXTENSIONS = ["hbs", "gjs", "gts"];
 
 class ScopedFilter extends Filter {
   constructor(componentsNode, options = {}) {
@@ -31,17 +31,17 @@ class ScopedFilter extends Filter {
   }
 
   get extensions() {
-    return ['css'];
+    return ["css"];
   }
 
   get targetExtension() {
-    return 'css';
+    return "css";
   }
 
   async processString(content, relativePath) {
     // ignore css files for ember-css-modules
-    if (relativePath.endsWith('.module.css')) {
-      return '';
+    if (relativePath.endsWith(".module.css")) {
+      return "";
     }
 
     // check if corresponding js file exists
@@ -53,7 +53,7 @@ class ScopedFilter extends Filter {
       for (let ext of COMPONENT_EXTENSIONS) {
         if (hasRelevantFile) break;
 
-        const relativeComponentPath = relativePath.replace(/\.css$/, '.' + ext);
+        const relativeComponentPath = relativePath.replace(/\.css$/, "." + ext);
         const componentPath = path.join(inputPath, relativeComponentPath);
 
         if (existsSync(componentPath)) {
@@ -64,7 +64,7 @@ class ScopedFilter extends Filter {
       /**
        * Pods support
        */
-      if (relativePath.endsWith('styles.css')) {
+      if (relativePath.endsWith("styles.css")) {
         const absoluteCssPath = path.join(inputPath, relativePath);
 
         if (cssHasAssociatedComponent(absoluteCssPath)) {
@@ -88,12 +88,12 @@ class ScopedFilter extends Filter {
 
       return content;
     } else {
-      return '';
+      return "";
     }
   }
 
   async postProcess(results, relativePath) {
-    if (process.env.CI || relativePath.endsWith('.module.css')) {
+    if (process.env.CI || relativePath.endsWith(".module.css")) {
       return results;
     }
 
@@ -101,15 +101,15 @@ class ScopedFilter extends Filter {
       const templateFile = {};
 
       eachExtension: for (let ext of TEMPLATE_EXTENSIONS) {
-        const templatePath = relativePath.replace(/\.css/, '.' + ext);
+        const templatePath = relativePath.replace(/\.css/, "." + ext);
         let templateFilePath = path.join(inputPath, templatePath);
         let exists = existsSync(templateFilePath);
 
         /**
          * Pods support
          */
-        if (ext === 'hbs' && !exists && relativePath.endsWith('styles.css')) {
-          let podsName = relativePath.replace(/styles\.css$/, 'template.hbs');
+        if (ext === "hbs" && !exists && relativePath.endsWith("styles.css")) {
+          let podsName = relativePath.replace(/styles\.css$/, "template.hbs");
 
           templateFilePath = path.join(inputPath, podsName);
           exists = existsSync(templateFilePath);
@@ -126,7 +126,7 @@ class ScopedFilter extends Filter {
       // if the template exists we check the css for changes
       if (templateFile.path) {
         const cssFilePath = path.join(inputPath, relativePath);
-        const cssContents = await readFile(cssFilePath, 'utf-8');
+        const cssContents = await readFile(cssFilePath, "utf-8");
         const { classes, tags } = getClassesTagsFromCss(cssContents);
         const previousClasses = this.options.previousClasses.get(relativePath);
 
@@ -135,11 +135,11 @@ class ScopedFilter extends Filter {
           const localPackagerStylePath =
             packageScopedPathToModulePath(relativePath);
           const postfix = hashFromModulePath(localPackagerStylePath);
-          const templateRaw = await readFile(templateFile.path, 'utf-8');
+          const templateRaw = await readFile(templateFile.path, "utf-8");
           const templateComparison = [];
           let templateContents = templateRaw;
 
-          if (templateFile.ext === 'hbs') {
+          if (templateFile.ext === "hbs") {
             templateComparison.push(
               didTemplateChange(
                 templateContents,
@@ -151,7 +151,7 @@ class ScopedFilter extends Filter {
             );
           } else {
             // find all template tags, and extract the contents to compare
-            const results = p.parse(templateRaw, '');
+            const results = p.parse(templateRaw, "");
             const templates = results.map((x) => x.contents);
 
             for (let template of templates) {
@@ -173,7 +173,7 @@ class ScopedFilter extends Filter {
           if (templateChanged) {
             // this is an awful hack because we don't know how to invalidate broccoli-persistent-filter cache
             // ideally we'd invalidate the broccoli-peristent-filter cache here
-            await writeFile(templateFile.path, templateContents + ' ');
+            await writeFile(templateFile.path, templateContents + " ");
           }
         }
         // assign for next run comparison
@@ -213,7 +213,7 @@ export default class ScopedCssPreprocessor {
   constructor(options) {
     this.owner = options.owner;
     this.appName = options.owner.parent.pkg.name;
-    this.name = 'scoped-css-preprocessor';
+    this.name = "scoped-css-preprocessor";
     this.previousClasses = new Map();
   }
 
@@ -222,7 +222,7 @@ export default class ScopedCssPreprocessor {
    * @param {{ layerName?: string }} options
    */
   configureOptions(options) {
-    this.userOptions = options || { ['not configured']: true };
+    this.userOptions = options || { ["not configured"]: true };
   }
 
   toTree(inputNode, inputPath, outputDirectory, options) {
@@ -231,14 +231,14 @@ export default class ScopedCssPreprocessor {
     let mergedOtherTrees = new MergeTrees(otherTrees);
 
     let roots = [
-      this.appName + '/components/',
+      this.appName + "/components/",
       ...(this.userOptions.additionalRoots || []).map(
         (root) => `${this.appName}/${root}`,
       ),
     ];
     let include = roots
       .map((root) => {
-        let withSlash = root.endsWith('/') ? root : `${root}/`;
+        let withSlash = root.endsWith("/") ? root : `${root}/`;
 
         return [
           `${withSlash}**/*.css`,
@@ -258,14 +258,14 @@ export default class ScopedCssPreprocessor {
 
     const componentStyles = new Funnel(componentsNode, {
       include: roots.map((root) => {
-        let withSlash = root.endsWith('/') ? root : `${root}/`;
+        let withSlash = root.endsWith("/") ? root : `${root}/`;
 
         return `${withSlash}**/*.css`;
       }),
     });
 
     const appCss = new Funnel(inputNode, {
-      include: [this.appName + '/styles/app.css'],
+      include: [this.appName + "/styles/app.css"],
     });
 
     let mergedStyles = new MergeTrees(
@@ -274,7 +274,7 @@ export default class ScopedCssPreprocessor {
     );
 
     let newOutput = new Concat(mergedStyles, {
-      outputFile: options.outputPaths['app'],
+      outputFile: options.outputPaths["app"],
       allowNone: true,
       sourceMapConfig: { enabled: true },
     });

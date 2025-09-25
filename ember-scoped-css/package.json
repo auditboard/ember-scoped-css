@@ -63,6 +63,10 @@
     "./template-plugin": {
       "import": "./src/build/template-plugin.js",
       "require": "./dist/cjs/template-plugin.cjs"
+    },
+    "./__private__/lib/*": {
+      "import": "./src/lib/*.js",
+      "require": "./dist/cjs/lib/*.js"
     }
   },
   "scripts": {
@@ -104,6 +108,10 @@
     "esbuild": "^0.25.0",
     "esbuild-plugin-vitest-cleaner": "^0.5.1",
     "eslint": "^8.50.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-n": "^17.21.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-sort": "^4.0.0",
     "prettier": "^3.5.1",
     "typescript": "^5.2.2",
     "vitest": "^3.0.6",

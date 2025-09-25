@@ -4,6 +4,6 @@ const defaults = ember.recommended(import.meta.dirname);
 export default [
   ...defaults,
   {
-    ignores: ['dist', 'dist-prod'],
+    ignores: ['dist', 'dist-prod', 'build.mjs'],
   },
 ];
