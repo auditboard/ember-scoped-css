@@ -41,7 +41,7 @@ export default {
         },
         load(id) {
           if (id === privateId) {
-            return `export * from '${process.cwd()}/from-virtual/example.gts';`;
+            return `export * from '${process.cwd()}/src/from-virtual/example.gts';`;
           }
         },
       };

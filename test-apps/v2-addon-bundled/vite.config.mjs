@@ -6,14 +6,6 @@ import { babel } from '@rollup/plugin-babel';
 const isCompat = Boolean(process.env.ENABLE_COMPAT_BUILD);
 
 export default defineConfig({
-  resolve: {
-    alias: [
-      {
-        find: 'v2-addon-bundled',
-        replacement: `${__dirname}/src`,
-      },
-    ],
-  },
   plugins: [
     ...(isCompat ? [classicEmberSupport()] : []),
     ember(),
