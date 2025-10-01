@@ -18,7 +18,6 @@ let ourRequire = globalThis.require
   : here && createRequire(here);
 
 if (!ourRequire) {
-  // eslint-disable-next-line no-undef
   ourRequire = require;
 }
 
@@ -457,7 +456,6 @@ export function moduleName(sourcePath) {
    *       file is laid out from the blueprint defaults.
    */
   if (fsSync.existsSync(environmentJS)) {
-    // eslint-disable-next-line no-undef -- this exists
     const envFn = ourRequire(environmentJS);
     const env = envFn('ember-scoped-css');
 
