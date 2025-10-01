@@ -12,6 +12,11 @@
   },
   "license": "MIT",
   "author": "",
+  "files": [
+    "addon",
+    "app",
+    "index.js"
+  ],
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -38,7 +43,6 @@
     "@ember/test-helpers": "^3.2.0",
     "@embroider/test-setup": "^4.0.0",
     "@glimmer/component": "2.0.0",
-    "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "broccoli-asset-rev": "^3.0.0",
     "concurrently": "^9.1.2",
     "ember-auto-import": "^2.10.0",
@@ -50,6 +54,7 @@
     "ember-load-initializers": "^2.1.2",
     "ember-page-title": "^8.2.4",
     "ember-qunit": "^8.0.2",
+    "ember-eslint": "0.5.0",
     "ember-resolver": "^12.0.0",
     "ember-scoped-css": "workspace:*",
     "ember-source": "~5.12.0",
@@ -68,7 +73,7 @@
     "ember-scoped-css": ">=0.18.0"
   },
   "engines": {
-    "node": ">= 22"
+    "node": ">= 22.16"
   },
   "ember": {
     "edition": "octane"

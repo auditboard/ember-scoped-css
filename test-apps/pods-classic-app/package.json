@@ -29,6 +29,7 @@
     "@ember/test-helpers": "^5.1.0",
     "@ember/test-waiters": "^4.0.0",
     "@glimmer/component": "2.0.0",
+    "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "broccoli-asset-rev": "^3.0.0",
     "concurrently": "^9.1.2",
     "ember-auto-import": "^2.10.0",
@@ -65,7 +66,7 @@
     "webpack": "^5.98.0"
   },
   "engines": {
-    "node": ">= 22"
+    "node": ">= 22.16"
   },
   "ember": {
     "edition": "octane"

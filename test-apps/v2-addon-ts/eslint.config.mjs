@@ -3,6 +3,9 @@ import { configs } from '@nullvoxpopuli/eslint-configs';
 export default [
   ...configs.ember(import.meta.dirname),
   {
+    ignores: ['dist', 'dist-prod', 'fixtures', 'node_modules'],
+  },
+  {
     files: ['**/*.gjs', '**/*.gts'],
     rules: {
       // not relevant for what we're testing

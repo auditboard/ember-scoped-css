@@ -32,6 +32,7 @@
     "@embroider/macros": "^1.16.10",
     "@embroider/webpack": "^4.0.9",
     "@glimmer/component": "2.0.0",
+    "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "concurrently": "^9.1.2",
     "ember-auto-import": "^2.10.0",
     "ember-cli": "~5.9.0",
@@ -62,7 +63,7 @@
     "webpack": "^5.98.0"
   },
   "engines": {
-    "node": ">= 22"
+    "node": ">= 22.16"
   },
   "ember": {
     "edition": "octane"

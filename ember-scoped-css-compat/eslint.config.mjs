@@ -1,11 +1,9 @@
-import { configs } from "@nullvoxpopuli/eslint-configs";
+import { ember } from "ember-eslint";
 
+const defaults = ember.recommended(import.meta.dirname);
 export default [
-  ...configs.ember(import.meta.dirname),
+  ...defaults,
   {
-    files: ["**/*"],
-    rules: {
-      "prefer-const": "off",
-    },
+    ignores: ["dist", "dist-prod"],
   },
 ];

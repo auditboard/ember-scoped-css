@@ -34,6 +34,9 @@ importers:
       '@babel/preset-typescript':
         specifier: ^7.26.0
         version: 7.27.1(@babel/core@7.28.4)
+      '@ember/library-tsconfig':
+        specifier: ^1.1.3
+        version: 1.1.3
       '@embroider/addon-dev':
         specifier: ^4.3.1
         version: 4.3.1(rollup@4.52.3)
@@ -683,6 +686,9 @@ packages:
 
   '@ember-data/rfc395-data@0.0.4':
     resolution: {integrity: sha512-tGRdvgC9/QMQSuSuJV45xoyhI0Pzjm7A9o/MVVA3HakXIImJbbzx/k/6dO9CUEQXIyS2y0fW6C1XaYOG7rY0FQ==}
+
+  '@ember/library-tsconfig@1.1.3':
+    resolution: {integrity: sha512-4cKJ38VEcm4mYmontK9BCpQgm5GPLgAeXqd6PqTHD8eKN0GTeegxdX4SsSUN/8emmULq/9H/Oh6fp3vM2mFqkA==}
 
   '@embroider/addon-dev@4.3.1':
     resolution: {integrity: sha512-CNZ4Y69PPIZAAGGoERjvDcrwOwWTuUmnRYu+XnmqKk0opdlu/PTssO9YWyxp8AnvGd2l7iLCjEn5mpLFvifstA==}
@@ -4473,6 +4479,8 @@ snapshots:
   '@csstools/css-tokenizer@3.0.4': {}
 
   '@ember-data/rfc395-data@0.0.4': {}
+
+  '@ember/library-tsconfig@1.1.3': {}
 
   '@embroider/addon-dev@4.3.1(rollup@4.52.3)':
     dependencies:

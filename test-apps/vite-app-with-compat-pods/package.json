@@ -97,7 +97,7 @@
     "vite": "^6.3.5"
   },
   "engines": {
-    "node": ">= 22"
+    "node": ">= 22.16"
   },
   "ember": {
     "edition": "octane"

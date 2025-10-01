@@ -12,7 +12,7 @@ module('[In App] DynamicAttribute', function (hooks) {
       @tracked ya = true;
     }
 
-    let state = new State();
+    const state = new State();
 
     this.setProperties({ state });
     await render(hbs`<DynamicAttribute @foo={{this.state.ya}}/>`);

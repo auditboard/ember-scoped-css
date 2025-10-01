@@ -15,6 +15,9 @@ importers:
       '@babel/plugin-transform-typescript':
         specifier: ^7.26.8
         version: 7.26.8(@babel/core@7.28.4)
+      '@ember/app-tsconfig':
+        specifier: ^1.0.3
+        version: 1.0.3
       '@ember/optional-features':
         specifier: ^2.2.0
         version: 2.2.0
@@ -879,6 +882,9 @@ packages:
 
   '@ember-data/rfc395-data@0.0.4':
     resolution: {integrity: sha512-tGRdvgC9/QMQSuSuJV45xoyhI0Pzjm7A9o/MVVA3HakXIImJbbzx/k/6dO9CUEQXIyS2y0fW6C1XaYOG7rY0FQ==}
+
+  '@ember/app-tsconfig@1.0.3':
+    resolution: {integrity: sha512-dw+/F68xvBw8JYLpyFmAcnF5d/vZqlP6GkEde+XIuPPPn6PIakrh0jtP0/tPxBw8tVuc6eD+H+8CWSsSFrGuiA==}
 
   '@ember/edition-utils@1.2.0':
     resolution: {integrity: sha512-VmVq/8saCaPdesQmftPqbFtxJWrzxNGSQ+e8x8LLe3Hjm36pJ04Q8LeORGZkAeOhldoUX9seLGmSaHeXkIqoog==}
@@ -8593,6 +8599,8 @@ snapshots:
   '@csstools/css-tokenizer@3.0.3': {}
 
   '@ember-data/rfc395-data@0.0.4': {}
+
+  '@ember/app-tsconfig@1.0.3': {}
 
   '@ember/edition-utils@1.2.0': {}
 
