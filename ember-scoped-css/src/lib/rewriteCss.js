@@ -37,7 +37,7 @@ function isInsideKeyframes(node) {
   return isInsideKeyframes(parent);
 }
 
-export default function rewriteCss(css, postfix, fileName, layerName) {
+export function rewriteCss(css, postfix, fileName, layerName) {
   const layerNameWithDefault = layerName ?? 'components';
   const ast = postcss.parse(css);
 
@@ -112,3 +112,5 @@ if (import.meta.vitest) {
     );
   });
 }
+
+export default rewriteCss;

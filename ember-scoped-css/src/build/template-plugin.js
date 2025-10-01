@@ -4,7 +4,9 @@
  *
  */
 
+import { makeRequest } from '../lib/request.js';
 import { getCSSInfo } from '../lib/css/utils.js';
+import { rewriteCss } from '../lib/rewriteCss.js';
 import { fixFilename } from '../lib/path/template-transform-paths.js';
 import {
   appPath,
@@ -47,6 +49,14 @@ export function createPlugin(config) {
     if (!info) {
       return noopPlugin;
     }
+
+    let scopedCss = rewriteCss(info.css, postfix, cssPath, config.layerName);
+    let cssRequest = makeRequest(modulePath, scopedCss);
+
+    /**
+     * With this we don't need a JS plugin
+     */
+    env.meta.jsutils.importForSideEffect(cssRequest);
 
     let visitors = templatePlugin({
       classes: info.classes,

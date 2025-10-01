@@ -4,7 +4,7 @@
  * (and linting)
  */
 import { buildMacros } from '@embroider/macros/babel';
-import * as scopedCSS from "ember-scoped-css/build";
+import * as scopedCSS from 'ember-scoped-css/build';
 
 import {
   babelCompatSupport,
@@ -26,7 +26,7 @@ export default {
         onlyRemoveTypeImports: true,
       },
     ],
-    scopedCSS.babelPlugin({}),
+    scopedCSS.babelPlugin,
     [
       'babel-plugin-ember-template-compilation',
       {

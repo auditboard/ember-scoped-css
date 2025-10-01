@@ -29,7 +29,7 @@ export default function getClassesTagsFromCss(css) {
     }
   });
 
-  return { classes, tags };
+  return { classes, tags, css };
 }
 
 if (import.meta.vitest) {

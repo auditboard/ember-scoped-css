@@ -5,6 +5,7 @@ import process from 'node:process';
 
 import { createUnplugin } from 'unplugin';
 
+import { isScopedCSSRequest, decodeScopedCSSRequest } from '../lib/request.js';
 import getClassesTagsFromCss from '../lib/getClassesTagsFromCss.js';
 import {
   cssHasAssociatedComponent,
@@ -124,98 +125,37 @@ function gatherCSSFiles(bundle) {
   return cssFiles;
 }
 
-let virtualAll = `virtual:scoped.css?all`;
-let virtualAllId = '\0' + virtualAll;
+/**
+ * The plugin that handles CSS requests from other transform (e.g.: babel)
+ *
+ * This plugin takes no options because the CSS transform has already happened by the time
+ * we handle it here.
+ */
+export default createUnplugin(() => {
+  return {
+    name: 'ember-scoped-css-unplugin',
 
-export default createUnplugin(
-  /**
-   * @typedef {object} Options
-   * @property {string} [layerName] the name of the layer to place the generated css. Defaults to "components"
-   *
-   * @param {Options} [options]
-   */
-  (options) => {
-    let cwd = process.cwd();
-    let additionalRoots = options?.additionalRoots || [];
+    resolveId(id, importer) {
+      if (isScopedCSSRequest(id)) {
+        let parsed = decodeScopedCSSRequest(id);
 
-    let manualImportAll = false;
+        return {
+          id: path.resolve(path.dirname(importer), parsed.id),
+          meta: {
+            'scoped-css': {
+              css: parsed.css,
+            },
+          },
+        };
+      }
+    },
 
-    return {
-      name: 'ember-scoped-css-unplugin',
+    load(id) {
+      let meta = this.getModuleInfo(id)?.meta?.['scoped-css'];
 
-      generateBundle(_, bundle) {
-        let cssFiles = gatherCSSFiles(bundle);
-
-        if (manualImportAll || process.env.environment === 'development') {
-          this.emitFile({
-            type: 'asset',
-            fileName: 'scoped.css',
-            source: cssFiles.join('\n'),
-          });
-        }
-      },
-      vite: {
-        generateBundle() {
-          /* deliberately do nothing */
-        },
-        transform(code, jsPath) {
-          if (!isRelevantFile(jsPath, { additionalRoots, cwd })) return;
-
-          /**
-           * HBS files are actually JS files with a call to precompileTemplate
-           */
-          if (isHbsFile(jsPath)) {
-            return transformJsFile(code, jsPath);
-          } else if (isJsFile(jsPath)) {
-            return transformJsFile(code, jsPath);
-          } else if (isCssFile(jsPath)) {
-            return transformCssFile(code, jsPath, options?.layerName);
-          }
-        },
-      },
-
-      resolveId(id, importer) {
-        if (id === virtualAll) {
-          manualImportAll = importer;
-          return virtualAllId;
-        }
-      },
-
-      load(id) {
-        if (id === virtualAllId) {
-          // We can't emit only contents for this file until we process all the other files
-          // though, if we assume all CSS files are used, we could eagerly do this.
-          return '';
-        }
-      },
-
-      transform(code, jsPath) {
-        if (!isRelevantFile(jsPath, { additionalRoots, cwd })) return;
-
-        /**
-         * HBS files are actually JS files with a call to precompileTemplate
-         */
-        if (isHbsFile(jsPath)) {
-          return transformJsFile(code, jsPath);
-        } else if (isJsFile(jsPath)) {
-          return transformJsFile(code, jsPath);
-        } else if (isCssFile(jsPath)) {
-          let css = transformCssFile(code, jsPath, options?.layerName);
-
-          const emittedFileName = jsPath.replace(
-            path.join(process.cwd(), 'src/'),
-            '',
-          );
-
-          this.emitFile({
-            type: 'asset',
-            fileName: emittedFileName,
-            source: css,
-          });
-
-          return '';
-        }
-      },
-    };
-  },
-);
+      if (meta) {
+        return meta.css;
+      }
+    },
+  };
+});
