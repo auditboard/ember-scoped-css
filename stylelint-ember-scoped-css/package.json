@@ -51,7 +51,7 @@
     "stylelint": "^16.0.0"
   },
   "engines": {
-    "node": ">= 22"
+    "node": ">= 22.16"
   },
   "volta": {
     "extends": "../package.json"

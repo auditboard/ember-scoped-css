@@ -21,9 +21,6 @@ export default [
   },
   {
     files: ['**/*.test.ts', '**/*.test.d.ts'],
-    env: {
-      mocha: true,
-    },
     rules: {
       'n/no-unpublished-import': 'off',
       'node/no-unpublished-import': 'off',
