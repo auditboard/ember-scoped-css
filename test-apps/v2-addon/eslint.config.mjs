@@ -3,6 +3,15 @@ import { configs } from '@nullvoxpopuli/eslint-configs';
 export default [
   ...configs.ember(import.meta.dirname),
   {
+    ignores: [
+      'node_modules',
+      'declarations',
+      'dist',
+      'template-registry.d.ts',
+      'vitest.config.mts',
+    ],
+  },
+  {
     files: ['**/*.gjs', '**/*.gts'],
     rules: {
       // scoped-class isn't defined, yet we allow it for build time.

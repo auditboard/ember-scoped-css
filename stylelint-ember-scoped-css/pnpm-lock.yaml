@@ -14,7 +14,7 @@ importers:
     devDependencies:
       '@nullvoxpopuli/eslint-configs':
         specifier: ^5.3.4
-        version: 5.3.4(f477b291baabb911bda7887580e35223)
+        version: 5.3.4(85e0df20e2b9ca1c4c153b3ba4b3ff77)
       '@tsconfig/strictest':
         specifier: ^2.0.5
         version: 2.0.5
@@ -30,6 +30,9 @@ importers:
       postcss-selector-parser:
         specifier: ^6.1.0
         version: 6.1.2
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
       stylelint:
         specifier: ^16.24.0
         version: 16.24.0(typescript@5.9.2)
@@ -1972,6 +1975,11 @@ packages:
     peerDependencies:
       prettier: '>= 3.0.0'
 
+  prettier@3.6.2:
+    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
@@ -2877,7 +2885,7 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
-  '@nullvoxpopuli/eslint-configs@5.3.4(f477b291baabb911bda7887580e35223)':
+  '@nullvoxpopuli/eslint-configs@5.3.4(85e0df20e2b9ca1c4c153b3ba4b3ff77)':
     dependencies:
       '@babel/core': 7.28.4
       '@eslint/js': 9.36.0
@@ -2892,9 +2900,10 @@ snapshots:
       eslint-plugin-n: 17.23.1(eslint@9.36.0)(typescript@5.9.2)
       eslint-plugin-simple-import-sort: 12.1.1(eslint@9.36.0)
       globals: 16.4.0
-      prettier-plugin-ember-template-tag: 2.1.0
+      prettier-plugin-ember-template-tag: 2.1.0(prettier@3.6.2)
     optionalDependencies:
       '@babel/eslint-parser': 7.28.4(@babel/core@7.28.4)(eslint@9.36.0)
+      prettier: 3.6.2
     transitivePeerDependencies:
       - eslint-import-resolver-webpack
       - eslint-plugin-import-x
@@ -4478,12 +4487,15 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-ember-template-tag@2.1.0:
+  prettier-plugin-ember-template-tag@2.1.0(prettier@3.6.2):
     dependencies:
       '@babel/core': 7.28.4
       content-tag: 4.0.0
+      prettier: 3.6.2
     transitivePeerDependencies:
       - supports-color
+
+  prettier@3.6.2: {}
 
   punycode@2.3.1: {}
 
