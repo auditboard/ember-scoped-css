@@ -6,6 +6,7 @@ export default [
     ignores: [
       'node_modules',
       'declarations',
+      'fixtures',
       'dist',
       'template-registry.d.ts',
       'vitest.config.mts',
