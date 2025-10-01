@@ -1,9 +1,12 @@
+import * as scopedCSS from "ember-scoped-css/build";
+
+
 /**
  * This babel.config is only used for publishing.
  *
  * For local dev experience, see the babel.config
  */
-module.exports = {
+export default {
   plugins: [
     [
       '@babel/plugin-transform-typescript',
@@ -13,11 +16,15 @@ module.exports = {
         onlyRemoveTypeImports: true,
       },
     ],
+        scopedCSS.babelPlugin,
+
     [
       'babel-plugin-ember-template-compilation',
       {
         targetFormat: 'hbs',
-        transforms: [],
+        transforms: [
+          scopedCSS.templatePlugin({}),
+        ],
       },
     ],
     [

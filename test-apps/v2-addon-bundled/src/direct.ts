@@ -1,1 +1,1 @@
-export * from './from-direct/example.gts';
+export * from './components/from-direct/example.gts';

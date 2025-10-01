@@ -138,13 +138,15 @@ export default createUnplugin(
     let cwd = process.cwd();
     let additionalRoots = options?.additionalRoots || [];
 
+    let manualImportAll = false;
+
     return {
       name: 'ember-scoped-css-unplugin',
 
       generateBundle(_, bundle) {
         let cssFiles = gatherCSSFiles(bundle);
 
-        if (process.env.environment === 'development') {
+        if (manualImportAll || process.env.environment === 'development') {
           this.emitFile({
             type: 'asset',
             fileName: 'scoped.css',
@@ -172,17 +174,18 @@ export default createUnplugin(
         },
       },
 
-      resolveId(id) {
+      resolveId(id, importer) {
         if (id === virtualAll) {
+          manualImportAll = importer;
           return virtualAllId;
         }
       },
 
       load(id) {
         if (id === virtualAllId) {
-          let cssFiles = gatherCSSFiles(this.getModuleInfo);
-
-          return cssFiles.join('\n');
+          // We can't emit only contents for this file until we process all the other files
+          // though, if we assume all CSS files are used, we could eagerly do this.
+          return '';
         }
       },
 

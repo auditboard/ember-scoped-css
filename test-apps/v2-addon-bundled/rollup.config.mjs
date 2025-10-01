@@ -3,15 +3,13 @@ import { Addon } from '@embroider/addon-dev/rollup';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 
-import { scopedCssUnplugin } from 'ember-scoped-css/build';
-
 const addon = new Addon({
   srcDir: 'src',
   destDir: 'dist',
 });
 
 const rootDirectory = dirname(fileURLToPath(import.meta.url));
-const babelConfig = resolve(rootDirectory, './babel.publish.config.cjs');
+const babelConfig = resolve(rootDirectory, './babel.publish.config.mjs');
 
 export default {
   // This provides defaults that work well alongside `publicEntrypoints` below.
@@ -27,6 +25,7 @@ export default {
       configFile: babelConfig,
     }),
     addon.gjs(),
+    addon.keepAssets(['**/*.css']),
     (() => {
       let virtualId = 'virtual:from-virtual';
       let privateId = '\0' + virtualId;
@@ -41,12 +40,12 @@ export default {
         },
         load(id) {
           if (id === privateId) {
-            return `export * from '${process.cwd()}/src/from-virtual/example.gts';`;
+            return `export * from '${process.cwd()}/src/components/from-virtual/example.gts';`;
           }
         },
       };
     })(),
-    scopedCssUnplugin.rollup(),
+    // scopedCssUnplugin.rollup(),
 
     addon.clean(),
   ],
