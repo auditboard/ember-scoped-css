@@ -49,7 +49,7 @@
     "prettier": "^3.6.2",
     "rollup": "^4.34.9",
     "rollup-plugin-copy": "^3.5.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
