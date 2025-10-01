@@ -124,6 +124,9 @@ function gatherCSSFiles(bundle) {
   return cssFiles;
 }
 
+let virtualAll = `virtual:scoped.css?all`;
+let virtualAllId = '\0' + virtualAll;
+
 export default createUnplugin(
   /**
    * @typedef {object} Options
@@ -167,6 +170,20 @@ export default createUnplugin(
             return transformCssFile(code, jsPath, options?.layerName);
           }
         },
+      },
+
+      resolveId(id) {
+        if (id === virtualAll) {
+          return virtualAllId;
+        }
+      },
+
+      load(id) {
+        if (id === virtualAllId) {
+          let cssFiles = gatherCSSFiles(this.getModuleInfo);
+
+          return cssFiles.join('\n');
+        }
       },
 
       transform(code, jsPath) {
