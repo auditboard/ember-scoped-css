@@ -97,8 +97,6 @@
     "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "@tsconfig/ember": "^3.0.9",
     "@tsconfig/strictest": "^2.0.5",
-    "@typescript-eslint/eslint-plugin": "^8.24.1",
-    "@typescript-eslint/parser": "^8.24.1",
     "concurrently": "^9.1.2",
     "ember-template-lint": "^6.1.0",
     "esbuild": "^0.25.0",
