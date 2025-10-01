@@ -91,6 +91,9 @@ importers:
       ember-resolver:
         specifier: ^13.1.0
         version: 13.1.1
+      ember-scoped-css:
+        specifier: workspace:*
+        version: link:../../ember-scoped-css
       ember-source:
         specifier: ^6.3.0
         version: 6.7.0(@glimmer/component@2.0.0)(rsvp@4.8.5)

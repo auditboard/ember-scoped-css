@@ -12,7 +12,6 @@ const addon = new Addon({
 
 const rootDirectory = dirname(fileURLToPath(import.meta.url));
 const babelConfig = resolve(rootDirectory, './babel.publish.config.cjs');
-const tsConfig = resolve(rootDirectory, './tsconfig.publish.json');
 
 export default {
   // This provides defaults that work well alongside `publicEntrypoints` below.
@@ -20,7 +19,7 @@ export default {
   output: addon.output(),
 
   plugins: [
-    addon.publicEntrypoints(['index.js', 'template-registry.js']),
+    addon.publicEntrypoints(['index.js']),
     addon.dependencies(),
     babel({
       extensions: ['.js', '.gjs', '.ts', '.gts'],
@@ -28,6 +27,25 @@ export default {
       configFile: babelConfig,
     }),
     addon.gjs(),
+    (() => {
+      let virtualId = 'virtual:from-virtual';
+      let privateId = '\0' + virtualId;
+
+      return {
+        name: 'example-virtual',
+        resolveId(id) {
+          console.log(id);
+          if (id === virtualId) {
+            return privateId;
+          }
+        },
+        load(id) {
+          if (id === privateId) {
+            return `export * from '${process.cwd()}/from-virtual/example.gts';`;
+          }
+        },
+      };
+    })(),
     scopedCssUnplugin.rollup(),
 
     addon.clean(),
