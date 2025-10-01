@@ -27,11 +27,9 @@
     "@ember/optional-features": "^2.2.0",
     "@ember/string": "^3.0.1",
     "@ember/test-helpers": "^3.2.0",
-    "@glimmer/component": "^1.1.2",
+    "@glimmer/component": "2.0.0",
     "@glint/template": "^1.5.2",
-    "@nullvoxpopuli/eslint-configs": "^4.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.24.1",
-    "@typescript-eslint/parser": "^8.24.1",
+    "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "broccoli-asset-rev": "^3.0.0",
     "concurrently": "^9.1.2",
     "ember-auto-import": "2.10.0",
@@ -55,12 +53,9 @@
     "ember-style-loader": "github:mainmatter/ember-style-loader#main",
     "ember-template-imports": "^4.3.0",
     "ember-template-lint": "^6.1.0",
-    "eslint": "^8.50.0",
-    "eslint-plugin-ember": "^12.5.0",
-    "eslint-plugin-n": "^17.15.1",
-    "eslint-plugin-qunit": "^8.1.2",
+    "eslint": "^9.36.0",
     "loader.js": "^4.7.0",
-    "prettier": "^3.5.1",
+    "prettier": "^3.6.2",
     "qunit": "^2.24.1",
     "qunit-dom": "^3.4.0",
     "tracked-built-ins": "^3.1.0",
@@ -70,7 +65,7 @@
     "webpack": "^5.98.0"
   },
   "engines": {
-    "node": "14.* || 16.* || >= 18"
+    "node": ">= 22"
   },
   "ember": {
     "edition": "octane"

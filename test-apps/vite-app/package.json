@@ -53,11 +53,11 @@
     "concurrently": "9.1.2",
     "decorator-transforms": "^2.3.0",
     "ember-cli": "^6.3.1",
-    "ember-eslint": "0.3.0",
+    "ember-eslint": "0.5.0",
     "ember-qunit": "^9.0.2",
     "ember-template-lint": "6.1.0",
-    "eslint": "9.21.0",
-    "prettier": "3.5.3",
+    "eslint": "9.36.0",
+    "prettier": "3.6.2",
     "prettier-plugin-ember-template-tag": "2.0.5",
     "qunit": "^3.0.0-alpha.4",
     "qunit-dom": "^3.4.0",
@@ -75,7 +75,7 @@
     "@glimmer/component": "2.0.0"
   },
   "engines": {
-    "node": ">= 18"
+    "node": ">= 22"
   },
   "ember": {
     "edition": "octane"

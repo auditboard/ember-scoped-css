@@ -94,7 +94,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.8",
-    "@nullvoxpopuli/eslint-configs": "^4.3.0",
+    "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "@tsconfig/ember": "^3.0.9",
     "@tsconfig/strictest": "^2.0.5",
     "@typescript-eslint/eslint-plugin": "^8.24.1",
@@ -103,8 +103,8 @@
     "ember-template-lint": "^6.1.0",
     "esbuild": "^0.25.0",
     "esbuild-plugin-vitest-cleaner": "^0.5.1",
-    "eslint": "^8.50.0",
-    "prettier": "^3.5.1",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
     "typescript": "^5.2.2",
     "vitest": "^3.0.6",
     "webpack": "^5.98.0"
