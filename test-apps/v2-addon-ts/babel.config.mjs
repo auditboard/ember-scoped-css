@@ -15,7 +15,7 @@ export default {
         onlyRemoveTypeImports: true,
       },
     ],
-    scopedCSS.babelPlugin,
+    [scopedCSS.babelPlugin, {}],
 
     [
       'babel-plugin-ember-template-compilation',
@@ -24,6 +24,7 @@ export default {
         transforms: [scopedCSS.templatePlugin({})],
       },
     ],
+    '@embroider/addon-dev/template-colocation-plugin',
     [
       'module:decorator-transforms',
       {
