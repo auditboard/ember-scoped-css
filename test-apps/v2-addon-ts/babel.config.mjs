@@ -24,7 +24,6 @@ export default {
         transforms: [scopedCSS.templatePlugin({})],
       },
     ],
-    '@embroider/addon-dev/template-colocation-plugin',
     [
       'module:decorator-transforms',
       {

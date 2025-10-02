@@ -13,12 +13,10 @@ module('[v2 Addon TS] Integration | Component | @class', function (hooks) {
   setupRenderingTest(hooks);
 
   test('strict mode', async function (assert) {
-    console.log(ComponentAtClass);
     await render(<template>
       <ComponentAtClass />
     </template>
     );
-    await this.pauseTest();
 
     assert
       .dom('p')
