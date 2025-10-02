@@ -11,7 +11,6 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "vite build",
     "format": "prettier . --cache --write",
     "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\" --prefixColors auto",
     "lint:css": "stylelint \"**/*.css\"",

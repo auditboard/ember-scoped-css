@@ -4,9 +4,7 @@
  *
  */
 
-import { makeRequest } from '../lib/request.js';
 import { getCSSInfo } from '../lib/css/utils.js';
-import { rewriteCss } from '../lib/rewriteCss.js';
 import { fixFilename } from '../lib/path/template-transform-paths.js';
 import {
   appPath,
@@ -14,6 +12,8 @@ import {
   hashFromModulePath,
   isRelevantFile,
 } from '../lib/path/utils.js';
+import { makeRequest } from '../lib/request.js';
+import { rewriteCss } from '../lib/rewriteCss.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
 
 const noopPlugin = {
