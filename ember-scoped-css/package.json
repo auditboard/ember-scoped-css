@@ -44,17 +44,6 @@
     "./helpers/scoped-class": {
       "default": "./classic-app-support/helpers/scoped-class.js"
     },
-    "./build/app-css-loader": {
-      "import": "./src/build/app-css-loader.js",
-      "require": "./dist/cjs/app-css-loader.cjs"
-    },
-    "./build/app-dependency-loader": {
-      "import": "./src/build/app-dependency-loader.js",
-      "require": "./dist/cjs/app-dependency-loader.cjs"
-    },
-    "./build/ember-classic-support": {
-      "require": "./dist/cjs/ember-classic-support.cjs"
-    },
     "./addon-main.cjs": "./addon-main.cjs",
     "./babel-plugin": {
       "import": "./src/build/babel-plugin.js",
