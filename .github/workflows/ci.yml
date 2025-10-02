@@ -32,6 +32,8 @@ jobs:
           - "stylelint-ember-scoped-css"
           - "test-apps/v2-addon-bundled"
           - "test-apps/vite-app"
+          - "test-apps/vite-app-witht-compat"
+          - "test-apps/vite-app-witht-compat-pods"
 
     steps:
       - uses: wyvox/action@v1
@@ -51,6 +53,8 @@ jobs:
           - "stylelint-ember-scoped-css"
           - "test-apps/v2-addon-bundled"
           - "test-apps/vite-app"
+          - "test-apps/vite-app-witht-compat"
+          - "test-apps/vite-app-witht-compat-pods"
 
     steps:
       - uses: wyvox/action@v1
