@@ -1,10 +1,12 @@
-import './strict-class.css';
+import "./e1bb7ee70.css"
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import { precompileTemplate } from '@ember/template-compilation';
 import { setComponentTemplate } from '@ember/component';
 import templateOnly from '@ember/component/template-only';
-import { g, i } from 'decorator-transforms/runtime';
+import { g, i } from 'decorator-transforms/runtime-esm';
+
+;
 
 const A = setComponentTemplate(precompileTemplate("<div ...attributes>A</div>", {
   strictMode: true
