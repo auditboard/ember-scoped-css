@@ -31,10 +31,6 @@ jobs:
           - "ember-scoped-css"
           - "stylelint-ember-scoped-css"
           - "test-apps/v2-addon-bundled"
-          - "test-apps/classic-app"
-          - "test-apps/embroider-app"
-          - "test-apps/pods-embroider-app"
-          - "test-apps/pods-classic-app"
           - "test-apps/vite-app"
 
     steps:
@@ -54,10 +50,6 @@ jobs:
           - "ember-scoped-css"
           - "stylelint-ember-scoped-css"
           - "test-apps/v2-addon-bundled"
-          - "test-apps/classic-app"
-          - "test-apps/embroider-app"
-          - "test-apps/pods-embroider-app"
-          - "test-apps/pods-classic-app"
           - "test-apps/vite-app"
 
     steps:
