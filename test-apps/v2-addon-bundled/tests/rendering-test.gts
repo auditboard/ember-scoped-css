@@ -1,8 +1,9 @@
-import { direct, virtual } from 'v2-addon-bundled';
-
+import { render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-import { render } from '@ember/test-helpers';
+
+import { direct, virtual } from 'v2-addon-bundled';
+
 import { scopedClass } from 'ember-scoped-css/test-support';
 
 module('example', function (hooks) {

@@ -1,10 +1,11 @@
 import EmberApp from '@ember/application';
-import Resolver from 'ember-resolver';
 import EmberRouter from '@ember/routing/router';
-import * as QUnit from 'qunit';
 import { setApplication } from '@ember/test-helpers';
+import * as QUnit from 'qunit';
 import { setup } from 'qunit-dom';
-import { start as qunitStart, setupEmberOnerrorValidation } from 'ember-qunit';
+import { setupEmberOnerrorValidation, start as qunitStart } from 'ember-qunit';
+
+import Resolver from 'ember-resolver';
 
 class Router extends EmberRouter {
   location = 'none';
