@@ -11,7 +11,7 @@ module('[In App] subexpression', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it has scoped class', async function (assert) {
-    let cond = cell(false);
+    const cond = cell(false);
 
     await render(<template>
       <SubExpression @condition={{cond.current}} />

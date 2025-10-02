@@ -47,8 +47,7 @@ export default {
     // addons are allowed to contain imports of .css files, which we want rollup
     // to leave alone and keep in the published output.
     // addon.keepAssets(['**/*.css']),
-    // eslint-disable-next-line no-undef
-    // eslint-disable-next-line no-undef
+
     scopedCssUnplugin.rollup(),
 
     // Remove leftover build artifacts when starting a new build.

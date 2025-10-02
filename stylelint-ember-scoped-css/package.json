@@ -36,15 +36,14 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@nullvoxpopuli/eslint-configs": "^4.3.0",
+    "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "@tsconfig/strictest": "^2.0.5",
-    "@typescript-eslint/eslint-plugin": "^8.24.1",
-    "@typescript-eslint/parser": "^8.24.1",
     "concurrently": "^9.1.2",
-    "eslint": "^8.50.0",
-    "stylelint": "^16.23.0",
+    "eslint": "^9.36.0",
     "postcss": "^8.5.6",
     "postcss-selector-parser": "^6.1.0",
+    "prettier": "^3.6.2",
+    "stylelint": "^16.24.0",
     "typescript": "^5.9.2",
     "vitest": "^3.0.6",
     "vitest-stylelint-utils": "^2.0.0"
@@ -53,7 +52,7 @@
     "stylelint": "^16.0.0"
   },
   "engines": {
-    "node": ">= 18"
+    "node": ">= 22.16"
   },
   "volta": {
     "extends": "../package.json"

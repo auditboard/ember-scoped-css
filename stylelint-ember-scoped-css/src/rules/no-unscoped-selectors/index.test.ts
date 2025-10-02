@@ -1,4 +1,8 @@
+import { getTestRule } from 'vitest-stylelint-utils';
+
 import rule from './index.js';
+
+const testRule = getTestRule({ plugins: ['./'] });
 
 testRule({
   ruleName: rule.ruleName,

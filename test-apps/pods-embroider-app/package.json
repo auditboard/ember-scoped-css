@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",
-    "@babel/eslint-parser": "^7.26.8",
     "@babel/plugin-proposal-decorators": "^7.25.9",
     "@ember/optional-features": "^2.2.0",
     "@ember/string": "^3.1.1",
@@ -32,7 +31,8 @@
     "@embroider/core": "^3.5.0",
     "@embroider/macros": "^1.16.10",
     "@embroider/webpack": "^4.0.9",
-    "@glimmer/component": "^1.1.2",
+    "@glimmer/component": "2.0.0",
+    "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "concurrently": "^9.1.2",
     "ember-auto-import": "^2.10.0",
     "ember-cli": "~5.9.0",
@@ -53,14 +53,9 @@
     "ember-source": "~5.9.0",
     "ember-template-imports": "^4.3.0",
     "ember-template-lint": "^6.1.0",
-    "eslint": "^8.49.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-ember": "^12.5.0",
-    "eslint-plugin-n": "^17.15.1",
-    "eslint-plugin-prettier": "^5.2.3",
-    "eslint-plugin-qunit": "^8.1.2",
+    "eslint": "^9.36.0",
     "loader.js": "^4.7.0",
-    "prettier": "^3.5.1",
+    "prettier": "^3.6.2",
     "qunit": "^2.24.1",
     "qunit-dom": "^3.4.0",
     "tracked-built-ins": "^3.2.0",
@@ -68,7 +63,7 @@
     "webpack": "^5.98.0"
   },
   "engines": {
-    "node": "16.* || >= 18"
+    "node": ">= 22.16"
   },
   "ember": {
     "edition": "octane"

@@ -3,8 +3,8 @@ blueprints/*/files/
 
 # compiled output
 dist/
-declarations/
 
 # misc
 coverage/
-
+*.md
+*.yaml

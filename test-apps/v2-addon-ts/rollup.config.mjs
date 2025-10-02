@@ -67,7 +67,7 @@ export default {
     {
       name: 'generate types',
       closeBundle: async () => {
-        // eslint-disable-next-line no-console
+         
         console.info(`Generating type declarations...`);
         await execaCommand('pnpm glint --declaration', {
           stdio: 'inherit',
@@ -82,7 +82,7 @@ export default {
           'Glint#628',
           'Glint#697',
         ]);
-        // eslint-disable-next-line no-console
+         
         console.info('Types generated');
       },
     },

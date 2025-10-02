@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-typescript": "^7.26.8",
+    "@ember/app-tsconfig": "^1.0.3",
     "@ember/optional-features": "^2.2.0",
     "@ember/string": "^3.0.1",
     "@ember/test-helpers": "^3.2.0",
@@ -33,10 +34,8 @@
     "@embroider/macros": "^1.16.10",
     "@embroider/test-setup": "^4.0.0",
     "@embroider/webpack": "4.0.9",
-    "@glimmer/component": "^1.1.2",
-    "@nullvoxpopuli/eslint-configs": "^4.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.24.1",
-    "@typescript-eslint/parser": "^8.24.1",
+    "@glimmer/component": "2.0.0",
+    "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "broccoli-asset-rev": "^3.0.0",
     "concurrently": "^9.1.2",
     "copy-webpack-plugin": "^12.0.2",
@@ -63,13 +62,10 @@
     "ember-template-imports": "^4.3.0",
     "ember-template-lint": "^6.1.0",
     "ember-try": "^3.0.0",
-    "eslint": "^8.50.0",
-    "eslint-plugin-ember": "^12.5.0",
-    "eslint-plugin-n": "^17.15.1",
-    "eslint-plugin-qunit": "^8.1.2",
+    "eslint": "^9.36.0",
     "latest-version": "^9.0.0",
     "loader.js": "^4.7.0",
-    "prettier": "^3.5.1",
+    "prettier": "^3.6.2",
     "qunit": "^2.24.1",
     "qunit-dom": "^3.4.0",
     "tracked-built-ins": "^3.1.0",
@@ -78,7 +74,7 @@
     "webpack": "^5.98.0"
   },
   "engines": {
-    "node": ">= 22"
+    "node": ">= 22.16"
   },
   "ember": {
     "edition": "octane"
