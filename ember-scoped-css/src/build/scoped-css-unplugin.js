@@ -18,7 +18,7 @@ export default createUnplugin(() => {
         let parsed = decodeScopedCSSRequest(id);
 
         return {
-          id: path.resolve(path.dirname(importer), parsed.id),
+          id: path.resolve(path.dirname(importer), parsed.postfix + '.css'),
           meta: {
             'scoped-css': {
               css: parsed.css,

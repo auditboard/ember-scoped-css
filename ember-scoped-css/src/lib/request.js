@@ -1,30 +1,37 @@
 const key = 'styles.ember-scoped.css';
-const relativeKey = `./${key}`;
 
 function parse(request) {
-  let [, qps] = request.split('?');
+  let [left, qps] = request.split('?');
+  let [relativePostfix] = left.split('___');
+  let postfix = relativePostfix.slice(2);
 
   let search = new URLSearchParams(qps);
 
   return {
-    from: search.get('from'),
+    from: postfix,
     css: search.get('css'),
   };
 }
+
 export function isScopedCSSRequest(request) {
-  return request.startsWith(relativeKey);
+  let [, stuff] = request.split('___');
+
+  if (!stuff) return false;
+
+  let [k] = stuff.split('?');
+
+  return k === key;
 }
 
 export function decodeScopedCSSRequest(request) {
   let params = parse(request);
 
   return {
-    id: relativeKey,
-    fromFile: decodeURIComponent(params.from),
+    postfix: params.from,
     css: decodeURIComponent(params.css),
   };
 }
 
-export function makeRequest(fromFile, cssContent) {
-  return `${relativeKey}?from=${encodeURIComponent(fromFile)}&css=${encodeURIComponent(cssContent)}`;
+export function makeRequest(postfix, cssContent) {
+  return `./${postfix}___${key}?css=${encodeURIComponent(cssContent)}`;
 }

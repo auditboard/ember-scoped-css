@@ -51,7 +51,7 @@ export function createPlugin(config) {
     }
 
     let scopedCss = rewriteCss(info.css, postfix, cssPath, config.layerName);
-    let cssRequest = makeRequest(modulePath, scopedCss);
+    let cssRequest = makeRequest(postfix, scopedCss);
 
     /**
      * With this we don't need a JS plugin
