@@ -1,7 +1,7 @@
 import postcss from 'postcss';
 import parser from 'postcss-selector-parser';
 
-import isInsideGlobal from './isInsideGlobal.js';
+import { isInsideGlobal } from './utils.js';
 
 function rewriteSelector(sel, postfix) {
   const transform = (selectors) => {
@@ -112,5 +112,3 @@ if (import.meta.vitest) {
     );
   });
 }
-
-export default rewriteCss;

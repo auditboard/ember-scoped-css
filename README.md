@@ -1,8 +1,42 @@
 # ember-scoped-css
 
-`ember-scoped-css` is a modern addon that allows you to isolate your CSS in a modular way with co-located scoped CSS. This is a build-time-only addon and therefore is fully supported if your app is built with Embroider.
+Scope your component styles and never worry about a collision ever again.
 
-With `ember-scoped-css` you can write your component styles in a co-located `.css` file next to your `.hbs` or `.gjs/.gts` files. Every selector you write in your styles is automatically scoped to the component. So you can develop your component with styles isolated from the rest of the application and you don't have to worry about CSS selectors collisions or issues with the CSS cascade.
+```gjs
+const greeting = "hello world";
+
+<template>
+  <div>{{greeting}}</div>
+
+  <style scoped>
+    div {
+      color: blue;
+    }
+  </style>
+</template>
+```
+becomes the equivelent of;
+```gjs
+const greeting = "hello world";
+
+<template>
+  <div class="abcd1234">{{greeting}}</div>
+
+  <style scoped>
+    div.abcd1234 {
+      color: blue;
+    }
+  </style>
+</template>
+```
+
+This is a build-time-only addon, so there is no need to worry about runtime performance.
+
+You can also write your styles as a co-located `.css` file, right next to your `.gjs`/`.gts` files.
+Every selector you write in your styles is automatically scoped to the component. 
+So you can develop your component with styles isolated from the rest of the application and you don't have to worry about CSS selectors collisions or issues with the CSS cascade.
+
+_See [Usage](#usage) for details_.
 
 If you want to read more specifics on how this addon achieves isolation with CSS you can read more in the [detailed CSS isolation documentation](docs/css-isolation.md)
 
@@ -11,7 +45,7 @@ As selectors are scoped/renamed during the build process. So there is no perform
 The philosophy of `ember-scoped-css` is to stick as close to CSS and HTML as possible and not introduce new syntax or concepts unless it is absolutely necessary. 
 
 You may also find the docs on [CSS `@layer`](https://developer.mozilla.org/en-US/docs/Web/CSS/@layer) interesting.
-This build tool emits CSS in a `@layer`.
+This build tool can emit CSS in a `@layer`.
 
 ## Compatibility
 
@@ -120,10 +154,39 @@ plugins: [
 
 ## Usage
 
-With `ember-scoped-css` you define styles in `.css` files that are colocated with your components
+With `ember-scoped-css` you define styles in an inline `<style scoped>` block or `.css` files that are colocated with your components
+
+```gjs
+// ...
+
+<template>
+  <div data-test-my-component class='hello-class header'>
+    <b>Hello</b>, world!
+  </div>
+
+  <style scoped>
+    .hello-class {
+      color: red;
+    }
+
+    /* the :global() pseudo-class is used to define a global class. 
+       It mean that header class wont be scoped to that component */
+    .hello-class:global(.header) {
+      font-size: 20px;
+    }
+
+    b {
+      color: blue;
+    }
+  </style>
+</template>
+```
+
+Note that `<style>` (without `scoped`) will continue to work as it does today and be "global styles"
+
+<details><summary>separate CSS file</summary>
 
 ```hbs
-{{! src/components/my-component.hbs }}
 <div data-test-my-component class='hello-class header'><b>Hello</b>, world!</div>
 ```
 
@@ -145,22 +208,14 @@ b {
 
 NOTE: that if you're using pods, css co-located with templates/routes/etc will need to be named `styles.css`
 
+</details>
+
 
 
 ### Passing classes as arguments to a component
 
-There is a `scoped-class` helper that you can use to pass a class name as an argument to a component. The helper takes a class name and returns a scoped class name. `scoped-class` helper is replaced at build time so there is no performance hit when running the app.
+There is a `scopedClass` helper that you can use to pass a class name as an argument to a component. The helper takes a class name and returns a scoped class name. `scopedClass` helper is replaced at build time so there is no performance hit when running the app.
 
-```hbs
-{{! src/components/my-component.hbs }}
-<OtherComponent @internalClass={{scoped-class 'hello-class'}} />
-<OtherComponent @internalClass={{(scoped-class 'hello-class')}} />
-<OtherComponent
-  @internalClass={{concat (scoped-class 'hello-class') ' other-class'}}
-/>
-```
-
-In gjs/gts/`<template>`, the above would look like:
 ```gjs
 import { scopedClass } from 'ember-scoped-css';
 
@@ -200,7 +255,7 @@ test('MyComponent has hello-class', async function (assert) {
 
 ## Linting
 
-`ember-scoped-css` exports a ember-template-lint plugin with one rule `scoped-class-helper`. This lint rule is intended to help you prevent improper use of the `scoped-class` helper which might not be immediately obvious during regular development. You can read more information in the [lint rules documentation](docs/lint-rules.md)
+`ember-scoped-css` exports a ember-template-lint plugin with one rule `scoped-class-helper`. This lint rule is intended to help you prevent improper use of the `scopedClass` helper which might not be immediately obvious during regular development. You can read more information in the [lint rules documentation](docs/lint-rules.md)
 
 ### Steps for adding the rule to the project
 

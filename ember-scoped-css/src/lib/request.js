@@ -32,6 +32,6 @@ export function decodeScopedCSSRequest(request) {
   };
 }
 
-export function makeRequest(postfix, cssContent) {
-  return `./${postfix}___${key}?css=${encodeURIComponent(cssContent)}`;
+export function makeRequest(postfix, cssId, cssContent) {
+  return `./${postfix}___${cssId}___${key}?css=${encodeURIComponent(cssContent)}`;
 }
