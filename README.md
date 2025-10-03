@@ -282,6 +282,7 @@ module.exports = {
   ],
   rules: {
 +    'scoped-class-helper': 'error',
++    'no-forbidden-elements': ['meta', 'html', 'script'], // style removed
   }
 
 ```

@@ -5,7 +5,7 @@
  */
 
 import { rewriteCss } from '../lib/css/rewrite.js';
-import { getCSSContentInfo, getCSSInfo, hash } from '../lib/css/utils.js';
+import { getCSSContentInfo, getCSSInfo } from '../lib/css/utils.js';
 import { fixFilename } from '../lib/path/template-transform-paths.js';
 import {
   appPath,
