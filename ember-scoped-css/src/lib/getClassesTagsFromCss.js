@@ -17,6 +17,10 @@ function getClassesAndTags(sel, classes, tags) {
   parser(transform).processSync(sel);
 }
 
+/**
+ * We use this function to check each class used in the template
+ * to see if we need to leave it alone or transform it
+ */
 export default function getClassesTagsFromCss(css) {
   const classes = new Set();
   const tags = new Set();
