@@ -1,0 +1,23 @@
+/* src/components/alert.css */
+@layer components {
+
+div.e4b9579df {
+  width: 400px;
+  border: 1px solid black;
+  padding: 0px 15px;
+  margin-top: 15px;
+}
+
+.header_e4b9579df {
+  margin-top: 0;
+  background-color: lightslategray;
+  padding: 15px;
+  margin: 0px -15px;
+}
+
+.message_e4b9579df {
+  font-style: italic;
+  font-size: 1em;
+}
+
+}

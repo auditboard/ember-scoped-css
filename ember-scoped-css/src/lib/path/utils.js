@@ -21,10 +21,6 @@ if (!ourRequire) {
   ourRequire = require;
 }
 
-const EMBROIDER_DIR = 'node_modules/.embroider';
-const EMBROIDER_3_REWRITTEN_APP_PATH = `${EMBROIDER_DIR}/rewritten-app`;
-const EMBROIDER_3_REWRITTEN_APP_ASSETS = `${EMBROIDER_3_REWRITTEN_APP_PATH}/assets`;
-const EMBROIDER_3_REWRITTEN_PACKAGES = `${EMBROIDER_DIR}/rewritten-packages`;
 const IRRELEVANT_PATHS = ['node_modules/.pnpm', '__vite-'];
 const UNSUPPORTED_DIRECTORIES = new Set(['tests']);
 
@@ -199,33 +195,6 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   if (fileName.startsWith('/@embroider')) return false;
   if (IRRELEVANT_PATHS.some((i) => fileName.includes(i))) return false;
 
-  if (fileName.includes('/node_modules/')) {
-    // if a file is not the embroider cache directory
-    // and is in node_modules, skip it.
-    if (!fileName.includes(EMBROIDER_DIR)) {
-      return false;
-    }
-
-    // rewritten packages should have already been processed at their own
-    // publish time
-    if (fileName.includes(EMBROIDER_3_REWRITTEN_PACKAGES)) {
-      return false;
-    }
-
-    // These are already the bundled files.
-    if (fileName.includes(EMBROIDER_3_REWRITTEN_APP_ASSETS)) {
-      // not supported, never will be
-      if (fileName.endsWith(`${EMBROIDER_3_REWRITTEN_APP_ASSETS}/tests.js`)) {
-        return false;
-      }
-
-      // Ideally, we never get here -- indicates we're not filtering effectively in babel
-      // NOTE: if we get here, we're trying to operate on a file too late.
-      //       we need ScopedCSS to operate as close to original source as possible -- not output files.
-      return false;
-    }
-  }
-
   let workspace = findWorkspacePath(fileName);
 
   assert(cwd, `cwd was not passed to isRelevantFile`);
@@ -319,15 +288,6 @@ export function appPath(sourcePath) {
    */
   packageRelative = packageRelative.replace(`/app/`, `/`);
 
-  /**
-   * also also, we know that the re-written app structure in embroider@v3
-   * is extraneous, and we can collapse it
-   */
-  packageRelative = packageRelative.replace(
-    `${EMBROIDER_3_REWRITTEN_APP_PATH}/`,
-    '/',
-  );
-
   // Any of the above relpacements could accidentally give us an extra / (depending on our build environment)
   packageRelative = packageRelative.replace('//', '/');
 
@@ -362,10 +322,6 @@ function getSeen(sourcePath) {
 
 export function findWorkspacePath(sourcePath, options) {
   let cwd = options?.cwd ?? CWD;
-
-  if (sourcePath.includes(EMBROIDER_3_REWRITTEN_APP_PATH)) {
-    sourcePath = sourcePath.split(EMBROIDER_3_REWRITTEN_APP_PATH)[0];
-  }
 
   if (sourcePath.endsWith('/')) {
     sourcePath = sourcePath.replace(/\/$/, '');
@@ -432,39 +388,6 @@ export function moduleName(sourcePath) {
   const workspace = findWorkspacePath(sourcePath);
   const manifest = getManifest(workspace);
 
-  if (manifest['ember-addon']) {
-    /**
-     * Libraries are not allowed to customize their module name
-     * to be different from their package name.
-     *
-     * (It's also bonkers that this is allowed for v1 apps)
-     */
-    return manifest.name;
-  }
-
-  /**
-   * For v1 apps, we need to reference the config/environment.js file
-   * to see if the modulePrefix setting differs from manifest.name;
-   */
-  let environmentJS = path.join(workspace, 'config/environment.js');
-
-  /**
-   * NOTE: the environment.js is a commonJS file, so we can synchronously require it
-   *
-   * TODO: if we have issues with loading this file later we should probably just run jscodeshift on it
-   *       but that could allow us to be brittle in different ways, like if folks stray from the way the
-   *       file is laid out from the blueprint defaults.
-   */
-  if (fsSync.existsSync(environmentJS)) {
-    const envFn = ourRequire(environmentJS);
-    const env = envFn('ember-scoped-css');
-
-    return env.modulePrefix || manifest.name;
-  }
-
-  /**
-   * Fallback to the true™ module™ name.
-   */
   return manifest.name;
 }
 

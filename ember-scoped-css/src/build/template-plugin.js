@@ -12,6 +12,8 @@ import {
   hashFromModulePath,
   isRelevantFile,
 } from '../lib/path/utils.js';
+import { makeRequest } from '../lib/request.js';
+import { rewriteCss } from '../lib/rewriteCss.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
 
 const noopPlugin = {
@@ -28,9 +30,10 @@ export function createPlugin(config) {
    * @param {ASTPluginEnvironment} env
    */
   return function scopedCss(env) {
+    let cwd = process.cwd();
     let isRelevant = isRelevantFile(env.filename, {
       additionalRoots: config.additionalRoots,
-      cwd: process.cwd(),
+      cwd,
     });
 
     if (!isRelevant) {
@@ -47,6 +50,20 @@ export function createPlugin(config) {
     if (!info) {
       return noopPlugin;
     }
+
+    let localCssPath = cssPath.replace(cwd + '/', '');
+    let scopedCss = rewriteCss(
+      info.css,
+      postfix,
+      localCssPath,
+      config.layerName,
+    );
+    let cssRequest = makeRequest(postfix, scopedCss);
+
+    /**
+     * With this we don't need a JS plugin
+     */
+    env.meta.jsutils.importForSideEffect(cssRequest);
 
     let visitors = templatePlugin({
       classes: info.classes,

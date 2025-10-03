@@ -7,16 +7,16 @@ import { paths } from './utils.paths.test.js';
 
 describe('hashFrom()', () => {
   let component = {
-    css: path.join(paths.embroiderApp, 'components/forth.css'),
-    ext: path.join(paths.embroiderApp, 'components/forth.gjs'),
-    withoutExt: path.join(paths.embroiderApp, 'components/forth'),
-    module: 'embroider-app/components/forth',
+    css: path.join(paths.viteApp, 'components/forth.css'),
+    ext: path.join(paths.viteApp, 'components/forth.gjs'),
+    withoutExt: path.join(paths.viteApp, 'components/forth'),
+    module: 'vite-app/components/forth',
   };
   let route = {
-    css: path.join(paths.embroiderApp, 'templates/application.css'),
-    ext: path.join(paths.embroiderApp, 'templates/application.hbs'),
-    withoutExt: path.join(paths.embroiderApp, 'templates/application'),
-    module: 'embroider-app/templates/application',
+    css: path.join(paths.viteApp, 'templates/application.css'),
+    ext: path.join(paths.viteApp, 'templates/application.gjs'),
+    withoutExt: path.join(paths.viteApp, 'templates/application'),
+    module: 'vite-app/templates/application',
   };
 
   describe('component', () => {

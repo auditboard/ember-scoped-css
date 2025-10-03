@@ -6,8 +6,6 @@ const require = topLevelCreateRequire(import.meta.url);
 
 const buildFiles = [
   'src/build/index.js',
-  'src/build/app-css-loader.js',
-  'src/build/ember-classic-support.js',
   'src/build/babel-plugin.js',
   'src/build/template-plugin.js',
 ];

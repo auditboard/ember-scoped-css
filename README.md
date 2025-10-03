@@ -20,12 +20,21 @@ This build tool emits CSS in a `@layer`.
 - non-embroider apps 
 - embroider apps
 
-| You Have | ember-scoped-css | ember-scoped-css-compat |
-| -------- | ----------- | ---------------------- |
-| ember-template-imports@v4 or babel-plugin-ember-template-compilation@2.2.5+ | 0.19.0 | 10.0.0 |
-| ember-template-imports@v3 or babel-plugin-ember-template-compilation@2.2.1 or rollup-plugin-glimmer-template-tag | <= 0.18.0 | <= 9.0.0 |
-| classic components | <= 0.18.0 | <= 8.0.0 |
-| ember < 4 | <= 0.18.0 | <= 8.0.0 |
+| You Have | ember-scoped-css | ember-scoped-css-compat | docs |
+| -------- | ----------- | ---------------------- | --- |
+| vite | >= 1.0.0 | 🚫 | [main][docs-main]
+| gjs / gts library (no hbs) | >= 1.0.0 | 🚫 | [main][docs-main]
+| webpack | <= 0.24.3 | <= 10.0.0 | [0.24.3][docs-2] 
+| hbs | <= 0.24.3 | <= 10.0.0 | [0.24.3][docs-2]
+| ember-template-imports@v4 or babel-plugin-ember-template-compilation@2.2.5+ | 0.19.0 | 10.0.0 | [0.19][docs-3] - [0.24][docs-2]
+| ember-template-imports@v3 or babel-plugin-ember-template-compilation@2.2.1 or rollup-plugin-glimmer-template-tag | <= 0.18.0 | <= 9.0.0 | [0.18][docs-4]
+| classic components | <= 0.18.0 | <= 8.0.0 | [0.18][docs-4]
+| ember < 4 | <= 0.18.0 | <= 8.0.0 | [0.18][docs-4]
+
+[docs-main]: https://github.com/auditboard/ember-scoped-css/
+[docs-2]: https://github.com/auditboard/ember-scoped-css/tree/v0.24.3-ember-scoped-css
+[docs-3]: https://github.com/auditboard/ember-scoped-css/tree/v0.19.1-ember-scoped-css
+[docs-4]: https://github.com/auditboard/ember-scoped-css/tree/ember-scoped-css%400.18.0
 
 ## Installation for a Vite app
 
@@ -56,6 +65,7 @@ import * as scopedCSS from "ember-scoped-css/build";
 module.exports = {
   plugins: [
     // ...
+    [scopedCSS.babelPlugin, {}],
     [
       'babel-plugin-ember-template-compilation',
       {
@@ -70,29 +80,16 @@ module.exports = {
 
 ```
 
-## Installation for a non-embroider ember app
+If you have a rollup config:
+```js
+import * as scopedCss from 'ember-scoped-css/build';
 
-```bash
-npm install --save-dev ember-scoped-css ember-scoped-css-compat
+// ...
+plugins: [
+    scopedCss.rollupPlugin(),
+]
 ```
 
-### Configuration
-
-In your `ember-cli-build.js`, you can configure the behavior of scoped-css transformations within the app via 
-```js 
-
-const app = new EmberApp(defaults, { 
-  /* ... */ 
-  'ember-scoped-css': {
-    layerName: 'app-styles', // default: 'components', set to false to disable the layer
-    additionalRoots: ['routes/'], // default: [], set this to use scoped-css in pods-using apps
-    passthrough: ['some-other-file.css'], // default: [] this is only used in a non-embroider app to pass files through the build pipeline
-    passthroughDestination: 'assets' // default: undefined this alters where the passthrough files are placed in the output tree
-  }
-});
-```
-
-Note that supporting `pods` is _opt in_, because all apps can have their pods root directory configured differently.
 
 ## Installation for an embroider app
 
@@ -100,83 +97,25 @@ Note that supporting `pods` is _opt in_, because all apps can have their pods ro
 npm install --save-dev ember-scoped-css ember-scoped-css-compat
 ```
 
-Setup webpack:
-```js 
-// ember-cli-build.js
-module.exports = async function (defaults) {  
-  const app = new EmberApp(defaults, { /* ... */ });
-
-  const { Webpack } = require('@embroider/webpack');
-
-  return require('@embroider/compat').compatBuild(app, Webpack, {
-    /* ... */
-    packagerOptions: {
-      webpackConfig: {
-        module: {
-          rules: [
-            // css loaders for your app CSS
-            {
-              test: /\.css$/,
-              use: [
-                {
-                  loader: require.resolve(
-                    'ember-scoped-css/build/app-css-loader'
-                  ),
-                  options: {
-                    layerName: 'the-layer-name', // optional
-                  }
-                },
-              ],
-            },
-          ],
-        },
-      },
-    },
-  });
-}
-```
-
-## Installation for a V2 Addon
-
-```
-npm install --save-dev ember-scoped-css
-```
-
-1. If you want to use `.gjs/gts` components, [`@embroider/addon-dev`](https://github.com/embroider-build/embroider/tree/main/packages/addon-dev) provides a plugin for you, `addon.gjs()`.
-
-<details><summary>An older approach</summary>
-
-There is a deprecated plugin (superseded by `@embroider/addon-dev`) that uses ember-template-imports -- to use this follow the instructions from [rollup-plugin-glimmer-template-tag](https://github.com/NullVoxPopuli/rollup-plugin-glimmer-template-tag) addon.
-
-This plugin is not recommended, and is archived.
-
-</details>
-
-2. Add the following to your `rollup.config.mjs`:
-
-```diff
-+ import { scopedCssUnplugin } from 'ember-scoped-css/build';
-
-// if you want to have some global styles in your addon then
-// put them in the styles folder and change the path to the styles folder
-// if there are no global styles then you can remove addon.keepAssets
-- addon.keepAssets(['**/*.css']),
-+ addon.keepAssets(['**/styles/*.css']),
-
-// add the following to the rollup config
-+ scopedCssUnplugin.rollup(),
-```
-
-Note that if you're using [`rollup-plugin-ts`](https://github.com/wessberg/rollup-plugin-ts), `scopedCssUnpulugin.rollup()` must come before `typescript(/*...*/)` 
-
 ### Configuration
 
-In the rollup config, you may pass options:
+All forms of `scopedCss` take an options hash except for the rollup and vite plugins.
 
-```js 
-scopedCssUnplugin.rollup({ 
-  layerName: 'utilities', // default: 'components', set to false to disable the layer
-});
+Configuration in the two locations in the babel config should match, for example:
+
+
+```js
+plugins: [
+  [scopedCSS.babelPlugin, { layerName: 'my-library' }],
+
+  [
+    'babel-plugin-ember-template-compilation',
+    {
+      targetFormat: 'hbs',
+      transforms: [scopedCSS.templatePlugin({ layerName: 'my-libarry' })],
+    },
+  ],
+],
 ```
 
 ## Usage
@@ -240,15 +179,15 @@ As classes are renamed during the build process you can't directly verify if cla
 
 The path to the CSS file is always relative to the V2 addon root no matter where the test is located.
 
-```js
+```gjs
 import { scopedClass } from 'ember-scoped-css/test-support';
 
 test('MyComponent has hello-class', async function (assert) {
   assert.expect(1);
 
-  await render(hbs`
+  await render(<template>
     <MyComponent />
-  `);
+  </template>);
 
   const rewrittenClass = scopedClass(
     'hello-class',

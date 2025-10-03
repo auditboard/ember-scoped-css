@@ -53,21 +53,6 @@ export function fixFilename(filename) {
     return candidatePath;
   }
 
-  /**
-   * under embroider@3, the fileName will be the path to the rewritten file.
-   * we don't want this.
-   * we want the path to the original source.
-   * Through the powers of ✨ convention ✨, we can map back to source.
-   */
-  if (fileName.includes('/node_modules/.embroider/rewritten-app/')) {
-    let candidatePath = fileName.replace(
-      '/node_modules/.embroider/rewritten-app/',
-      '/app/',
-    );
-
-    return candidatePath;
-  }
-
   // TODO: why are we passed files to other projects?
   if (!fileName.includes(workspace)) {
     return fileName;

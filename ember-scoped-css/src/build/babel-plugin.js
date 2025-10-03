@@ -1,8 +1,4 @@
-import { ImportUtil } from 'babel-import-util';
-import { existsSync } from 'fs';
-import nodePath from 'path';
-
-import { cssPathFor, isRelevantFile } from '../lib/path/utils.js';
+import { isRelevantFile } from '../lib/path/utils.js';
 
 function _isRelevantFile(state, cwd) {
   let fileName = state.file.opts.filename;
@@ -21,11 +17,10 @@ function _isRelevantFile(state, cwd) {
  */
 export default (env, options, workingDirectory) => {
   /**
-   * This babel plugin does three things:
+   * This babel plugin does two things:
    * - removes the import of scopedClass, if it exists
    *   - if scopedClass was imported, it is removed from any component's "scope bag"
    *     (the scope bag being a low-level object used for passing what is "in scope" for a component)
-   * - adds an import to the CSS file, if it exists
    */
   return {
     visitor: {
@@ -36,8 +31,6 @@ export default (env, options, workingDirectory) => {
 
             return;
           }
-
-          state.importUtil = new ImportUtil(env, path);
         },
       },
       ImportDeclaration(path, state) {
@@ -74,35 +67,6 @@ export default (env, options, workingDirectory) => {
           path.node.value.name === state.file.opts?.importedScopedClass
         ) {
           path.remove();
-        }
-      },
-      /**
-       * If there is a CSS file, AND a corresponding template,
-       * we can import the CSS to then defer to the CSS loader
-       * or other CSS processing to handle the postfixing
-       */
-      CallExpression(path, state) {
-        if (state.canSkip) {
-          return;
-        }
-
-        const node = path.node;
-
-        if (
-          node.callee.name === 'precompileTemplate' ||
-          node.callee.name === 'hbs' ||
-          node.callee.name === 'createTemplateFactory'
-        ) {
-          const fileName =
-            state.file.opts.sourceFileName || state.file.opts.filename;
-
-          let cssPath = cssPathFor(fileName);
-
-          if (existsSync(cssPath)) {
-            let baseCSS = nodePath.basename(cssPath);
-
-            state.importUtil.importForSideEffect(`./${baseCSS}`);
-          }
         }
       },
     },

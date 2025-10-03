@@ -1,7 +1,7 @@
 import { Addon } from '@embroider/addon-dev/rollup';
 
 import { babel } from '@rollup/plugin-babel';
-import { scopedCssUnplugin } from 'ember-scoped-css/build';
+import * as scopedCss from 'ember-scoped-css/build';
 import { execaCommand } from 'execa';
 import { fixBadDeclarationOutput } from 'fix-bad-declaration-output';
 
@@ -16,6 +16,7 @@ export default {
   output: addon.output(),
 
   plugins: [
+    scopedCss.rollupPlugin(),
     // These are the modules that users should be able to import from your
     // addon. Anything not listed here may get optimized away.
     // By default all your JavaScript modules (**/*.js) will be importable.
@@ -59,15 +60,13 @@ export default {
     // Ensure that .gjs files are properly integrated as Javascript
     addon.gjs(),
 
-    scopedCssUnplugin.rollup(),
-
+    addon.keepAssets(['**/*.css']),
     // Remove leftover build artifacts when starting a new build.
     addon.clean(),
 
     {
       name: 'generate types',
       closeBundle: async () => {
-         
         console.info(`Generating type declarations...`);
         await execaCommand('pnpm glint --declaration', {
           stdio: 'inherit',
@@ -82,7 +81,7 @@ export default {
           'Glint#628',
           'Glint#697',
         ]);
-         
+
         console.info('Types generated');
       },
     },
