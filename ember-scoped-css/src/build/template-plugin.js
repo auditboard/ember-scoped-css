@@ -30,9 +30,10 @@ export function createPlugin(config) {
    * @param {ASTPluginEnvironment} env
    */
   return function scopedCss(env) {
+    let cwd = process.cwd();
     let isRelevant = isRelevantFile(env.filename, {
       additionalRoots: config.additionalRoots,
-      cwd: process.cwd(),
+      cwd,
     });
 
     if (!isRelevant) {
@@ -50,7 +51,13 @@ export function createPlugin(config) {
       return noopPlugin;
     }
 
-    let scopedCss = rewriteCss(info.css, postfix, cssPath, config.layerName);
+    let localCssPath = cssPath.replace(cwd + '/', '');
+    let scopedCss = rewriteCss(
+      info.css,
+      postfix,
+      localCssPath,
+      config.layerName,
+    );
     let cssRequest = makeRequest(postfix, scopedCss);
 
     /**
