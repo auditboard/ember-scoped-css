@@ -35,7 +35,8 @@
     "ember-resolver": "13.1.0",
     "ember-scoped-css": "workspace:*",
     "ember-source": "6.4.0-alpha.3",
-    "v2-addon-ts": "workspace:*"
+    "v2-addon-ts": "workspace:*",
+    "v2-addon": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "7.26.10",

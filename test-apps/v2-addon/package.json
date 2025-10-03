@@ -68,6 +68,7 @@
       "./components/at-class/has-at-class.js": "./dist/_app_/components/at-class/has-at-class.js",
       "./components/footer.js": "./dist/_app_/components/footer.js",
       "./components/header.js": "./dist/_app_/components/header.js",
+      "./components/inline.js": "./dist/_app_/components/inline.js",
       "./components/time.js": "./dist/_app_/components/time.js"
     }
   },
