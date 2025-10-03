@@ -1,5 +1,31 @@
 # Changelog
 
+## Release (2025-10-03)
+
+* ember-scoped-css 1.0.0 (major)
+* stylelint-ember-scoped-css 1.0.0 (major)
+
+#### :boom: Breaking Change
+* `ember-scoped-css`
+  * [#328](https://github.com/auditboard/ember-scoped-css/pull/328) Drop support for hbs, ember-classic, webpack ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `ember-scoped-css`, `stylelint-ember-scoped-css`
+  * [#329](https://github.com/auditboard/ember-scoped-css/pull/329) Require Node 22.16+, update to ESLint 9 ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :rocket: Enhancement
+* `ember-scoped-css`
+  * [#330](https://github.com/auditboard/ember-scoped-css/pull/330) Support `<style scoped>` ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :memo: Documentation
+* `stylelint-ember-scoped-css`
+  * [#326](https://github.com/auditboard/ember-scoped-css/pull/326) Improve README.md ([@mmun](https://github.com/mmun))
+
+#### :house: Internal
+* [#331](https://github.com/auditboard/ember-scoped-css/pull/331) Make v2-addon-bundled private ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 2
+- Martin Muñoz ([@mmun](https://github.com/mmun))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-09-04)
 
 * stylelint-ember-scoped-css 0.2.0 (minor)
