@@ -30,7 +30,7 @@ export function decodeScopedCSSRequest(request) {
 
   return {
     postfix: params.from,
-    css: decodeURIComponent(params.css),
+    css: params.css,
     cssId: params.cssId,
   };
 }
