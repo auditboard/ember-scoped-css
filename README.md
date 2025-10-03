@@ -50,9 +50,7 @@ This build tool can emit CSS in a `@layer`.
 ## Compatibility
 
 - Vite
-- V2 addons
-- non-embroider apps 
-- embroider apps
+- V2 addons with `@embroider/addon-dev` @ v8+ (or similar)
 
 | You Have | ember-scoped-css | ember-scoped-css-compat | docs |
 | -------- | ----------- | ---------------------- | --- |
