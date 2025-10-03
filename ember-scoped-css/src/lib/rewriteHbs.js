@@ -93,7 +93,7 @@ export function templatePlugin({ classes, tags, postfix }) {
         const textNode = recast.builders.text(renameClass(cssClass, postfix));
         const parent = stack[stack.length - 1];
 
-        if (parent.type === 'AttrNode') {
+        if (parent?.type === 'AttrNode') {
           parent.quoteType = '"';
         }
 

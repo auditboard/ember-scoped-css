@@ -114,7 +114,7 @@ export function createPlugin(config) {
          * the tags and classes to then pass to the other visitors so that they can
          * appropriately change matching classes / tags.
          */
-        Template(node, walker) {
+        Template(node) {
           /**
            * We only allow a scoped <style> at the root
            */
@@ -146,8 +146,20 @@ export function createPlugin(config) {
         AttrNode(...args) {
           return visitors.AttrNode(...args);
         },
-        ElementNode(...args) {
-          return visitors.ElementNode(...args);
+        ElementNode(node, walker) {
+          // class attribute handling
+          visitors.ElementNode(node, walker);
+
+          if (hasScopedAttribute(node)) {
+            if (walker.parent?.node.type !== 'Template') {
+              throw new Error(
+                '<style scoped> tags must be at the root of the template, they cannot be nested',
+              );
+            }
+
+            // Returning null removes the node
+            return null;
+          }
         },
         MustacheStatement(...args) {
           return visitors.MustacheStatement(...args);
@@ -166,6 +178,10 @@ export function createPlugin(config) {
 const SCOPED_ATTRIBUTE_NAME = 'scoped';
 
 function hasScopedAttribute(node) {
+  if (!node) return;
+  if (node.tag !== 'style') return;
+  if (node.type !== 'ElementNode') return;
+
   return node.attributes.some(
     (attribute) => attribute.name === SCOPED_ATTRIBUTE_NAME,
   );
