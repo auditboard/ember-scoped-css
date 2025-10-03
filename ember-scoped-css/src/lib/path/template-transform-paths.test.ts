@@ -19,86 +19,51 @@ describe('fixFilename()', () => {
     );
   });
 
-  describe(`when the app's modulePrefix does not match the folder name (common in most apps)`, () => {
-    it(`works with /app/ in the components path`, () => {
-      let file = path.join(
-        paths.classicApp,
-        'test-app',
-        'components/app/template-only.hbs',
-      );
-      let corrected = fixFilename(file);
-
-      expect(corrected).to.equal(
-        path.join(paths.classicApp, 'app/components/app/template-only.hbs'),
-      );
-    });
-  });
-
   it('works with the real path', () => {
-    let file = path.join(
-      paths.classicApp,
-      'app',
-      'components/template-only.hbs',
-    );
+    let file = path.join(paths.viteApp, 'app', 'components/template-only.hbs');
     let corrected = fixFilename(file);
 
     expect(corrected).to.equal(
-      path.join(paths.classicApp, 'app/components/template-only.hbs'),
+      path.join(paths.viteApp, 'app/components/template-only.hbs'),
     );
   });
 
   it('is not confused with "app" in the component path', () => {
     let file = path.join(
-      paths.classicApp,
+      paths.viteApp,
       'app',
       'components/app/page/template-only.hbs',
     );
     let corrected = fixFilename(file);
 
     expect(corrected).to.equal(
-      path.join(paths.classicApp, 'app/components/app/page/template-only.hbs'),
-    );
-  });
-
-  it('is not confused with "app" in the embroider rewritten location', () => {
-    let file = path.join(
-      paths.embroiderApp,
-      paths.rewritten,
-      'components/app/page/template-only.hbs',
-    );
-    let corrected = fixFilename(file);
-
-    expect(corrected).to.equal(
-      path.join(
-        paths.embroiderApp,
-        'app/components/app/page/template-only.hbs',
-      ),
+      path.join(paths.viteApp, 'app/components/app/page/template-only.hbs'),
     );
   });
 
   it('works with classic paths (w/ module name)', () => {
     let file = path.join(
-      paths.classicApp,
+      paths.viteApp,
       'classic-app',
       'components/template-only.hbs',
     );
     let corrected = fixFilename(file);
 
     expect(corrected).to.equal(
-      path.join(paths.classicApp, 'app/components/template-only.hbs'),
+      path.join(paths.viteApp, 'app/components/template-only.hbs'),
     );
   });
 
   it('is not confused with "app" in the component path (w/ module name)', () => {
     let file = path.join(
-      paths.classicApp,
+      paths.viteApp,
       'classic-app',
       'components/app/page/template-only.hbs',
     );
     let corrected = fixFilename(file);
 
     expect(corrected).to.equal(
-      path.join(paths.classicApp, 'app/components/app/page/template-only.hbs'),
+      path.join(paths.viteApp, 'app/components/app/page/template-only.hbs'),
     );
   });
 });

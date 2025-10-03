@@ -388,39 +388,6 @@ export function moduleName(sourcePath) {
   const workspace = findWorkspacePath(sourcePath);
   const manifest = getManifest(workspace);
 
-  if (manifest['ember-addon']) {
-    /**
-     * Libraries are not allowed to customize their module name
-     * to be different from their package name.
-     *
-     * (It's also bonkers that this is allowed for v1 apps)
-     */
-    return manifest.name;
-  }
-
-  /**
-   * For v1 apps, we need to reference the config/environment.js file
-   * to see if the modulePrefix setting differs from manifest.name;
-   */
-  let environmentJS = path.join(workspace, 'config/environment.js');
-
-  /**
-   * NOTE: the environment.js is a commonJS file, so we can synchronously require it
-   *
-   * TODO: if we have issues with loading this file later we should probably just run jscodeshift on it
-   *       but that could allow us to be brittle in different ways, like if folks stray from the way the
-   *       file is laid out from the blueprint defaults.
-   */
-  if (fsSync.existsSync(environmentJS)) {
-    const envFn = ourRequire(environmentJS);
-    const env = envFn('ember-scoped-css');
-
-    return env.modulePrefix || manifest.name;
-  }
-
-  /**
-   * Fallback to the true™ module™ name.
-   */
   return manifest.name;
 }
 
