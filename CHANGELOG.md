@@ -2,6 +2,17 @@
 
 ## Release (2025-10-03)
 
+* ember-scoped-css 1.0.1 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#332](https://github.com/auditboard/ember-scoped-css/pull/332) Don't unneedely decodeURIComponent ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
+## Release (2025-10-03)
+
 * ember-scoped-css 1.0.0 (major)
 * stylelint-ember-scoped-css 1.0.0 (major)
 
