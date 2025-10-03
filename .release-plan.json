@@ -1,39 +1,21 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "major",
-      "oldVersion": "0.24.3",
-      "newVersion": "1.0.0",
+      "impact": "patch",
+      "oldVersion": "1.0.0",
+      "newVersion": "1.0.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
-        },
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "impact": "major",
-      "oldVersion": "0.2.0",
-      "newVersion": "1.0.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :memo: Documentation"
-        }
-      ],
-      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
+      "oldVersion": "1.0.0"
     }
   },
-  "description": "## Release (2025-10-03)\n\n* ember-scoped-css 1.0.0 (major)\n* stylelint-ember-scoped-css 1.0.0 (major)\n\n#### :boom: Breaking Change\n* `ember-scoped-css`\n  * [#328](https://github.com/auditboard/ember-scoped-css/pull/328) Drop support for hbs, ember-classic, webpack ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember-scoped-css`, `stylelint-ember-scoped-css`\n  * [#329](https://github.com/auditboard/ember-scoped-css/pull/329) Require Node 22.16+, update to ESLint 9 ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#330](https://github.com/auditboard/ember-scoped-css/pull/330) Support `<style scoped>` ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :memo: Documentation\n* `stylelint-ember-scoped-css`\n  * [#326](https://github.com/auditboard/ember-scoped-css/pull/326) Improve README.md ([@mmun](https://github.com/mmun))\n\n#### :house: Internal\n* [#331](https://github.com/auditboard/ember-scoped-css/pull/331) Make v2-addon-bundled private ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- Martin Muñoz ([@mmun](https://github.com/mmun))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2025-10-03)\n\n* ember-scoped-css 1.0.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#332](https://github.com/auditboard/ember-scoped-css/pull/332) Don't unneedely decodeURIComponent ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
