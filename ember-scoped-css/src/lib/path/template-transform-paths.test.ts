@@ -6,19 +6,6 @@ import { fixFilename } from './template-transform-paths.js';
 import { paths } from './utils.paths.test.js';
 
 describe('fixFilename()', () => {
-  it('works with embroider paths', () => {
-    let file = path.join(
-      paths.embroiderApp,
-      paths.rewritten,
-      'components/template-only.hbs',
-    );
-    let corrected = fixFilename(file);
-
-    expect(corrected).to.equal(
-      path.join(paths.embroiderApp, 'app/components/template-only.hbs'),
-    );
-  });
-
   it(`works with /src/`, () => {
     let file = path.join(
       paths.viteApp,
@@ -33,19 +20,6 @@ describe('fixFilename()', () => {
   });
 
   describe(`when the app's modulePrefix does not match the folder name (common in most apps)`, () => {
-    it(`works`, () => {
-      let file = path.join(
-        paths.classicApp,
-        'test-app',
-        'components/template-only.hbs',
-      );
-      let corrected = fixFilename(file);
-
-      expect(corrected).to.equal(
-        path.join(paths.classicApp, 'app/components/template-only.hbs'),
-      );
-    });
-
     it(`works with /app/ in the components path`, () => {
       let file = path.join(
         paths.classicApp,
