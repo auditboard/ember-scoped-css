@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-10-04)
+
+
+
+#### :memo: Documentation
+* [#336](https://github.com/auditboard/ember-scoped-css/pull/336) Update README with bugfixes link ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* [#334](https://github.com/auditboard/ember-scoped-css/pull/334) Revise compatibility details in README ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-10-03)
 
 * ember-scoped-css 1.0.1 (patch)

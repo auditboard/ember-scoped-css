@@ -1,21 +1,11 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "patch",
-      "oldVersion": "1.0.0",
-      "newVersion": "1.0.1",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
-        }
-      ],
-      "pkgJSONPath": "./ember-scoped-css/package.json"
+      "oldVersion": "1.0.1"
     },
     "stylelint-ember-scoped-css": {
       "oldVersion": "1.0.0"
     }
   },
-  "description": "## Release (2025-10-03)\n\n* ember-scoped-css 1.0.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#332](https://github.com/auditboard/ember-scoped-css/pull/332) Don't unneedely decodeURIComponent ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2025-10-04)\n\n\n\n#### :memo: Documentation\n* [#336](https://github.com/auditboard/ember-scoped-css/pull/336) Update README with bugfixes link ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* [#334](https://github.com/auditboard/ember-scoped-css/pull/334) Revise compatibility details in README ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
