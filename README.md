@@ -52,6 +52,8 @@ This build tool can emit CSS in a `@layer`.
 - Vite
 - V2 addons with `@embroider/addon-dev` @ v8+ (or similar)
 
+For [bugfixes for the pre-ember-scoped-css-1.0 code, PR here](https://github.com/auditboard/ember-scoped-css/tree/hbs-classic-and-webpack-support)
+
 | You Have | ember-scoped-css | ember-scoped-css-compat | docs |
 | -------- | ----------- | ---------------------- | --- |
 | vite | >= 1.0.0 | 🚫 | [main][docs-main]
