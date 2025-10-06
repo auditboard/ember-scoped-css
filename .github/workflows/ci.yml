@@ -22,7 +22,7 @@ jobs:
       - run: pnpm lint
 
   test:
-    name: "Test ${{ matrix.dir }}"
+    name: "${{ matrix.os }} ${{ matrix.dir }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
