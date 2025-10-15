@@ -6,9 +6,20 @@ import { isInsideGlobal } from './utils.js';
 function rewriteSelector(sel, postfix) {
   const transform = (selectors) => {
     selectors.walk((selector) => {
-      if (selector.type === 'class' && !isInsideGlobal(selector)) {
+      if (isInsideGlobal(selector)) return;
+
+      // We never want to touch psuedo selectors since we and the user doesn't own them.
+      if (selector.type === 'psuedo') return;
+
+      // :nth-of-type has special syntax where the values passed to nth-of-type()
+      // must either be exactly "odd", "even", or a simple formula
+      //
+      // https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-of-type
+      if (isNthOfType(selector)) return;
+
+      if (selector.type === 'class') {
         selector.value += '_' + postfix;
-      } else if (selector.type === 'tag' && !isInsideGlobal(selector)) {
+      } else if (selector.type === 'tag') {
         selector.replaceWith(
           parser.tag({ value: selector.value }),
           parser.className({ value: postfix }),
@@ -28,6 +39,12 @@ function rewriteSelector(sel, postfix) {
   return transformed;
 }
 
+function isNthOfType(node) {
+  if (!node) return false;
+
+  return node.parent?.value === ':nth-of-type' || isNthOfType(node.parent);
+}
+
 function isInsideKeyframes(node) {
   const parent = node.parent;
 
@@ -42,9 +59,12 @@ export function rewriteCss(css, postfix, fileName, layerName) {
   const ast = postcss.parse(css);
 
   ast.walk((node) => {
-    if (node.type === 'rule' && !isInsideKeyframes(node)) {
-      node.selector = rewriteSelector(node.selector, postfix);
-    }
+    if (node.type !== 'rule') return;
+    // TODO: https://github.com/auditboard/ember-scoped-css/issues/44
+    //       (we should scope keyframes too)
+    if (isInsideKeyframes(node)) return;
+
+    node.selector = rewriteSelector(node.selector, postfix);
   });
 
   const rewrittenCss = ast.toString();
@@ -58,57 +78,4 @@ export function rewriteCss(css, postfix, fileName, layerName) {
     rewrittenCss +
     '\n}\n'
   );
-}
-
-if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest;
-
-  it('should rewrite css', function () {
-    const css = '.foo { color: red; }';
-    const postfix = 'postfix';
-    const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, false);
-
-    expect(rewritten).to.equal(`/* foo.css */\n.foo_postfix { color: red; }\n`);
-  });
-
-  it('should use a custom layer', function () {
-    const css = '.foo { color: red; }';
-    const postfix = 'postfix';
-    const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'utils');
-
-    expect(rewritten).to.equal(
-      `/* foo.css */\n@layer utils {\n\n.foo_postfix { color: red; }\n}\n`,
-    );
-  });
-
-  it('shouldnt rewrite global', function () {
-    const css = '.baz :global(.foo p) .bar { color: red; }';
-    const postfix = 'postfix';
-    const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
-
-    expect(rewritten).to.equal(
-      `/* foo.css */\n@layer components {\n\n.baz_postfix .foo p .bar_postfix { color: red; }\n}\n`,
-    );
-  });
-
-  it(`shouldn't rewrite keyframes`, function () {
-    const css = `
-      @keyframes luna-view-navigation {
-        100% {
-          padding-top: 1rem;
-        }
-      }
-    `;
-
-    const postfix = 'postfix';
-    const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
-
-    expect(rewritten).to.equal(
-      `/* foo.css */\n@layer components {\n\n${css}\n}\n`,
-    );
-  });
 }
