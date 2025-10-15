@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { rewriteCss } from './rewrite.js';
 
@@ -33,24 +33,6 @@ it('shouldnt rewrite global', function () {
   );
 });
 
-it(`shouldn't rewrite keyframes`, function () {
-  const css = `
-      @keyframes luna-view-navigation {
-        100% {
-          padding-top: 1rem;
-        }
-      }
-    `;
-
-  const postfix = 'postfix';
-  const fileName = 'foo.css';
-  const rewritten = rewriteCss(css, postfix, fileName);
-
-  expect(rewritten).to.equal(
-    `/* foo.css */\n@layer components {\n\n${css}\n}\n`,
-  );
-});
-
 it(`understands nth-of-type syntax`, function () {
   const css = `
     li:nth-of-type(odd) {}
@@ -61,7 +43,7 @@ it(`understands nth-of-type syntax`, function () {
   const fileName = 'foo.css';
   const rewritten = rewriteCss(css, postfix, fileName);
 
-  expect(rewritten).to.toMatchInlineSnapshot(`
+  expect(rewritten).toMatchInlineSnapshot(`
     "/* foo.css */
     @layer components {
 
@@ -72,4 +54,221 @@ it(`understands nth-of-type syntax`, function () {
     }
     "
   `);
+});
+
+describe('@keyframe', () => {
+  it(`rewrites`, function () {
+    const css = `
+      @keyframes luna-view-navigation {
+        100% {
+          padding-top: 1rem;
+        }
+      }
+    `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            @keyframes luna-view-navigation__postfix {
+              100% {
+                padding-top: 1rem;
+              }
+            }
+          
+      }
+      "
+    `);
+  });
+
+  it(`references are also scoped`, function () {
+    const css = `
+      p {
+        animation-duration: 3s;
+        animation-name: slide-in;
+      }
+
+      @keyframes slide-in {
+        from {
+          translate: 150vw 0;
+          scale: 200% 1;
+        }
+
+        to {
+          translate: 0 0;
+          scale: 100% 1;
+        }
+      }
+    `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            p.postfix {
+              animation-duration: 3s;
+              animation-name: slide-in__postfix;
+            }
+
+            @keyframes slide-in__postfix {
+              from {
+                translate: 150vw 0;
+                scale: 200% 1;
+              }
+
+              to {
+                translate: 0 0;
+                scale: 100% 1;
+              }
+            }
+          
+      }
+      "
+    `);
+  });
+
+  it('handles multiple references and keyframes', () => {
+    const css = `
+      p {
+        animation-duration: 3s;
+        animation-name: slide-in;
+      }
+      p.hello {
+        animation-duration: 5s;
+        animation-name: slide-in;
+      }
+      p span {
+        display: inline-block;
+        animation-duration: 3s;
+        animation-name: grow-shrink;
+      }
+
+      @keyframes slide-in {
+        from {
+          translate: 150vw 0;
+          scale: 200% 1;
+        }
+
+        to {
+          translate: 0 0;
+          scale: 100% 1;
+        }
+      }
+
+      @keyframes grow-shrink {
+        25%,
+        75% {
+          scale: 100%;
+        }
+
+        50% {
+          scale: 200%;
+          color: magenta;
+        }
+      }
+      `;
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            p.postfix {
+              animation-duration: 3s;
+              animation-name: slide-in__postfix;
+            }
+            p.postfix.hello_postfix {
+              animation-duration: 5s;
+              animation-name: slide-in__postfix;
+            }
+            p.postfix span.postfix {
+              display: inline-block;
+              animation-duration: 3s;
+              animation-name: grow-shrink__postfix;
+            }
+
+            @keyframes slide-in__postfix {
+              from {
+                translate: 150vw 0;
+                scale: 200% 1;
+              }
+
+              to {
+                translate: 0 0;
+                scale: 100% 1;
+              }
+            }
+
+            @keyframes grow-shrink__postfix {
+              25%,
+              75% {
+                scale: 100%;
+              }
+
+              50% {
+                scale: 200%;
+                color: magenta;
+              }
+            }
+
+      }
+      "
+    `);
+  });
+
+  it('works in shorthand combo-declarations', () => {
+    const css = `
+      div {
+        width: 100px;
+        height: 100px;
+        background: red;
+        position: relative;
+        animation: mymove 5s infinite;
+      }
+
+      @keyframes mymove {
+        from {top: 0px;}
+        to {top: 200px;}
+      }
+      `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            div.postfix {
+              width: 100px;
+              height: 100px;
+              background: red;
+              position: relative;
+              animation: mymove__postfix 5s infinite;
+            }
+
+            @keyframes mymove__postfix {
+              from {top: 0px;}
+              to {top: 200px;}
+            }
+
+      }
+      "
+    `);
+  });
 });
