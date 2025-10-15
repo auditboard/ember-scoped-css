@@ -1,13 +1,13 @@
+/**
+ * Important docs:
+ * - https://developer.mozilla.org/en-US/docs/Web/CSS/
+ */
 import postcss from 'postcss';
 import parser from 'postcss-selector-parser';
 
 import { isInsideGlobal } from './utils.js';
 
 const SEP = '__';
-
-function isKeyframes(node) {
-  return node.type === 'atrule' && node.name === 'keyframes';
-}
 
 function isRule(node) {
   return node.type === 'rule';
@@ -21,7 +21,7 @@ function isDeclaration(node) {
  * NOTE: "keyframes" is a singular definition, in that it's a block containing keyframes
  *       using `@keyframes {}` with only one thing on the inside doesn't make sense.
  */
-function rewriteKeyframes(node, postfix) {
+function rewriteReferencable(node, postfix) {
   let originalName = node.params;
   let postfixedName = node.params + SEP + postfix;
 
@@ -93,11 +93,26 @@ export function rewriteCss(css, postfix, fileName, layerName) {
    */
   const referencables = {
     keyframes: {},
+    'counter-style': {},
+    'position-try': {},
+    property: {},
   };
 
+  const availableReferencables = new Set(Object.keys(referencables));
+
+  function isReferencable(node) {
+    if (node.type !== 'atrule') return;
+
+    return availableReferencables.has(node.name);
+  }
+
   function updateDirectReferences(node) {
-    if (referencables.keyframes[node.value]) {
-      node.value = referencables.keyframes[node.value];
+    if (!node.value) return;
+
+    for (let [, map] of Object.entries(referencables)) {
+      if (map[node.value]) {
+        node.value = map[node.value];
+      }
     }
   }
 
@@ -116,6 +131,13 @@ export function rewriteCss(css, postfix, fileName, layerName) {
         });
       }
     }
+
+    for (let [lookFor, replaceWith] of Object.entries(referencables.property)) {
+      let lookForVar = `var(${lookFor})`;
+      let replaceWithVar = `var(${replaceWith})`;
+
+      node.value = node.value.replace(lookForVar, replaceWithVar);
+    }
   }
 
   /**
@@ -127,10 +149,14 @@ export function rewriteCss(css, postfix, fileName, layerName) {
 
   // Step 1: find referencables
   ast.walk((node) => {
-    if (isKeyframes(node)) {
-      let { originalName, postfixedName } = rewriteKeyframes(node, postfix);
+    /**
+     * @keyframes, @counter-style, etc
+     */
+    if (isReferencable(node)) {
+      let name = node.name;
+      let { originalName, postfixedName } = rewriteReferencable(node, postfix);
 
-      referencables.keyframes[originalName] = postfixedName;
+      referencables[name][originalName] = postfixedName;
 
       return;
     }
