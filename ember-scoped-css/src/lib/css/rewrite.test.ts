@@ -527,3 +527,97 @@ describe('@position-try', () => {
     `);
   });
 });
+
+describe('@property', () => {
+  it('rewrites', () => {
+    const css = `
+      @property --item-size {
+        syntax: "<percentage>";
+        inherits: true;
+        initial-value: 40%;
+      }
+    `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            @property --item-size__postfix {
+              syntax: "<percentage>";
+              inherits: true;
+              initial-value: 40%;
+            }
+          
+      }
+      "
+    `);
+  });
+
+  it('updates references', () => {
+    const css = `
+      @property --item-size {
+        syntax: "<percentage>";
+        inherits: true;
+        initial-value: 40%;
+      }
+
+      .container {
+        display: flex;
+        height: 200px;
+        border: 1px dashed black;
+
+        /* set custom property values on parent */
+        --item-size: 20%;
+        --item-color: orange;
+      }
+
+      /* use custom properties to set item size and background color */
+      .item {
+        width: var(--item-size);
+        height: var(--item-size);
+        background-color: var(--item-color);
+      }
+    `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            @property --item-size__postfix {
+              syntax: "<percentage>";
+              inherits: true;
+              initial-value: 40%;
+            }
+
+            .container_postfix {
+              display: flex;
+              height: 200px;
+              border: 1px dashed black;
+
+              /* set custom property values on parent */
+              --item-size: 20%;
+              --item-color: orange;
+            }
+
+            /* use custom properties to set item size and background color */
+            .item_postfix {
+              width: var(--item-size__postfix);
+              height: var(--item-size__postfix);
+              background-color: var(--item-color);
+            }
+          
+      }
+      "
+    `);
+  });
+});

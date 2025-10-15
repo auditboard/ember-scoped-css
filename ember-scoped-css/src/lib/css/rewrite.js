@@ -95,6 +95,7 @@ export function rewriteCss(css, postfix, fileName, layerName) {
     keyframes: {},
     'counter-style': {},
     'position-try': {},
+    property: {},
   };
 
   const availableReferencables = new Set(Object.keys(referencables));
@@ -107,10 +108,6 @@ export function rewriteCss(css, postfix, fileName, layerName) {
 
   function updateDirectReferences(node) {
     if (!node.value) return;
-
-    if (referencables.keyframes[node.value]) {
-      node.value = referencables.keyframes[node.value];
-    }
 
     for (let [, map] of Object.entries(referencables)) {
       if (map[node.value]) {
@@ -133,6 +130,13 @@ export function rewriteCss(css, postfix, fileName, layerName) {
           node.value = node.value.replace(x, replacement);
         });
       }
+    }
+
+    for (let [lookFor, replaceWith] of Object.entries(referencables.property)) {
+      let lookForVar = `var(${lookFor})`;
+      let replaceWithVar = `var(${replaceWith})`;
+
+      node.value = node.value.replace(lookForVar, replaceWithVar);
     }
   }
 
