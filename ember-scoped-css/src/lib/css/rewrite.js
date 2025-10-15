@@ -13,7 +13,7 @@ function rewriteSelector(sel, postfix) {
 
       // :nth-of-type has special syntax where the values passed to nth-of-type()
       // must either be exactly "odd", "even", or a simple formula
-      // 
+      //
       // https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-of-type
       if (isNthOfType(selector)) return;
 
@@ -41,7 +41,7 @@ function rewriteSelector(sel, postfix) {
 
 function isNthOfType(node) {
   if (!node) return false;
-  
+
   return node.parent?.value === ':nth-of-type' || isNthOfType(node.parent);
 }
 
