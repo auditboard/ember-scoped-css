@@ -1,5 +1,22 @@
 # Changelog
 
+## Release (2025-10-15)
+
+* ember-scoped-css 1.0.2 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#340](https://github.com/auditboard/ember-scoped-css/pull/340) Fix support for more at-rules, (@counter-style, @position-try, @property, etc) ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+  * [#339](https://github.com/auditboard/ember-scoped-css/pull/339) Fix @keyframe postfixing support ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+  * [#338](https://github.com/auditboard/ember-scoped-css/pull/338) Don't add scoping postfix to contents of `nth-of-type` psuedo-selector ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :memo: Documentation
+* [#336](https://github.com/auditboard/ember-scoped-css/pull/336) Update README with bugfixes link ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* [#334](https://github.com/auditboard/ember-scoped-css/pull/334) Revise compatibility details in README ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-10-03)
 
 * ember-scoped-css 1.0.1 (patch)
