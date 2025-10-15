@@ -621,3 +621,28 @@ describe('@property', () => {
     `);
   });
 });
+
+describe('@supports', () => {
+  it('does nothing for feature checking', () => {
+    const css = `
+    @supports (transform-origin: 5% 5%) {}
+    @supports selector(h2 > p) {}
+`;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+          @supports (transform-origin: 5% 5%) {}
+          @supports selector(h2 > p) {}
+
+      }
+      "
+    `);
+  });
+});
