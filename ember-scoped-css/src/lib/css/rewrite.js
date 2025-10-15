@@ -5,7 +5,7 @@ import { isInsideGlobal } from './utils.js';
 
 const SEP = '__';
 
-function isKeyframe(node) {
+function isKeyframes(node) {
   return node.type === 'atrule' && node.name === 'keyframes';
 }
 
@@ -17,7 +17,11 @@ function isDeclaration(node) {
   return node.type === 'decl';
 }
 
-function rewriteKeyframe(node, postfix) {
+/**
+ * NOTE: "keyframes" is a singular definition, in that it's a block containing keyframes
+ *       using `@keyframes {}` with only one thing on the inside doesn't make sense.
+ */
+function rewriteKeyframes(node, postfix) {
   let originalName = node.params;
   let postfixedName = node.params + SEP + postfix;
 
@@ -84,10 +88,35 @@ export function rewriteCss(css, postfix, fileName, layerName) {
   const layerNameWithDefault = layerName ?? 'components';
   const ast = postcss.parse(css);
   /**
-   * originalName => postfixedName
-   * @type { { [originalName: string]: string }}
+   * kind => originalName => postfixedName
+   * @type {{ [kind: string]: { [originalName: string]: string }}}
    */
-  const referencables = {};
+  const referencables = {
+    keyframes: {},
+  };
+
+  function updateDirectReferences(node) {
+    if (referencables.keyframes[node.value]) {
+      node.value = referencables.keyframes[node.value];
+    }
+  }
+
+  function updateShorthandContents(node) {
+    if (node.prop === 'animation') {
+      let parts = node.value.split(' ');
+      let match = parts.filter((x) => referencables.keyframes[x]);
+
+      if (match.length) {
+        match.forEach((x) => {
+          let replacement = referencables.keyframes[x];
+
+          if (!replacement) return;
+
+          node.value = node.value.replace(x, replacement);
+        });
+      }
+    }
+  }
 
   /**
    * We have to do two passes:
@@ -98,10 +127,10 @@ export function rewriteCss(css, postfix, fileName, layerName) {
 
   // Step 1: find referencables
   ast.walk((node) => {
-    if (isKeyframe(node)) {
-      let { originalName, postfixedName } = rewriteKeyframe(node, postfix);
+    if (isKeyframes(node)) {
+      let { originalName, postfixedName } = rewriteKeyframes(node, postfix);
 
-      referencables[originalName] = postfixedName;
+      referencables.keyframes[originalName] = postfixedName;
 
       return;
     }
@@ -110,9 +139,8 @@ export function rewriteCss(css, postfix, fileName, layerName) {
   // Step 2: postfix and update refenced referencables
   ast.walk((node) => {
     if (isDeclaration(node)) {
-      if (referencables[node.value]) {
-        node.value = referencables[node.value];
-      }
+      updateDirectReferences(node);
+      updateShorthandContents(node);
 
       return;
     }

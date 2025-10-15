@@ -223,7 +223,50 @@ describe('@keyframe', () => {
                 color: magenta;
               }
             }
-            
+
+      }
+      "
+    `);
+  });
+
+  it('works in shorthand combo-declarations', () => {
+    const css = `
+      div {
+        width: 100px;
+        height: 100px;
+        background: red;
+        position: relative;
+        animation: mymove 5s infinite;
+      }
+
+      @keyframes mymove {
+        from {top: 0px;}
+        to {top: 200px;}
+      }
+      `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            div.postfix {
+              width: 100px;
+              height: 100px;
+              background: red;
+              position: relative;
+              animation: mymove__postfix 5s infinite;
+            }
+
+            @keyframes mymove__postfix {
+              from {top: 0px;}
+              to {top: 200px;}
+            }
+
       }
       "
     `);
