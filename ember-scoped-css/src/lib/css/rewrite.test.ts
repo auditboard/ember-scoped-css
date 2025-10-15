@@ -457,3 +457,73 @@ describe('@counter-style', () => {
     `);
   });
 });
+
+describe('@position-try', () => {
+  it('rewrites', () => {
+    const css = `
+      @position-try --custom-left {
+        position-area: left;
+        width: 100px;
+        margin-right: 10px;
+      }
+    `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            @position-try --custom-left__postfix {
+              position-area: left;
+              width: 100px;
+              margin-right: 10px;
+            }
+          
+      }
+      "
+    `);
+  });
+
+  it('updates references', () => {
+    const css = `
+      @position-try --custom-left {
+        position-area: left;
+        width: 100px;
+        margin-right: 10px;
+      }
+
+      .infobox {
+        position-try-fallbacks:
+          --custom-left;
+      }
+    `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName);
+
+    expect(rewritten).toMatchInlineSnapshot(`
+      "/* foo.css */
+      @layer components {
+
+
+            @position-try --custom-left__postfix {
+              position-area: left;
+              width: 100px;
+              margin-right: 10px;
+            }
+
+            .infobox_postfix {
+              position-try-fallbacks:
+                --custom-left__postfix;
+            }
+          
+      }
+      "
+    `);
+  });
+});

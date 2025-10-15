@@ -94,6 +94,7 @@ export function rewriteCss(css, postfix, fileName, layerName) {
   const referencables = {
     keyframes: {},
     'counter-style': {},
+    'position-try': {},
   };
 
   const availableReferencables = new Set(Object.keys(referencables));
