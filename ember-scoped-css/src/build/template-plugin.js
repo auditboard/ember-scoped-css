@@ -135,6 +135,13 @@ export function createPlugin(config) {
 
             addInfo(info);
 
+            /**
+             * This will be handled in ElementNode traversal
+             */
+            if (hasInlineAttribute(styleTag)) {
+              return;
+            }
+
             let cssRequest = makeRequest(postfix, info.id, scopedCss);
 
             env.meta.jsutils.importForSideEffect(cssRequest);
@@ -157,8 +164,25 @@ export function createPlugin(config) {
               );
             }
 
+            if (hasInlineAttribute(node)) {
+              let text = textContent(node);
+
+              /**
+               * Traverse this and allow interpolation
+               */
+              node.children = [env.syntax.builders.text(text)];
+
+              return;
+            }
+
             // Returning null removes the node
             return null;
+          }
+
+          if (hasInlineAttribute(node)) {
+            throw new Error(
+              `<style inline> is not valid. Please add the scoped attribute: <style scoped inline>`,
+            );
           }
         },
         MustacheStatement(...args) {
@@ -176,6 +200,7 @@ export function createPlugin(config) {
  * Thanks, CardStack and @ef4 for this code.
  */
 const SCOPED_ATTRIBUTE_NAME = 'scoped';
+const INLINE_ATTRIBUTE_NAME = 'inline';
 
 function hasScopedAttribute(node) {
   if (!node) return;
@@ -184,6 +209,16 @@ function hasScopedAttribute(node) {
 
   return node.attributes.some(
     (attribute) => attribute.name === SCOPED_ATTRIBUTE_NAME,
+  );
+}
+
+function hasInlineAttribute(node) {
+  if (!node) return;
+  if (node.tag !== 'style') return;
+  if (node.type !== 'ElementNode') return;
+
+  return node.attributes.some(
+    (attribute) => attribute.name === INLINE_ATTRIBUTE_NAME,
   );
 }
 
