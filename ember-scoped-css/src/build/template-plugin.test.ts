@@ -70,7 +70,7 @@ it('scoped transforms correctly', async () => {
 });
 
 
-it('scoped transforms correctly', async () => {
+it('scoped inline transforms correctly', async () => {
     let output = await transform(`
         export const Foo = <template>
             <div class="foo">
@@ -87,12 +87,17 @@ it('scoped transforms correctly', async () => {
         expect(templateContentsOf(output)).toMatchInlineSnapshot(`
           [
             "<div class="foo_e65d154a1">
-              <h1>Hello, World!</h1>
-          </div>
-          <style scoped inline>
-              .foo {
-                  color: red;
-              }
+                          <h1>Hello, World!</h1>
+                      </div>
+                      <style scoped inline>/* src/components/example-component.css */
+          @layer components {
+
+
+                          .foo_e65d154a1 {
+                              color: red;
+                          }
+                      
+          }
           </style>",
           ]
         `);

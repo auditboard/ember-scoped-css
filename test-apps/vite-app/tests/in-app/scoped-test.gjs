@@ -14,7 +14,7 @@ module('[In App] scoped', function (hooks) {
 
     assert
       .dom('p')
-      .hasClass(scopedClass('hi', 'vite-app/components/in-app/inline'));
+      .hasClass(scopedClass('hi', 'vite-app/components/in-app/scoped'));
     assert.dom('p').hasStyle({ color: 'rgb(0, 0, 200)' });
   });
 
@@ -23,7 +23,7 @@ module('[In App] scoped', function (hooks) {
 
     assert
       .dom('p')
-      .hasClass(scopedClass('hello', 'vite-app/components/in-app/inline'));
+      .hasClass(scopedClass('hello', 'vite-app/components/in-app/scoped'));
     assert.dom('p').hasStyle({ color: 'rgb(0, 200, 0)' });
   });
 });

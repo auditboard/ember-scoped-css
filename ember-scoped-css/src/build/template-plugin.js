@@ -166,11 +166,18 @@ export function createPlugin(config) {
 
             if (hasInlineAttribute(node)) {
               let text = textContent(node);
+              let localCssPath = cssPath.replace(cwd + '/', '');
+              let scopedText = rewriteCss(
+                text,
+                postfix,
+                localCssPath,
+                config.layerName,
+              );
 
               /**
                * Traverse this and allow interpolation
                */
-              node.children = [env.syntax.builders.text(text)];
+              node.children = [env.syntax.builders.text(scopedText)];
 
               return;
             }
