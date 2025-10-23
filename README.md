@@ -184,6 +184,43 @@ With `ember-scoped-css` you define styles in an inline `<style scoped>` block or
 
 Note that `<style>` (without `scoped`) will continue to work as it does today and be "global styles"
 
+<details><summary>inline / conditional CSS</summary>
+
+  Like the example above, we can specify the `scoped` attribute on the `<style>` tag, but if we add the `inline` attribute as well, the `<style>` tag will not be extracted to a CSS file during your app's build -- it will be left inline.
+
+  This can be useful for conditionally applied styles.
+
+> [!IMPORTANT]
+> While using `inline` enables conditional styles, if multiple of the same component are rendered on a page, the CSS from both `<style scoped inline>` elements will be applied to both renderings of that component.
+
+```gjs
+// ...
+
+<template>
+  <div data-test-my-component class='hello-class header'>
+    <b>Hello</b>, world!
+  </div>
+
+  <style scoped inline>
+    .hello-class {
+      color: red;
+    }
+
+    /* the :global() pseudo-class is used to define a global class. 
+       It mean that header class wont be scoped to that component */
+    .hello-class:global(.header) {
+      font-size: 20px;
+    }
+
+    b {
+      color: blue;
+    }
+  </style>
+</template>
+```
+
+</details>
+
 <details><summary>separate CSS file</summary>
 
 ```hbs
