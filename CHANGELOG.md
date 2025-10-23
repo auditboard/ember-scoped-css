@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-10-23)
+
+* ember-scoped-css 1.1.0 (minor)
+
+#### :rocket: Enhancement
+* `ember-scoped-css`
+  * [#341](https://github.com/auditboard/ember-scoped-css/pull/341) Support inline scoped styles (enabling interpolation later) ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-10-15)
 
 * ember-scoped-css 1.0.2 (patch)
