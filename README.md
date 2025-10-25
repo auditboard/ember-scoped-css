@@ -240,7 +240,7 @@ const padding = '20';
 
   <style scoped inline>
     .hello-class {
-      font-size: {{20}}px;
+      font-size: {{padding}}px;
     }
 
     b {
