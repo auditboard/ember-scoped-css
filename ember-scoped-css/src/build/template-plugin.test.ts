@@ -140,3 +140,79 @@ it('scoped inline (with stache) transforms correctly', async () => {
     ]
   `);
 });
+
+it('scoped inline with stache and units', async () => {
+  let output = await transform(`
+        const red = '12';
+
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style scoped inline>
+                .foo {
+                    border: {{red}}px;
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style scoped inline>/* src/components/example-component.css */
+    @layer components {
+
+
+                    .foo_e65d154a1 {
+                        border: {{red}}px;
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
+});
+
+it('scoped inline with complex stache', async () => {
+  let output = await transform(`
+        const red = '12';
+        const defaultValue = '1rem';
+        const concat = (...args) => args.join('');
+
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style scoped inline>
+                .foo {
+                    border: calc(1dvw * {{if condition
+                                             (concat red "px")
+                                             defaultValue}}
+                                 );
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style scoped inline>/* src/components/example-component.css */
+    @layer components {
+
+
+                    .foo_e65d154a1 {
+                        border: calc(1dvw * {{if condition (concat red "px") defaultValue}}
+                                     );
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
+});
