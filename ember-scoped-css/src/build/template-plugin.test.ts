@@ -65,12 +65,17 @@ it('scoped transforms correctly', async () => {
     `);
 
   expect(templateContentsOf(output)).toMatchInlineSnapshot(`
-      [
-        "<div class="foo_e65d154a1">
-          <h1>Hello, World!</h1>
-      </div>",
-      ]
-    `);
+    [
+      "<div class="foo_e65d154a1">
+        <h1>Hello, World!</h1>
+    </div>
+    <style>
+        .foo {
+            color: red;
+        }
+    </style>",
+    ]
+  `);
 });
 
 it('scoped inline transforms correctly', async () => {
@@ -92,7 +97,7 @@ it('scoped inline transforms correctly', async () => {
       "<div class="foo_e65d154a1">
                     <h1>Hello, World!</h1>
                 </div>
-                <style scoped inline>/* src/components/example-component.css */
+                <style>/* src/components/example-component.css */
     @layer components {
 
 
@@ -127,7 +132,7 @@ it('scoped inline (with stache) transforms correctly', async () => {
       "<div class="foo_e65d154a1">
                     <h1>Hello, World!</h1>
                 </div>
-                <style scoped inline>/* src/components/example-component.css */
+                <style>/* src/components/example-component.css */
     @layer components {
 
 
@@ -162,7 +167,7 @@ it('scoped inline with stache and units', async () => {
       "<div class="foo_e65d154a1">
                     <h1>Hello, World!</h1>
                 </div>
-                <style scoped inline>/* src/components/example-component.css */
+                <style>/* src/components/example-component.css */
     @layer components {
 
 
@@ -202,7 +207,7 @@ it('scoped inline with complex stache', async () => {
       "<div class="foo_e65d154a1">
                     <h1>Hello, World!</h1>
                 </div>
-                <style scoped inline>/* src/components/example-component.css */
+                <style>/* src/components/example-component.css */
     @layer components {
 
 
@@ -214,5 +219,39 @@ it('scoped inline with complex stache', async () => {
     }
     </style>",
     ]
+  `);
+});
+
+it('scoped inline with complex stache (references retained)', async () => {
+  let output = await transform(`
+        const red = '12';
+        const defaultValue = '1rem';
+        const concat = (...args) => args.join('');
+
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style scoped inline>
+                .foo {
+                    border: calc(1dvw * {{if condition
+                                             (concat red "px")
+                                             defaultValue}}
+                                 );
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(output).toMatchInlineSnapshot(`
+    "import { precompileTemplate } from "@ember/template-compilation";
+    import { setComponentTemplate } from "@ember/component";
+    import templateOnly from "@ember/component/template-only";
+    const red = '12';
+    const defaultValue = '1rem';
+    const concat = (...args) => args.join('');
+    export const Foo = setComponentTemplate(precompileTemplate("\\n            <div class=\\"foo_e65d154a1\\">\\n                <h1>Hello, World!</h1>\\n            </div>\\n            <style>/* src/components/example-component.css */\\n@layer components {\\n\\n\\n                .foo_e65d154a1 {\\n                    border: calc(1dvw * {{if condition (concat red \\"px\\") defaultValue}}\\n                                 );\\n                }\\n            \\n}\\n</style>\\n        ", {
+      strictMode: true
+    }), templateOnly());"
   `);
 });

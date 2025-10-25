@@ -19,7 +19,7 @@ export const ScopedInlineFoo = <template>
 const fromSomewhere = 'rgb(0, 200, 0)';
 
 export const ScopedInlineInterpolated = <template>
-  <p class="intern">hi</p>
+  <p class="intern">hi {{fromSomewhere}}</p>
   <style
     scoped
     inline

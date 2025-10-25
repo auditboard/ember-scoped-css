@@ -177,6 +177,8 @@ export function createPlugin(config) {
                */
               styleTag.children = [env.syntax.builders.text(restached)];
 
+              removeStylePragmaAttributes(styleTag);
+
               return;
             }
 
@@ -195,6 +197,7 @@ export function createPlugin(config) {
             );
 
             addInfo(info);
+            removeStylePragmaAttributes(styleTag);
 
             let cssRequest = makeRequest(postfix, info.id, scopedCss);
 
@@ -273,4 +276,12 @@ function textContent(node) {
   let children = node.children.map(print);
 
   return children.join('');
+}
+
+function removeStylePragmaAttributes(node) {
+  node.attributes = node.attributes.filter(
+    (attr) =>
+      attr.name !== SCOPED_ATTRIBUTE_NAME &&
+      attr.name !== INLINE_ATTRIBUTE_NAME,
+  );
 }
