@@ -90,7 +90,7 @@
     "@types/common-tags": "^1.8.4",
     "@types/jscodeshift": "^17.3.0",
     "@vitest/coverage-v8": "^3.2.4",
-    "babel-plugin-ember-template-compilation": "^3.0.1",
+    "babel-plugin-ember-template-compilation": "^2.4.1",
     "common-tags": "^1.8.2",
     "concurrently": "^9.1.2",
     "content-tag": "^3.1.1",

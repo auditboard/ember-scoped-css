@@ -221,6 +221,38 @@ Note that `<style>` (without `scoped`) will continue to work as it does today an
 
 </details>
 
+<details><summary>inline style tag with dynamic interpolation</summary>
+
+  When using the `inline` attribute on the `<style>` tag, we allow using `{{ }}` interpolation within the style tag. This can enable user-provided CSS / themeing or other dynamic, data-driven CSS (provided the inputs are sanitized by you, if needed)
+
+> [!IMPORTANT]
+> While using `inline` enables conditional styles, if multiple of the same component are rendered on a page, the CSS from both `<style scoped inline>` elements will be applied to both renderings of that component.
+
+```gjs
+// ...
+
+const padding = '20';
+
+<template>
+  <div class='hello-class'>
+    <b>Hello</b>, world!
+  </div>
+
+  <style scoped inline>
+    .hello-class {
+      font-size: {{padding}}px;
+    }
+
+    b {
+      color: blue;
+    }
+  </style>
+</template>
+```
+
+</details>
+
+
 <details><summary>separate CSS file</summary>
 
 ```hbs

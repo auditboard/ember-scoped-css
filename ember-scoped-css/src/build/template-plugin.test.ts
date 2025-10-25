@@ -61,16 +61,16 @@ it('scoped transforms correctly', async () => {
                     color: red;
                 }
             </style>
-        </template>;    
+        </template>;
     `);
 
   expect(templateContentsOf(output)).toMatchInlineSnapshot(`
-      [
-        "<div class="foo_e65d154a1">
-          <h1>Hello, World!</h1>
-      </div>",
-      ]
-    `);
+    [
+      "<div class="foo_e65d154a1">
+        <h1>Hello, World!</h1>
+    </div>",
+    ]
+  `);
 });
 
 it('scoped inline transforms correctly', async () => {
@@ -84,24 +84,172 @@ it('scoped inline transforms correctly', async () => {
                     color: red;
                 }
             </style>
-        </template>;    
+        </template>;
     `);
 
   expect(templateContentsOf(output)).toMatchInlineSnapshot(`
-          [
-            "<div class="foo_e65d154a1">
-                          <h1>Hello, World!</h1>
-                      </div>
-                      <style scoped inline>/* src/components/example-component.css */
-          @layer components {
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style>/* src/components/example-component.css */
+    @layer components {
 
 
-                          .foo_e65d154a1 {
-                              color: red;
-                          }
-                      
-          }
-          </style>",
-          ]
-        `);
+                    .foo_e65d154a1 {
+                        color: red;
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
+});
+
+it('scoped inline (with stache) transforms correctly', async () => {
+  let output = await transform(`
+        const red = 'red';
+
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style scoped inline>
+                .foo {
+                    color: {{red}};
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style>/* src/components/example-component.css */
+    @layer components {
+
+
+                    .foo_e65d154a1 {
+                        color: {{red}};
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
+});
+
+it('scoped inline with stache and units', async () => {
+  let output = await transform(`
+        const red = '12';
+
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style scoped inline>
+                .foo {
+                    border: {{red}}px;
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style>/* src/components/example-component.css */
+    @layer components {
+
+
+                    .foo_e65d154a1 {
+                        border: {{red}}px;
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
+});
+
+it('scoped inline with complex stache', async () => {
+  let output = await transform(`
+        const red = '12';
+        const defaultValue = '1rem';
+        const concat = (...args) => args.join('');
+
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style scoped inline>
+                .foo {
+                    border: calc(1dvw * {{if condition
+                                             (concat red "px")
+                                             defaultValue}}
+                                 );
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style>/* src/components/example-component.css */
+    @layer components {
+
+
+                    .foo_e65d154a1 {
+                        border: calc(1dvw * {{if condition (concat red "px") defaultValue}}
+                                     );
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
+});
+
+it('scoped inline with complex stache (references retained)', async () => {
+  let output = await transform(`
+        const red = '12';
+        const defaultValue = '1rem';
+        const concat = (...args) => args.join('');
+
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style
+              scoped
+              inline
+            >
+                .foo {
+                    border: calc(1dvw * {{if condition
+                                             (concat red "px")
+                                             defaultValue}}
+                                 );
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(output).toMatchInlineSnapshot(`
+    "import { precompileTemplate } from "@ember/template-compilation";
+    import { setComponentTemplate } from "@ember/component";
+    import templateOnly from "@ember/component/template-only";
+    const red = '12';
+    const defaultValue = '1rem';
+    const concat = (...args) => args.join('');
+    export const Foo = setComponentTemplate(precompileTemplate("\\n            <div class=\\"foo_e65d154a1\\">\\n                <h1>Hello, World!</h1>\\n            </div>\\n            <style>/* src/components/example-component.css */\\n@layer components {\\n\\n\\n                .foo_e65d154a1 {\\n                    border: calc(1dvw * {{if condition (concat red \\"px\\") defaultValue}}\\n                                 );\\n                }\\n            \\n}\\n</style>\\n        ", {
+      strictMode: true
+    }), templateOnly());"
+  `);
 });
