@@ -61,7 +61,7 @@ it('scoped transforms correctly', async () => {
                     color: red;
                 }
             </style>
-        </template>;    
+        </template>;
     `);
 
   expect(templateContentsOf(output)).toMatchInlineSnapshot(`
@@ -84,24 +84,59 @@ it('scoped inline transforms correctly', async () => {
                     color: red;
                 }
             </style>
-        </template>;    
+        </template>;
     `);
 
   expect(templateContentsOf(output)).toMatchInlineSnapshot(`
-          [
-            "<div class="foo_e65d154a1">
-                          <h1>Hello, World!</h1>
-                      </div>
-                      <style scoped inline>/* src/components/example-component.css */
-          @layer components {
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style scoped inline>/* src/components/example-component.css */
+    @layer components {
 
 
-                          .foo_e65d154a1 {
-                              color: red;
-                          }
-                      
-          }
-          </style>",
-          ]
-        `);
+                    .foo_e65d154a1 {
+                        color: red;
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
+});
+
+it('scoped inline (with stache) transforms correctly', async () => {
+  let output = await transform(`
+        const red = 'red';
+
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style scoped inline>
+                .foo {
+                    color: {{red}};
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style scoped inline>/* src/components/example-component.css */
+    @layer components {
+
+
+                    .foo_e65d154a1 {
+                        color: {{red}};
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
 });

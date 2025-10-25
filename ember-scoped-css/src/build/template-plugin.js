@@ -4,6 +4,8 @@
  *
  */
 
+import { print } from 'ember-template-recast';
+
 import { rewriteCss } from '../lib/css/rewrite.js';
 import { getCSSContentInfo, getCSSInfo } from '../lib/css/utils.js';
 import { fixFilename } from '../lib/path/template-transform-paths.js';
@@ -103,6 +105,37 @@ export function createPlugin(config) {
       postfix,
     });
 
+    /**
+     * For inline CSS, we can have interpolation.
+     * But when doing the CSS processing we need to have a valid CSS file,
+     * so all the staches need to be temporarily replaced with something valid for
+     * our CSS preprocessor
+     */
+    let interpId = 0;
+    let replaceId = () => `es${interpId++}`;
+    let staches = new Map();
+
+    function unStache(css) {
+      return css.replaceAll(/\{\{([^}]+)\}\}/g, (_, capture) => {
+        let id = replaceId();
+
+        staches.set(id, capture);
+
+        return `var(--scoped-css____${id}____)`;
+      });
+    }
+
+    function reStache(unstached) {
+      return unstached.replaceAll(
+        /var\(--scoped-css____([^_]+)____\)/g,
+        (_, capture) => {
+          let stache = staches.get(capture);
+
+          return `{{${stache}}}`;
+        },
+      );
+    }
+
     return {
       name: 'ember-scoped-css:template-plugin',
       visitor: {
@@ -123,6 +156,34 @@ export function createPlugin(config) {
           );
 
           if (hasScopedAttribute(styleTag)) {
+            if (hasInlineAttribute(styleTag)) {
+              let raw = textContent(styleTag);
+              let unstached = unStache(raw);
+              let info = getCSSContentInfo(unstached);
+              let localCssPath = cssPath.replace(cwd + '/', '');
+              let scopedText = rewriteCss(
+                unstached,
+                postfix,
+                localCssPath,
+                config.layerName,
+              );
+
+              let restached = reStache(scopedText);
+
+              addInfo(info);
+
+              /**
+               * Traverse this and allow interpolation
+               */
+              styleTag.children = [env.syntax.builders.text(restached)];
+
+              return;
+            }
+
+            /**
+             * For non-inline style tags, we prepare to extract to a CSS file
+             */
+
             let css = textContent(styleTag);
             let info = getCSSContentInfo(css);
             let localCssPath = `<inline>/` + cssPath.replace(cwd + '/', '');
@@ -134,13 +195,6 @@ export function createPlugin(config) {
             );
 
             addInfo(info);
-
-            /**
-             * This will be handled in ElementNode traversal
-             */
-            if (hasInlineAttribute(styleTag)) {
-              return;
-            }
 
             let cssRequest = makeRequest(postfix, info.id, scopedCss);
 
@@ -165,20 +219,6 @@ export function createPlugin(config) {
             }
 
             if (hasInlineAttribute(node)) {
-              let text = textContent(node);
-              let localCssPath = cssPath.replace(cwd + '/', '');
-              let scopedText = rewriteCss(
-                text,
-                postfix,
-                localCssPath,
-                config.layerName,
-              );
-
-              /**
-               * Traverse this and allow interpolation
-               */
-              node.children = [env.syntax.builders.text(scopedText)];
-
               return;
             }
 
@@ -230,7 +270,7 @@ function hasInlineAttribute(node) {
 }
 
 function textContent(node) {
-  let textChildren = node.children.filter((c) => c.type === 'TextNode');
+  let children = node.children.map(print);
 
-  return textChildren.map((c) => c.chars).join('');
+  return children.join('');
 }
