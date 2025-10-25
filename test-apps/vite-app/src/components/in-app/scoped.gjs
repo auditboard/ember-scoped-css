@@ -15,3 +15,17 @@ export const ScopedInlineFoo = <template>
     }
   </style>
 </template>;
+
+const fromSomewhere = 'rgb(0, 200, 0)';
+
+export const ScopedInlineInterpolated = <template>
+  <p class="hello">hi</p>
+  <style
+    scoped
+    inline
+  >
+    .intern {
+      color: {{fromSomewhere}};
+    }
+  </style>
+</template>;
