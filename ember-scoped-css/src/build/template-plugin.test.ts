@@ -227,7 +227,10 @@ it('scoped inline with complex stache (references retained)', async () => {
             <div class="foo">
                 <h1>Hello, World!</h1>
             </div>
-            <style scoped inline>
+            <style
+              scoped
+              inline
+            >
                 .foo {
                     border: calc(1dvw * {{if condition
                                              (concat red "px")
