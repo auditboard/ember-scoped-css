@@ -68,12 +68,7 @@ it('scoped transforms correctly', async () => {
     [
       "<div class="foo_e65d154a1">
         <h1>Hello, World!</h1>
-    </div>
-    <style>
-        .foo {
-            color: red;
-        }
-    </style>",
+    </div>",
     ]
   `);
 });

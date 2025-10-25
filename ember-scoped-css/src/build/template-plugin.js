@@ -177,8 +177,6 @@ export function createPlugin(config) {
                */
               styleTag.children = [env.syntax.builders.text(restached)];
 
-              removeStylePragmaAttributes(styleTag);
-
               return;
             }
 
@@ -197,7 +195,6 @@ export function createPlugin(config) {
             );
 
             addInfo(info);
-            removeStylePragmaAttributes(styleTag);
 
             let cssRequest = makeRequest(postfix, info.id, scopedCss);
 
@@ -222,6 +219,8 @@ export function createPlugin(config) {
             }
 
             if (hasInlineAttribute(node)) {
+              removeStylePragmaAttributes(node);
+
               return;
             }
 
