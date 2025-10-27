@@ -2,7 +2,7 @@ import * as babel from '@babel/core';
 import { stripIndent } from 'common-tags';
 import { Preprocessor } from 'content-tag';
 import jscodeshift from 'jscodeshift';
-import { expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { createPlugin } from './template-plugin.js';
 
@@ -50,6 +50,66 @@ function templateContentsOf(file: string | null | undefined) {
   return result;
 }
 
+describe('no transformation needed', () => {
+  describe('plain style tag', () => {
+    it('vanilla', async () => {
+      let output = await transform(`
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style>
+                .foo {
+                    color: red;
+                }
+            </style>
+        </template>;
+    `);
+
+      expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo">
+        <h1>Hello, World!</h1>
+    </div>
+    <style>
+        .foo {
+            color: red;
+        }
+    </style>",
+    ]
+  `);
+    });
+
+    it('with @scope', async () => {
+      let output = await transform(`
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style>
+                .foo {
+                    color: red;
+                }
+            </style>
+        </template>;
+    `);
+
+      expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo">
+        <h1>Hello, World!</h1>
+    </div>
+    <style>
+        .foo {
+            color: red;
+        }
+    </style>",
+    ]
+  `);
+    });
+  });
+});
+
 it('scoped transforms correctly', async () => {
   let output = await transform(`
         export const Foo = <template>
@@ -61,7 +121,7 @@ it('scoped transforms correctly', async () => {
                     color: red;
                 }
             </style>
-        </template>;    
+        </template>;
     `);
 
   expect(templateContentsOf(output)).toMatchInlineSnapshot(`
@@ -71,6 +131,43 @@ it('scoped transforms correctly', async () => {
       </div>",
       ]
     `);
+});
+
+it('scoped with @scope transforms correctly', async () => {
+  let output = await transform(`
+        export const Foo = <template>
+            <div class="foo">
+                <h1>Hello, World!</h1>
+            </div>
+            <style scoped inline>
+                @scope {
+                  .foo {
+                      color: red;
+                  }
+                }
+            </style>
+        </template>;
+    `);
+
+  expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style scoped inline>/* src/components/example-component.css */
+    @layer components {
+
+
+                    @scope {
+                      .foo_e65d154a1 {
+                          color: red;
+                      }
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
 });
 
 it('scoped inline transforms correctly', async () => {
@@ -84,24 +181,24 @@ it('scoped inline transforms correctly', async () => {
                     color: red;
                 }
             </style>
-        </template>;    
+        </template>;
     `);
 
   expect(templateContentsOf(output)).toMatchInlineSnapshot(`
-          [
-            "<div class="foo_e65d154a1">
-                          <h1>Hello, World!</h1>
-                      </div>
-                      <style scoped inline>/* src/components/example-component.css */
-          @layer components {
+    [
+      "<div class="foo_e65d154a1">
+                    <h1>Hello, World!</h1>
+                </div>
+                <style scoped inline>/* src/components/example-component.css */
+    @layer components {
 
 
-                          .foo_e65d154a1 {
-                              color: red;
-                          }
-                      
-          }
-          </style>",
-          ]
-        `);
+                    .foo_e65d154a1 {
+                        color: red;
+                    }
+                
+    }
+    </style>",
+    ]
+  `);
 });
