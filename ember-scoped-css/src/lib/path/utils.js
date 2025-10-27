@@ -10,6 +10,20 @@ import { hashFromModulePath } from './hash-from-module-path.js';
 export { hashFromAbsolutePath } from './hash-from-absolute-path.js';
 export { hashFromModulePath } from './hash-from-module-path.js';
 
+/**
+ * @param {string} filePath
+ */
+export function forcePosix(filePath) {
+  const parsed = path.parse(filePath);
+
+  let rootless = filePath.replace(
+    new RegExp(`^${RegExp.escape(parsed.root)}`),
+    path.posix.sep,
+  );
+
+  return rootless.replaceAll(path.win32.sep, path.posix.sep);
+}
+
 const COMPONENT_EXTENSIONS = ['.gts', '.gjs', '.ts', '.js', '.hbs'];
 
 // CJS / ESM?
