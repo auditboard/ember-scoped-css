@@ -11,6 +11,7 @@ export const leadingSlashPath = {
   templatesDir: path.join('/templates/'),
   testem: path.join('/testem'),
   src: path.join('/src/'),
+  app: path.join('/app/'),
 };
 
 export const barePath = {
