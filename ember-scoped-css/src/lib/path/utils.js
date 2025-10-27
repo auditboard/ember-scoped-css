@@ -16,6 +16,10 @@ export { hashFromModulePath } from './hash-from-module-path.js';
 export function forcePosix(filePath) {
   const parsed = path.parse(filePath);
 
+  if (parsed.root === '') {
+    return filePath.replaceAll(path.win32.sep, path.posix.sep);
+  }
+  
   let rootless = filePath.replace(
     new RegExp(`^${RegExp.escape(parsed.root)}`),
     path.posix.sep,
