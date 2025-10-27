@@ -19,7 +19,7 @@ export function forcePosix(filePath) {
   if (parsed.root === '') {
     return filePath.replaceAll(path.win32.sep, path.posix.sep);
   }
-  
+
   let rootless = filePath.replace(
     new RegExp(`^${RegExp.escape(parsed.root)}`),
     path.posix.sep,
@@ -220,6 +220,7 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
 
   let ourWorkspace = findWorkspacePath(cwd);
 
+  console.log({ workspace, ourWorkspace });
   if (workspace !== ourWorkspace) {
     return false;
   }
@@ -227,6 +228,7 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   let local = fileName.replace(workspace, '');
   let [, ...parts] = local.split(path.sep).filter(Boolean);
 
+  console.log({ parts, UNSUPPORTED_DIRECTORIES });
   if (UNSUPPORTED_DIRECTORIES.has(parts[0])) {
     return false;
   }
