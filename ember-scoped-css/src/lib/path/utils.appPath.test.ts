@@ -10,13 +10,13 @@ describe('appPath()', () => {
     let file = path.join(paths.viteApp, 'app', 'templates/application');
     let result = appPath(file);
 
-    expect(result).to.equal('vite-app/templates/application');
+    expect(result).to.equal(path.join('vite-app/templates/application'));
   });
 
   it('handles psuedo module', () => {
     let file = path.join(paths.viteApp, 'templates/application');
     let result = appPath(file);
 
-    expect(result).to.equal('vite-app/templates/application');
+    expect(result).to.equal(path.join('vite-app/templates/application'));
   });
 });
