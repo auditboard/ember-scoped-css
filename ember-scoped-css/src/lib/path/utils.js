@@ -6,6 +6,9 @@ import path from 'node:path';
 import { hashFromAbsolutePath } from './hash-from-absolute-path.js';
 import { hashFromModulePath } from './hash-from-module-path.js';
 
+export { hashFromAbsolutePath } from './hash-from-absolute-path.js';
+export { hashFromModulePath } from './hash-from-module-path.js';
+
 const COMPONENT_EXTENSIONS = ['.gts', '.gjs', '.ts', '.js', '.hbs'];
 
 // CJS / ESM?
