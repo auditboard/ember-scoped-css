@@ -4,16 +4,11 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { barePath, leadingSlashPath } from './const.js';
-import { hashFromAbsolutePath as hfap } from './hash-from-absolute-path.js';
-import { hashFromModulePath as hfmp } from './hash-from-module-path.js';
+import { hashFromAbsolutePath } from './hash-from-absolute-path.js';
+import { hashFromModulePath } from './hash-from-module-path.js';
 
-export function hashFromAbsolutePath(filePath) {
-  return hfap(forceUnixPath(filePath));
-}
-
-export function hashFromModulePath(filePath) {
-  return hfmp(forceUnixPath(filePath));
-}
+export { hashFromAbsolutePath } from './hash-from-absolute-path.js';
+export { hashFromModulePath } from './hash-from-module-path.js';
 
 const COMPONENT_EXTENSIONS = ['.gts', '.gjs', '.ts', '.js', '.hbs'];
 
@@ -40,9 +35,7 @@ const CWD = process.cwd();
  * @returns
  */
 export function hashFrom(filePath) {
-  filePath = forceUnixPath(filePath);
-
-  if (path.isAbsolute(filePath)) {
+  if (filePath.startsWith(path.sep)) {
     return hashFromAbsolutePath(filePath);
   }
 
@@ -193,8 +186,6 @@ export function withoutExtension(filePath) {
  * @returns
  */
 export function isRelevantFile(fileName, { additionalRoots, cwd }) {
-  fileName = forceUnixPath(fileName);
-
   // Fake file handled by testem server when it runs
   if (fileName.startsWith(leadingSlashPath.testem)) return false;
   // Private Virtual Modules
@@ -216,7 +207,7 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   }
 
   let local = fileName.replace(workspace, '');
-  let [, ...parts] = local.split('/').filter(Boolean);
+  let [, ...parts] = local.split(path.sep).filter(Boolean);
 
   if (UNSUPPORTED_DIRECTORIES.has(parts[0])) {
     return false;
@@ -240,8 +231,6 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
 }
 
 export function packageScopedPathToModulePath(packageScopedPath) {
-  packageScopedPath = forceUnixPath(packageScopedPath);
-
   /**
    * *By convention*, `src` is omitted from component paths.
    * We can reflect the same behavior by replacing src/
@@ -257,7 +246,7 @@ export function packageScopedPathToModulePath(packageScopedPath) {
    */
   let packageRelative = packageScopedPath.replace(
     new RegExp(`^${RegExp.escape(leadingSlashPath.src)}`),
-    '/',
+    path.sep,
   );
 
   let parsed = path.parse(packageRelative);
@@ -292,8 +281,6 @@ export function packageScopedPathToModulePath(packageScopedPath) {
  * which is `<package.json#name>/path-to-file`
  */
 export function appPath(sourcePath) {
-  sourcePath = forceUnixPath(sourcePath);
-
   let workspacePath = findWorkspacePath(sourcePath);
   let name = moduleName(sourcePath);
 
@@ -307,7 +294,7 @@ export function appPath(sourcePath) {
   /**
    * But we also don't want 'app' -- which is present in the v1 addon pipeline
    */
-  packageRelative = packageRelative.replace(leadingSlashPath.app, '/');
+  packageRelative = packageRelative.replace(leadingSlashPath.app, path.sep);
 
   // Any of the above relpacements could accidentally give us an extra / (depending on our build environment)
   packageRelative = path.normalize(packageRelative);
@@ -326,14 +313,12 @@ export function appPath(sourcePath) {
 const SEEN = new Set();
 
 function getSeen(sourcePath) {
-  sourcePath = forceUnixPath(sourcePath);
-
   if (SEEN.has(sourcePath)) return sourcePath;
 
-  let parts = sourcePath.split('/');
+  let parts = sourcePath.split(path.sep);
 
   for (let i = parts.length - 1; i > 1; i--) {
-    let toCheck = parts.slice(0, i).join('/');
+    let toCheck = parts.slice(0, i).join(path.sep);
 
     let seen = SEEN.has(toCheck);
 
@@ -343,29 +328,14 @@ function getSeen(sourcePath) {
   }
 }
 
-/**
- * @param {string} inputPath
- */
-export function forceUnixPath(inputPath) {
-  let parsed = path.parse(inputPath);
-
-  if (parsed.root === '') {
-    return inputPath.replaceAll(path.win32.sep, path.posix.sep);
-  }
-
-  // Remove the drive on windows
-  return inputPath
-    .replace(parsed.root, '/')
-    .replaceAll(path.win32.sep, path.posix.sep);
-}
-
 export function findWorkspacePath(sourcePath, options) {
-  let cwd = forceUnixPath(options?.cwd ?? CWD);
+  let cwd = options?.cwd ?? CWD;
 
-  sourcePath = forceUnixPath(sourcePath);
-
-  if (sourcePath.endsWith('/')) {
-    sourcePath = sourcePath.replace(new RegExp(`${RegExp.escape('/')}$`), '');
+  if (sourcePath.endsWith(path.sep)) {
+    sourcePath = sourcePath.replace(
+      new RegExp(`${RegExp.escape(path.sep)}$`),
+      '',
+    );
   }
 
   let seen = getSeen(sourcePath);
@@ -385,12 +355,10 @@ export function findWorkspacePath(sourcePath, options) {
   const packageJsonPath = findPackageJsonUp(sourcePath, { cwd });
 
   if (!packageJsonPath) {
-    throw new Error(
-      `Could not determine project for ${sourcePath} within ${cwd}`,
-    );
+    throw new Error(`Could not determine project for ${sourcePath}`);
   }
 
-  const workspacePath = forceUnixPath(path.dirname(packageJsonPath));
+  const workspacePath = path.dirname(packageJsonPath);
 
   SEEN.add(workspacePath);
 
@@ -398,11 +366,11 @@ export function findWorkspacePath(sourcePath, options) {
 }
 
 function findPackageJsonUp(startPath, options) {
-  let cwd = forceUnixPath(options?.cwd ?? CWD);
-  let parts = startPath.split('/');
+  let cwd = options?.cwd ?? CWD;
+  let parts = startPath.split(path.sep);
 
   for (let i = parts.length - 1; i > 1; i--) {
-    let toCheck = parts.slice(0, i).join('/');
+    let toCheck = parts.slice(0, i).join(path.sep);
 
     let packageJson = path.join(toCheck, 'package.json');
     let exists = fsSync.existsSync(packageJson);

@@ -1,13 +1,19 @@
+import path from 'path';
+
+/**
+ * Join will convert to whatever is appropriate fro the current platform
+ */
+
 export const leadingSlashPath = {
-  embroiderDir: '/node_modules/.embroider/',
-  atEmbroider: '/@embroider',
-  componentsDir: '/components/',
-  templatesDir: '/templates/',
-  testem: '/testem',
-  src: '/src/',
-  app: '/app/',
+  embroiderDir: path.join('/node_modules/.embroider/'),
+  atEmbroider: path.join('/@embroider'),
+  componentsDir: path.join('/components/'),
+  templatesDir: path.join('/templates/'),
+  testem: path.join('/testem'),
+  src: path.join('/src/'),
+  app: path.join('/app/'),
 };
 
 export const barePath = {
-  pnpmDir: 'node_modules/.pnpm',
+  pnpmDir: path.join('node_modules/.pnpm'),
 };
