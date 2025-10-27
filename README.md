@@ -51,8 +51,8 @@ This build tool can emit CSS in a `@layer`.
 
 - Vite
 - V2 addons with `@embroider/addon-dev` @ v8+ (or similar)
-
-For [bugfixes for the pre-ember-scoped-css-1.0 code, PR here](https://github.com/auditboard/ember-scoped-css/tree/hbs-classic-and-webpack-support)
+- For [hbs, broccoli, or webpack-based builds, view this version of the docs](https://github.com/auditboard/ember-scoped-css/tree/hbs-classic-and-webpack-support)
+  - For [bugfixes for the pre-ember-scoped-css-1.0 code, PR here](https://github.com/auditboard/ember-scoped-css/tree/hbs-classic-and-webpack-support)
 
 | You Have | ember-scoped-css | ember-scoped-css-compat | docs |
 | -------- | ----------- | ---------------------- | --- |
@@ -234,7 +234,7 @@ Note that `<style>` (without `scoped`) will continue to work as it does today an
 }
 
 /* the :global() pseudo-class is used to define a global class. It mean that header class wont be scoped to that component */
-.hello-class:global(.header) {
+:global(.header) {
   font-size: 20px;
 }
 
@@ -244,6 +244,92 @@ b {
 ```
 
 NOTE: that if you're using pods, css co-located with templates/routes/etc will need to be named `styles.css`
+
+</details>
+
+
+<details><summary>Difference with @scope</summary>
+
+  The [`@scope`](https://developer.mozilla.org/en-US/docs/Web/CSS/@scope) at-rule will scope all CSS defined within a `<style>` tag to the parent element. 
+
+```html
+<div>
+  <style>
+    @scope {
+      p { color: red; }
+    }
+  </style>
+
+  <p>this is red</p>
+</div>
+
+<p>not red</p>
+```
+
+In this example, it is effectively the same as:
+
+```html
+<!-- style scoped must be at the root of the template-area -->
+<style scoped>
+    p.inner { color: red; }
+</style>
+
+<div>
+  <p class="inner">this is red</p>
+</div>
+
+<p>not red</p>
+```
+
+But the nice thing is that you don't need to use classes with `@scope`.
+
+A _potential_ downside to `@scope` is that it operates deeply -- where as `<style scoped>` will only apply its styles to the immediate component -- meaning that nested elements / components don't accidentally get surprise styles.
+
+For example:
+```gjs
+const Inner = <template>
+  <p>
+    inner (also red)
+  </p>
+</template>;
+
+const Outer = <template>
+  <div>
+    <style>
+      @scope {
+        p { color: red; }
+      }
+    </style>
+
+    <p>this is red</p>
+
+    <Inner />
+  </div>
+</template>
+```
+
+Where as with `<style scoped>`
+```gjs
+
+const Inner = <template>
+  <p>
+    inner (not red)
+  </p>
+</template>;
+
+const Outer = <template>
+  <style scoped>
+    p { color: red; }
+  </style>
+
+  <div>
+    <p>this is red</p>
+
+    <Inner />
+  </div>
+</template>
+```
+
 
 </details>
 
