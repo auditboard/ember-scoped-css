@@ -3,6 +3,7 @@ import fsSync, { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
+import { barePath, leadingSlashPath } from './const.js';
 import { hashFromAbsolutePath } from './hash-from-absolute-path.js';
 import { hashFromModulePath } from './hash-from-module-path.js';
 
@@ -21,7 +22,7 @@ if (!ourRequire) {
   ourRequire = require;
 }
 
-const IRRELEVANT_PATHS = ['node_modules/.pnpm', '__vite-'];
+const IRRELEVANT_PATHS = [barePath.pnpmDir, '__vite-'];
 const UNSUPPORTED_DIRECTORIES = new Set(['tests']);
 
 const CWD = process.cwd();
@@ -34,7 +35,7 @@ const CWD = process.cwd();
  * @returns
  */
 export function hashFrom(filePath) {
-  if (filePath.startsWith('/')) {
+  if (filePath.startsWith(path.sep)) {
     return hashFromAbsolutePath(filePath);
   }
 
@@ -133,7 +134,7 @@ export function cssPathFor(fileName) {
  * @param {string} filePath
  */
 export function isPodTemplate(filePath) {
-  if (filePath.includes('/components/')) {
+  if (filePath.includes(leadingSlashPath.componentsDir)) {
     return false;
   }
 
@@ -152,7 +153,7 @@ export function isPodTemplate(filePath) {
  * @param {string} filePath
  */
 export function isPod(filePath) {
-  if (filePath.includes('/components/')) {
+  if (filePath.includes(leadingSlashPath.componentsDir)) {
     return false;
   }
 
@@ -186,13 +187,13 @@ export function withoutExtension(filePath) {
  */
 export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   // Fake file handled by testem server when it runs
-  if (fileName.startsWith('/testem')) return false;
+  if (fileName.startsWith(leadingSlashPath.testem)) return false;
   // Private Virtual Modules
   if (fileName.startsWith('\0')) return false;
   // These are not valid userland names (or are from libraries)
   if (fileName.match(/^[a-zA-Z]/)) return false;
   // External to us
-  if (fileName.startsWith('/@embroider')) return false;
+  if (fileName.startsWith(leadingSlashPath.atEmbroider)) return false;
   if (IRRELEVANT_PATHS.some((i) => fileName.includes(i))) return false;
 
   let workspace = findWorkspacePath(fileName);
@@ -206,7 +207,7 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   }
 
   let local = fileName.replace(workspace, '');
-  let [, ...parts] = local.split('/').filter(Boolean);
+  let [, ...parts] = local.split(path.sep).filter(Boolean);
 
   if (UNSUPPORTED_DIRECTORIES.has(parts[0])) {
     return false;
@@ -216,7 +217,11 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
    * Mostly pods support.
    * folks need to opt in to pods (routes), because every pods app can be configured differently
    */
-  let roots = ['/components/', '/templates/', ...(additionalRoots || [])];
+  let roots = [
+    leadingSlashPath.componentsDir,
+    leadingSlashPath.templatesDir,
+    ...(additionalRoots || []),
+  ];
 
   if (!roots.some((root) => fileName.includes(root))) {
     return;
@@ -239,7 +244,10 @@ export function packageScopedPathToModulePath(packageScopedPath) {
    * If we need further customizations, we'll want to match on `exports` in the
    * corresponding package.json
    */
-  let packageRelative = packageScopedPath.replace(/^\/src\//, '/');
+  let packageRelative = packageScopedPath.replace(
+    new RegExp(`^${RegExp.escape(leadingSlashPath.src)}`),
+    path.sep,
+  );
 
   let parsed = path.parse(packageRelative);
 
@@ -286,10 +294,10 @@ export function appPath(sourcePath) {
   /**
    * But we also don't want 'app' -- which is present in the v1 addon pipeline
    */
-  packageRelative = packageRelative.replace(`/app/`, `/`);
+  packageRelative = packageRelative.replace(leadingSlashPath.app, path.sep);
 
   // Any of the above relpacements could accidentally give us an extra / (depending on our build environment)
-  packageRelative = packageRelative.replace('//', '/');
+  packageRelative = path.normalize(packageRelative);
 
   let localPackagerStylePath = packageScopedPathToModulePath(packageRelative);
 
@@ -307,10 +315,10 @@ const SEEN = new Set();
 function getSeen(sourcePath) {
   if (SEEN.has(sourcePath)) return sourcePath;
 
-  let parts = sourcePath.split('/');
+  let parts = sourcePath.split(path.sep);
 
   for (let i = parts.length - 1; i > 1; i--) {
-    let toCheck = parts.slice(0, i).join('/');
+    let toCheck = parts.slice(0, i).join(path.sep);
 
     let seen = SEEN.has(toCheck);
 
@@ -323,8 +331,11 @@ function getSeen(sourcePath) {
 export function findWorkspacePath(sourcePath, options) {
   let cwd = options?.cwd ?? CWD;
 
-  if (sourcePath.endsWith('/')) {
-    sourcePath = sourcePath.replace(/\/$/, '');
+  if (sourcePath.endsWith(path.sep)) {
+    sourcePath = sourcePath.replace(
+      new RegExp(`${RegExp.escape(path.sep)}$`),
+      '',
+    );
   }
 
   let seen = getSeen(sourcePath);
@@ -356,10 +367,10 @@ export function findWorkspacePath(sourcePath, options) {
 
 function findPackageJsonUp(startPath, options) {
   let cwd = options?.cwd ?? CWD;
-  let parts = startPath.split('/');
+  let parts = startPath.split(path.sep);
 
   for (let i = parts.length - 1; i > 1; i--) {
-    let toCheck = parts.slice(0, i).join('/');
+    let toCheck = parts.slice(0, i).join(path.sep);
 
     let packageJson = path.join(toCheck, 'package.json');
     let exists = fsSync.existsSync(packageJson);

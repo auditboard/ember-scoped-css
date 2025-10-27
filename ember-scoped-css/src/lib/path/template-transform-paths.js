@@ -1,11 +1,7 @@
 import path from 'node:path';
 
+import { leadingSlashPath } from './const.js';
 import { findWorkspacePath } from './utils.js';
-
-/**
- * Join will convert to whatever is appropriate fro the current platform
- */
-const embroiderDir = path.join('/node_modules/.embroider/');
 
 /**
  * template plugins do not hand us the correct file path.
@@ -31,7 +27,10 @@ export function fixFilename(filename) {
   let hasAppDir = fileName.includes(path.join(workspace, 'app'));
   let hasSrcDir = fileName.includes(path.join(workspace, 'src'));
 
-  if (!(hasAppDir || hasSrcDir) && !fileName.includes(embroiderDir)) {
+  if (
+    !(hasAppDir || hasSrcDir) &&
+    !fileName.includes(leadingSlashPath.embroiderDir)
+  ) {
     let maybeModule = fileName.replace(workspace, '');
     let [maybeScope, ...rest] = maybeModule.split(path.sep).filter(Boolean);
     let parts = rest;
