@@ -2,6 +2,8 @@ import path from 'node:path';
 
 import { findWorkspacePath } from './utils.js';
 
+const embroiderDir = path.join('/node_modules/.embroider/');
+
 /**
  * template plugins do not hand us the correct file path.
  * additionally, we may not be able to rely on this data in the future,
@@ -26,12 +28,9 @@ export function fixFilename(filename) {
   let hasAppDir = fileName.includes(path.join(workspace, 'app'));
   let hasSrcDir = fileName.includes(path.join(workspace, 'src'));
 
-  if (
-    !(hasAppDir || hasSrcDir) &&
-    !fileName.includes('/node_modules/.embroider/')
-  ) {
+  if (!(hasAppDir || hasSrcDir) && !fileName.includes(embroiderDir)) {
     let maybeModule = fileName.replace(workspace, '');
-    let [maybeScope, ...rest] = maybeModule.split('/').filter(Boolean);
+    let [maybeScope, ...rest] = maybeModule.split(path.sep).filter(Boolean);
     let parts = rest;
 
     if (maybeScope.startsWith('@')) {

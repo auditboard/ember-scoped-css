@@ -34,8 +34,6 @@ const CWD = process.cwd();
  * @returns
  */
 export function hashFrom(filePath) {
-  filePath = path.normalize(filePath);
-
   if (filePath.startsWith('/')) {
     return hashFromAbsolutePath(filePath);
   }
