@@ -2,6 +2,9 @@ import path from 'node:path';
 
 import { findWorkspacePath } from './utils.js';
 
+/**
+ * Join will convert to whatever is appropriate fro the current platform
+ */
 const embroiderDir = path.join('/node_modules/.embroider/');
 
 /**
