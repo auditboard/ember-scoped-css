@@ -11,6 +11,7 @@ export function hashFromAbsolutePath(absolutePath) {
    */
   const modulePath = appPath(absolutePath);
   const forced = forcePosix(modulePath);
+  console.log('forced', forced);
   const postfix = hash(forced);
 
   return postfix;
