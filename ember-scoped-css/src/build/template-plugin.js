@@ -13,6 +13,7 @@ import {
   cssPathFor,
   hashFromModulePath,
   isRelevantFile,
+  forcePosix,
 } from '../lib/path/utils.js';
 import { makeRequest } from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
