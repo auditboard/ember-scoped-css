@@ -65,7 +65,7 @@ const CWD = process.cwd();
  */
 export function hashFrom(filePath) {
   console.log({ filePath });
-  if (filePath.startsWith(path.sep)) {
+  if (path.isAbsolute(filePath)) {
     return hashFromAbsolutePath(filePath);
   }
   
