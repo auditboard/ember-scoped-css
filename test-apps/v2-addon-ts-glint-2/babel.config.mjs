@@ -1,21 +1,22 @@
+import * as scopedCSS from 'ember-scoped-css/build';
 /**
  * This babel.config is not used for publishing.
  * It's only for the local editing experience
  * (and linting)
  */
-const { buildMacros } = require('@embroider/macros/babel');
+import { buildMacros } from '@embroider/macros/babel';
 
-const {
+import {
   babelCompatSupport,
   templateCompatSupport,
-} = require('@embroider/compat/babel');
+} from '@embroider/compat/babel';
 
 const macros = buildMacros();
 
 // For scenario testing
 const isCompat = Boolean(process.env.ENABLE_COMPAT_BUILD);
 
-module.exports = {
+export default {
   plugins: [
     [
       '@babel/plugin-transform-typescript',
@@ -29,6 +30,7 @@ module.exports = {
       'babel-plugin-ember-template-compilation',
       {
         transforms: [
+          scopedCSS.templatePlugin({}),
           ...(isCompat ? templateCompatSupport() : macros.templateMacros),
         ],
       },
@@ -37,7 +39,7 @@ module.exports = {
       'module:decorator-transforms',
       {
         runtime: {
-          import: require.resolve('decorator-transforms/runtime-esm'),
+          import: 'decorator-transforms/runtime-esm',
         },
       },
     ],

@@ -72,6 +72,7 @@
     "concurrently": "^9.0.1",
     "ember-page-title": "^8.2.0",
     "ember-qunit": "^9.0.2",
+    "ember-scoped-css": "workspace:*",
     "ember-source": "^6.7.0",
     "ember-strict-application-resolver": "^0.1.0",
     "ember-template-lint": "^7.9.0",
@@ -97,6 +98,9 @@
   "ember-addon": {
     "version": 2,
     "type": "addon",
-    "main": "addon-main.cjs"
+    "main": "addon-main.cjs",
+    "app-js": {
+      "./components/glint-v2.js": "./dist/_app_/components/glint-v2.js"
+    }
   }
 }

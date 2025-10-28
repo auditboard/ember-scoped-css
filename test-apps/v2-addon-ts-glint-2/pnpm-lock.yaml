@@ -91,6 +91,9 @@ importers:
       ember-qunit:
         specifier: ^9.0.2
         version: 9.0.4(42ea1babb02cd713896c01eab1f6c691)
+      ember-scoped-css:
+        specifier: workspace:*
+        version: link:../../ember-scoped-css
       ember-source:
         specifier: ^6.7.0
         version: 6.8.0(@glimmer/component@2.0.0)(rsvp@4.8.5)
