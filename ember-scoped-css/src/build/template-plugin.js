@@ -82,7 +82,7 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let localCssPath = cssPath.replace(cwd + path.sep, '');
+      let localCssPath = forcePosix(cssPath.replace(cwd + path.sep, ''));
       let scopedCss = rewriteCss(
         info.css,
         postfix,
@@ -126,11 +126,10 @@ export function createPlugin(config) {
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
             let info = getCSSContentInfo(css);
-            let localCssPath = `<inline>/` + cssPath.replace(cwd + path.sep, '');
             let scopedCss = rewriteCss(
               info.css,
               postfix,
-              localCssPath,
+              `<inline>/` + localCssPath,
               config.layerName,
             );
 
@@ -167,7 +166,6 @@ export function createPlugin(config) {
 
             if (hasInlineAttribute(node)) {
               let text = textContent(node);
-              let localCssPath = cssPath.replace(cwd + path.sep, '');
               let scopedText = rewriteCss(
                 text,
                 postfix,
