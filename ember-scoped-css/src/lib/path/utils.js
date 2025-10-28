@@ -9,6 +9,11 @@ import { hashFromModulePath as hashPosixModulePath } from './hash-from-module-pa
 
 export { hashFromAbsolutePath } from './hash-from-absolute-path.js';
 
+/**
+ * 
+ * @param {string} filePath 
+ * @returns {string}
+ */
 export function hashFromModulePath(filePath) {
   let posixPath = forcePosix(filePath);
 

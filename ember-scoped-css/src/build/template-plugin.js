@@ -4,6 +4,7 @@
  *
  */
 
+import path from 'node:path';
 import { rewriteCss } from '../lib/css/rewrite.js';
 import { getCSSContentInfo, getCSSInfo } from '../lib/css/utils.js';
 import { fixFilename } from '../lib/path/template-transform-paths.js';
@@ -81,7 +82,7 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let localCssPath = cssPath.replace(cwd + '/', '');
+      let localCssPath = cssPath.replace(cwd + path.sep, '');
       let scopedCss = rewriteCss(
         info.css,
         postfix,
@@ -125,7 +126,7 @@ export function createPlugin(config) {
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
             let info = getCSSContentInfo(css);
-            let localCssPath = `<inline>/` + cssPath.replace(cwd + '/', '');
+            let localCssPath = `<inline>/` + cssPath.replace(cwd + path.sep, '');
             let scopedCss = rewriteCss(
               info.css,
               postfix,
@@ -166,7 +167,7 @@ export function createPlugin(config) {
 
             if (hasInlineAttribute(node)) {
               let text = textContent(node);
-              let localCssPath = cssPath.replace(cwd + '/', '');
+              let localCssPath = cssPath.replace(cwd + path.sep, '');
               let scopedText = rewriteCss(
                 text,
                 postfix,
