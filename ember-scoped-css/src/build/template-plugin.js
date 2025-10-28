@@ -5,15 +5,16 @@
  */
 
 import path from 'node:path';
+
 import { rewriteCss } from '../lib/css/rewrite.js';
 import { getCSSContentInfo, getCSSInfo } from '../lib/css/utils.js';
 import { fixFilename } from '../lib/path/template-transform-paths.js';
 import {
   appPath,
   cssPathFor,
+  forcePosix,
   hashFromModulePath,
   isRelevantFile,
-  forcePosix,
 } from '../lib/path/utils.js';
 import { makeRequest } from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';

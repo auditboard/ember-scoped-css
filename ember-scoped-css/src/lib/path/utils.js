@@ -10,8 +10,8 @@ import { hashFromModulePath as hashPosixModulePath } from './hash-from-module-pa
 export { hashFromAbsolutePath } from './hash-from-absolute-path.js';
 
 /**
- * 
- * @param {string} filePath 
+ *
+ * @param {string} filePath
  * @returns {string}
  */
 export function hashFromModulePath(filePath) {
@@ -218,6 +218,7 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   if (fileName.startsWith(leadingSlashPath.testem)) return false;
   // Private Virtual Modules
   if (fileName.startsWith('\0')) return false;
+
   // These are not valid userland names (or are from libraries)
   if (path.isAbsolute(fileName) === false) {
     if (fileName.match(/^[a-zA-Z]/)) return false;
