@@ -75,6 +75,7 @@ export function createPlugin(config) {
 
     let cssPath = cssPathFor(absolutePath);
     let info = getCSSInfo(cssPath);
+    let localCssPath = forcePosix(cssPath.replace(cwd + path.sep, ''));
 
     /**
      * This will be falsey if we don't have a co-located CSS file.
@@ -83,7 +84,6 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let localCssPath = forcePosix(cssPath.replace(cwd + path.sep, ''));
       let scopedCss = rewriteCss(
         info.css,
         postfix,
