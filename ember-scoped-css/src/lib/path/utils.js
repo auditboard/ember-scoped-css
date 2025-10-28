@@ -5,10 +5,15 @@ import path from 'node:path';
 
 import { barePath, leadingSlashPath } from './const.js';
 import { hashFromAbsolutePath } from './hash-from-absolute-path.js';
-import { hashFromModulePath } from './hash-from-module-path.js';
+import { hashFromModulePath as hashPosixModulePath } from './hash-from-module-path.js';
 
 export { hashFromAbsolutePath } from './hash-from-absolute-path.js';
-export { hashFromModulePath } from './hash-from-module-path.js';
+
+export function hashFromModulePath(filePath) {
+  let posixPath = forcePosix(filePath);
+
+  return hashPosixModulePath(posixPath);
+}
 
 /**
  * @param {string} filePath
@@ -204,7 +209,6 @@ export function withoutExtension(filePath) {
  * @returns
  */
 export function isRelevantFile(fileName, { additionalRoots, cwd }) {
-  console.log({ fileName, cwd, additionalRoots })
   // Fake file handled by testem server when it runs
   if (fileName.startsWith(leadingSlashPath.testem)) return false;
   // Private Virtual Modules
@@ -224,7 +228,6 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
 
   let ourWorkspace = findWorkspacePath(cwd);
 
-  console.log({ workspace, ourWorkspace });
   if (workspace !== ourWorkspace) {
     return false;
   }
@@ -232,7 +235,6 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   let local = fileName.replace(workspace, '');
   let [, ...parts] = local.split(path.sep).filter(Boolean);
 
-  console.log({ parts, UNSUPPORTED_DIRECTORIES });
   if (UNSUPPORTED_DIRECTORIES.has(parts[0])) {
     return false;
   }
