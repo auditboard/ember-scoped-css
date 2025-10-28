@@ -204,6 +204,7 @@ export function withoutExtension(filePath) {
  * @returns
  */
 export function isRelevantFile(fileName, { additionalRoots, cwd }) {
+  console.log({ fileName, cwd, additionalRoots })
   // Fake file handled by testem server when it runs
   if (fileName.startsWith(leadingSlashPath.testem)) return false;
   // Private Virtual Modules
