@@ -16,7 +16,6 @@ export { hashFromAbsolutePath } from './hash-from-absolute-path.js';
  */
 export function hashFromModulePath(filePath) {
   let posixPath = forcePosix(filePath);
-  console.log('posixPath', posixPath);
 
   return hashPosixModulePath(posixPath);
 }
@@ -64,11 +63,10 @@ const CWD = process.cwd();
  * @returns
  */
 export function hashFrom(filePath) {
-  console.log({ filePath });
   if (path.isAbsolute(filePath)) {
     return hashFromAbsolutePath(filePath);
   }
-  
+
   return hashFromModulePath(filePath);
 }
 
