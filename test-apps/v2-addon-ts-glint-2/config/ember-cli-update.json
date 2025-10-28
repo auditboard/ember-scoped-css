@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectName": "v2-addon-ts-glint-2",
+  "packages": [
+    {
+      "name": "@ember/addon-blueprint",
+      "version": "0.14.2",
+      "blueprints": [
+        {
+          "name": "@ember/addon-blueprint",
+          "isBaseBlueprint": true,
+          "options": [
+            "--ci-provider=github",
+            "--pnpm"
+          ]
+        }
+      ]
+    }
+  ]
+}
