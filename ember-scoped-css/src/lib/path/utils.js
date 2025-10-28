@@ -63,6 +63,8 @@ const CWD = process.cwd();
  * @returns
  */
 export function hashFrom(filePath) {
+  filePath = forcePosix(filePath);
+
   if (filePath.startsWith(path.sep)) {
     return hashFromAbsolutePath(filePath);
   }
