@@ -19,10 +19,17 @@ import ember from 'eslint-plugin-ember/recommended';
 import importPlugin from 'eslint-plugin-import';
 import n from 'eslint-plugin-n';
 import globals from 'globals';
+import ts from 'typescript-eslint';
 
 const esmParserOptions = {
   ecmaFeatures: { modules: true },
   ecmaVersion: 'latest',
+};
+
+const tsParserOptions = {
+  projectService: true,
+  project: true,
+  tsconfigRootDir: import.meta.dirname,
 };
 
 const config = [
@@ -30,6 +37,7 @@ const config = [
   prettier,
   ember.configs.base,
   ember.configs.gjs,
+  ember.configs.gts,
   /**
    * Ignores must be in their own object
    * https://eslint.org/docs/latest/use/configure/ignore
@@ -66,6 +74,14 @@ const config = [
         ...globals.browser,
       },
     },
+  },
+  {
+    files: ['**/*.{ts,gts}'],
+    languageOptions: {
+      parser: ember.parser,
+      parserOptions: tsParserOptions,
+    },
+    extends: [...ts.configs.recommendedTypeChecked, ember.configs.gts],
   },
   {
     files: ['src/**/*'],
@@ -119,4 +135,4 @@ const config = [
   },
 ];
 
-export default config;
+export default ts.config(...config);
