@@ -17,16 +17,11 @@ const greeting = "hello world";
 ```
 becomes the equivelent of;
 ```gjs
+import './abcd1234.css'; // containing your CSS, but with selectors scoped
 const greeting = "hello world";
 
 <template>
   <div class="abcd1234">{{greeting}}</div>
-
-  <style scoped>
-    div.abcd1234 {
-      color: blue;
-    }
-  </style>
 </template>
 ```
 
