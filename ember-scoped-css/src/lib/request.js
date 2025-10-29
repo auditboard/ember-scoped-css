@@ -1,15 +1,17 @@
 const key = 'styles.ember-scoped.css';
 const separator = '____';
 
+import { hash } from './path/hash-from-absolute-path.js';
+
 function parse(request) {
   let [left, qps] = request.split('?');
   let [relativePostfix, cssId] = left.split(separator);
-  let postfix = relativePostfix.slice(2);
+  let key = relativePostfix.slice(2);
 
   let search = new URLSearchParams(qps);
 
   return {
-    from: postfix,
+    from: key,
     css: search.get('css'),
     cssId,
   };
@@ -36,5 +38,5 @@ export function decodeScopedCSSRequest(request) {
 }
 
 export function makeRequest(postfix, cssId, cssContent) {
-  return `./${postfix}${separator}${cssId}${separator}${key}?css=${encodeURIComponent(cssContent)}`;
+  return `./${postfix}${hash(cssContent)}${separator}${cssId}${separator}${key}?css=${encodeURIComponent(cssContent)}`;
 }
