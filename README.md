@@ -124,14 +124,7 @@ plugins: [
 ]
 ```
 
-
-## Installation for an embroider app
-
-```bash 
-npm install --save-dev ember-scoped-css ember-scoped-css-compat
-```
-
-### Configuration
+### Configuration Options
 
 All forms of `scopedCss` take an options hash except for the rollup and vite plugins.
 
