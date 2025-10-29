@@ -1,5 +1,6 @@
 import path from 'node:path';
 
+import { leadingSlashPath } from './const.js';
 import { findWorkspacePath } from './utils.js';
 
 /**
@@ -28,10 +29,10 @@ export function fixFilename(filename) {
 
   if (
     !(hasAppDir || hasSrcDir) &&
-    !fileName.includes('/node_modules/.embroider/')
+    !fileName.includes(leadingSlashPath.embroiderDir)
   ) {
     let maybeModule = fileName.replace(workspace, '');
-    let [maybeScope, ...rest] = maybeModule.split('/').filter(Boolean);
+    let [maybeScope, ...rest] = maybeModule.split(path.sep).filter(Boolean);
     let parts = rest;
 
     if (maybeScope.startsWith('@')) {

@@ -22,11 +22,15 @@ jobs:
       - run: pnpm lint
 
   test:
-    name: "Test ${{ matrix.dir }}"
-    runs-on: ubuntu-latest
+    name: "${{ matrix.os }} ${{ matrix.dir }}"
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
+          # TODO: re-enable
+          # - windows-latest
         dir:
           - "ember-scoped-css"
           - "stylelint-ember-scoped-css"

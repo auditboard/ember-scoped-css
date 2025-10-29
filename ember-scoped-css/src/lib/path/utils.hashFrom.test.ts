@@ -10,13 +10,13 @@ describe('hashFrom()', () => {
     css: path.join(paths.viteApp, 'components/forth.css'),
     ext: path.join(paths.viteApp, 'components/forth.gjs'),
     withoutExt: path.join(paths.viteApp, 'components/forth'),
-    module: 'vite-app/components/forth',
+    module: path.join('vite-app/components/forth'),
   };
   let route = {
     css: path.join(paths.viteApp, 'templates/application.css'),
     ext: path.join(paths.viteApp, 'templates/application.gjs'),
     withoutExt: path.join(paths.viteApp, 'templates/application'),
-    module: 'vite-app/templates/application',
+    module: path.join('vite-app/templates/application'),
   };
 
   describe('component', () => {

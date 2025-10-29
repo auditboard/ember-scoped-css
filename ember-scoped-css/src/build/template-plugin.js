@@ -4,12 +4,15 @@
  *
  */
 
+import path from 'node:path';
+
 import { rewriteCss } from '../lib/css/rewrite.js';
 import { getCSSContentInfo, getCSSInfo } from '../lib/css/utils.js';
 import { fixFilename } from '../lib/path/template-transform-paths.js';
 import {
   appPath,
   cssPathFor,
+  forcePosix,
   hashFromModulePath,
   isRelevantFile,
 } from '../lib/path/utils.js';
@@ -73,6 +76,7 @@ export function createPlugin(config) {
 
     let cssPath = cssPathFor(absolutePath);
     let info = getCSSInfo(cssPath);
+    let localCssPath = forcePosix(cssPath.replace(cwd + path.sep, ''));
 
     /**
      * This will be falsey if we don't have a co-located CSS file.
@@ -81,7 +85,6 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let localCssPath = cssPath.replace(cwd + '/', '');
       let scopedCss = rewriteCss(
         info.css,
         postfix,
@@ -125,11 +128,10 @@ export function createPlugin(config) {
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
             let info = getCSSContentInfo(css);
-            let localCssPath = `<inline>/` + cssPath.replace(cwd + '/', '');
             let scopedCss = rewriteCss(
               info.css,
               postfix,
-              localCssPath,
+              `<inline>/` + localCssPath,
               config.layerName,
             );
 
@@ -166,7 +168,6 @@ export function createPlugin(config) {
 
             if (hasInlineAttribute(node)) {
               let text = textContent(node);
-              let localCssPath = cssPath.replace(cwd + '/', '');
               let scopedText = rewriteCss(
                 text,
                 postfix,

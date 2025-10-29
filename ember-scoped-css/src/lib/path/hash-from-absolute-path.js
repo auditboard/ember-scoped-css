@@ -1,5 +1,5 @@
 import { hash } from './hash-from-module-path.js';
-import { appPath } from './utils.js';
+import { appPath, forcePosix } from './utils.js';
 
 export { hash } from './hash-from-module-path.js';
 
@@ -10,7 +10,8 @@ export function hashFromAbsolutePath(absolutePath) {
    * at runtime.
    */
   const modulePath = appPath(absolutePath);
-  const postfix = hash(modulePath);
+  const forced = forcePosix(modulePath);
+  const postfix = hash(forced);
 
   return postfix;
 }
