@@ -70,7 +70,7 @@ This build tool can emit CSS in a `@layer`.
 [docs-3]: https://github.com/auditboard/ember-scoped-css/tree/v0.19.1-ember-scoped-css
 [docs-4]: https://github.com/auditboard/ember-scoped-css/tree/ember-scoped-css%400.18.0
 
-## Installation for a Vite app
+## Installation
 
 ```bash
 npm install --save-dev ember-scoped-css
@@ -128,7 +128,7 @@ plugins: [
 
 All forms of `scopedCss` take an options hash except for the rollup and vite plugins.
 
-Configuration in the two locations in the babel config should match, for example:
+Configuration is in the two locations in the babel config and should match, for example:
 
 
 ```js
