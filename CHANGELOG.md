@@ -1,5 +1,30 @@
 # Changelog
 
+## Release (2025-10-30)
+
+* ember-scoped-css 1.1.1 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#353](https://github.com/auditboard/ember-scoped-css/pull/353) Fix issue with JS/TS not invalidating when CSS content changes ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :memo: Documentation
+* Other
+  * [#351](https://github.com/auditboard/ember-scoped-css/pull/351) Update README with scoped CSS example ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+  * [#350](https://github.com/auditboard/ember-scoped-css/pull/350) Revise installation and configuration sections in README ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+  * [#349](https://github.com/auditboard/ember-scoped-css/pull/349) Update README to remove outdated installation section ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `ember-scoped-css`
+  * [#345](https://github.com/auditboard/ember-scoped-css/pull/345) Closes [#342](https://github.com/soxhub/ember-scoped-css/issues/342): document @scope ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :house: Internal
+* Other
+  * [#354](https://github.com/auditboard/ember-scoped-css/pull/354) Make release-plan use node 24 ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `ember-scoped-css`
+  * [#337](https://github.com/auditboard/ember-scoped-css/pull/337) Refactor internal path management to prepare for windows support ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-10-23)
 
 * ember-scoped-css 1.1.0 (minor)
