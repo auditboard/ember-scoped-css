@@ -119,6 +119,48 @@ plugins: [
 ]
 ```
 
+### TypeScript
+
+If you use TypeScript, or rely on information from TypeScript, you'll want to add the special attributes to the `<style>` element's attributes list.
+These attributes don't exist in normal HTML, which is why they'd error without this change:
+
+Requires 
+- @glint/ember-tsc 1.0.5 or higher
+- @glint/template 1.7.0 or higher
+- @glint/tsserver-plugin 2.0.5 or higher
+
+In `types/index.d.ts` (or similar for apps) or `unpublished-development-types/index.d.ts` (for libraries), we'll declaration merge merge the known attributes for the `<style>` tag:
+```ts
+import '@glint/template';
+
+declare global {
+  interface HTMLStyleElementAttributes {
+    scoped: '';
+    inline: '';
+  }
+}
+```
+
+### template-lint
+
+If you use [ember-template-lint](https://github.com/ember-template-lint/ember-template-lint) for linting the `<template>...</template>` regions of your components, you'll need to allow the `<style>` attribute to be used. The easiest way is to disable the [`no-forbidden-elements`](https://github.com/ember-template-lint/ember-template-lint/blob/main/docs/rule/no-forbidden-elements.md) rule:
+```js
+// the template-lintrc
+{ // ...
+  overrides: [
+    {
+      files: ['**/*'],
+      rules: {
+        'no-forbidden-elements': false,
+        // or
+        'no-forbidden-elements': ['meta', 'html', 'script']
+      },
+    },
+  ],
+}
+```
+
+
 ### Configuration Options
 
 All forms of `scopedCss` take an options hash except for the rollup and vite plugins.
