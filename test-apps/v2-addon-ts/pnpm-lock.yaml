@@ -36,7 +36,7 @@ importers:
         version: 7.26.9
       '@embroider/addon-dev':
         specifier: ^8.1.0
-        version: 8.1.0(@glint/template@1.5.2)(rollup@4.34.9)
+        version: 8.1.0(@glint/template@1.7.0)(rollup@4.34.9)
       '@glimmer/component':
         specifier: 2.0.0
         version: 2.0.0
@@ -45,13 +45,13 @@ importers:
         version: 1.5.2(typescript@5.8.2)
       '@glint/environment-ember-loose':
         specifier: ^1.5.2
-        version: 1.5.2(807cfcd3020ea8ad8edb1795de9ad08f)
+        version: 1.5.2(75d48e51abf1911b0a0f64c71da9f303)
       '@glint/environment-ember-template-imports':
         specifier: ^1.5.2
-        version: 1.5.2(afe22372887c080a9f2e44ca13bb8b0d)
+        version: 1.5.2(e0aca56e06af5f03cfd86f68a5f48d80)
       '@glint/template':
-        specifier: ^1.5.2
-        version: 1.5.2
+        specifier: ^1.7.0
+        version: 1.7.0
       '@nullvoxpopuli/eslint-configs':
         specifier: ^5.3.4
         version: 5.3.4(bd389511770311b40de1e385072ef90b)
@@ -78,7 +78,7 @@ importers:
         version: link:../../ember-scoped-css
       ember-source:
         specifier: ^5.9.0
-        version: 5.12.0(87f2f8131cb021da8904be85a2b2cd16)
+        version: 5.12.0(e89ef6183755ba149414e3d931d211ca)
       ember-template-lint:
         specifier: ^6.1.0
         version: 6.1.0
@@ -1059,8 +1059,8 @@ packages:
       '@types/ember__routing':
         optional: true
 
-  '@glint/template@1.5.2':
-    resolution: {integrity: sha512-fA9FoHCmWsWkoOKWshsOQlS0WCAM7NwwoaeSTHuz5yHvBZmmtkgx3t2SPOTJs85/hWTNVzYC/Gthw7xDUR3BlQ==}
+  '@glint/template@1.7.0':
+    resolution: {integrity: sha512-IKfg/BsZGuSYnZ9ocB15LbDEGgmhFrX4i9h1xn7Q408s6ounKjREB8R+RRFN0K1nEjitHm6yXGKS8Vwx+zyrhg==}
 
   '@handlebars/parser@2.0.0':
     resolution: {integrity: sha512-EP9uEDZv/L5Qh9IWuMUGJRfwhXJ4h1dqKTT4/3+tY0eu7sPis7xh23j61SYUnNF4vqCQvvUXpDo9Bh/+q1zASA==}
@@ -5385,9 +5385,9 @@ snapshots:
 
   '@ember/edition-utils@1.2.0': {}
 
-  '@embroider/addon-dev@8.1.0(@glint/template@1.5.2)(rollup@4.34.9)':
+  '@embroider/addon-dev@8.1.0(@glint/template@1.7.0)(rollup@4.34.9)':
     dependencies:
-      '@embroider/core': 4.2.4(@glint/template@1.5.2)
+      '@embroider/core': 4.2.4(@glint/template@1.7.0)
       '@rollup/pluginutils': 5.3.0(rollup@4.34.9)
       content-tag: 3.1.3
       execa: 5.1.1
@@ -5414,12 +5414,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@embroider/core@4.2.4(@glint/template@1.5.2)':
+  '@embroider/core@4.2.4(@glint/template@1.7.0)':
     dependencies:
       '@babel/core': 7.26.9
       '@babel/parser': 7.28.4
       '@babel/traverse': 7.28.4
-      '@embroider/macros': 1.19.1(@glint/template@1.5.2)
+      '@embroider/macros': 1.19.1(@glint/template@1.7.0)
       '@embroider/reverse-exports': 0.1.2
       '@embroider/shared-internals': 3.0.1
       assert-never: 1.4.0
@@ -5450,7 +5450,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@embroider/macros@1.17.1(@glint/template@1.5.2)':
+  '@embroider/macros@1.17.1(@glint/template@1.7.0)':
     dependencies:
       '@embroider/shared-internals': 3.0.0
       assert-never: 1.4.0
@@ -5461,11 +5461,11 @@ snapshots:
       resolve: 1.22.10
       semver: 7.7.1
     optionalDependencies:
-      '@glint/template': 1.5.2
+      '@glint/template': 1.7.0
     transitivePeerDependencies:
       - supports-color
 
-  '@embroider/macros@1.19.1(@glint/template@1.5.2)':
+  '@embroider/macros@1.19.1(@glint/template@1.7.0)':
     dependencies:
       '@embroider/shared-internals': 3.0.1
       assert-never: 1.4.0
@@ -5476,7 +5476,7 @@ snapshots:
       resolve: 1.22.10
       semver: 7.7.2
     optionalDependencies:
-      '@glint/template': 1.5.2
+      '@glint/template': 1.7.0
     transitivePeerDependencies:
       - supports-color
 
@@ -5820,18 +5820,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@glint/environment-ember-loose@1.5.2(807cfcd3020ea8ad8edb1795de9ad08f)':
+  '@glint/environment-ember-loose@1.5.2(75d48e51abf1911b0a0f64c71da9f303)':
     dependencies:
       '@glimmer/component': 2.0.0
-      '@glint/template': 1.5.2
+      '@glint/template': 1.7.0
 
-  '@glint/environment-ember-template-imports@1.5.2(afe22372887c080a9f2e44ca13bb8b0d)':
+  '@glint/environment-ember-template-imports@1.5.2(e0aca56e06af5f03cfd86f68a5f48d80)':
     dependencies:
-      '@glint/environment-ember-loose': 1.5.2(807cfcd3020ea8ad8edb1795de9ad08f)
-      '@glint/template': 1.5.2
+      '@glint/environment-ember-loose': 1.5.2(75d48e51abf1911b0a0f64c71da9f303)
+      '@glint/template': 1.7.0
       content-tag: 2.0.3
 
-  '@glint/template@1.5.2': {}
+  '@glint/template@1.7.0': {}
 
   '@handlebars/parser@2.0.0': {}
 
@@ -7046,7 +7046,7 @@ snapshots:
 
   electron-to-chromium@1.5.228: {}
 
-  ember-auto-import@2.10.0(@glint/template@1.5.2):
+  ember-auto-import@2.10.0(@glint/template@1.7.0):
     dependencies:
       '@babel/core': 7.26.9
       '@babel/plugin-proposal-class-properties': 7.18.6(@babel/core@7.26.9)
@@ -7054,7 +7054,7 @@ snapshots:
       '@babel/plugin-proposal-private-methods': 7.18.6(@babel/core@7.26.9)
       '@babel/plugin-transform-class-static-block': 7.26.0(@babel/core@7.26.9)
       '@babel/preset-env': 7.26.9(@babel/core@7.26.9)
-      '@embroider/macros': 1.17.1(@glint/template@1.5.2)
+      '@embroider/macros': 1.17.1(@glint/template@1.7.0)
       '@embroider/shared-internals': 2.9.0
       babel-loader: 8.4.1(@babel/core@7.26.9)
       babel-plugin-ember-modules-api-polyfill: 3.5.0
@@ -7240,7 +7240,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ember-source@5.12.0(87f2f8131cb021da8904be85a2b2cd16):
+  ember-source@5.12.0(e89ef6183755ba149414e3d931d211ca):
     dependencies:
       '@babel/core': 7.26.9
       '@ember/edition-utils': 1.2.0
@@ -7268,7 +7268,7 @@ snapshots:
       broccoli-funnel: 3.0.8
       broccoli-merge-trees: 4.2.0
       chalk: 4.1.2
-      ember-auto-import: 2.10.0(@glint/template@1.5.2)
+      ember-auto-import: 2.10.0(@glint/template@1.7.0)
       ember-cli-babel: 8.2.0(@babel/core@7.26.9)
       ember-cli-get-component-path-option: 1.0.0
       ember-cli-is-package-missing: 1.0.0
