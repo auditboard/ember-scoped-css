@@ -141,6 +141,25 @@ declare global {
 }
 ```
 
+### template-lint
+
+If you use [ember-template-lint](https://github.com/ember-template-lint/ember-template-lint) for linting the `<template>...</template>` regions of your components, you'll need to allow the `<style>` attribute to be used. The easiest way is to disable the [`no-forbidden-elements`](https://github.com/ember-template-lint/ember-template-lint/blob/main/docs/rule/no-forbidden-elements.md) rule:
+```js
+// the template-lintrc
+{ // ...
+  overrides: [
+    {
+      files: ['**/*'],
+      rules: {
+        'no-forbidden-elements': false,
+        // or
+        'no-forbidden-elements': ['meta', 'html', 'script']
+      },
+    },
+  ],
+}
+```
+
 
 ### Configuration Options
 
