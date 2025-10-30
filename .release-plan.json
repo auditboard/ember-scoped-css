@@ -1,14 +1,22 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "minor",
-      "oldVersion": "1.0.2",
-      "newVersion": "1.1.0",
+      "impact": "patch",
+      "oldVersion": "1.1.0",
+      "newVersion": "1.1.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :memo: Documentation"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
@@ -17,5 +25,5 @@
       "oldVersion": "1.0.0"
     }
   },
-  "description": "## Release (2025-10-23)\n\n* ember-scoped-css 1.1.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#341](https://github.com/auditboard/ember-scoped-css/pull/341) Support inline scoped styles (enabling interpolation later) ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2025-10-30)\n\n* ember-scoped-css 1.1.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#353](https://github.com/auditboard/ember-scoped-css/pull/353) Fix issue with JS/TS not invalidating when CSS content changes ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :memo: Documentation\n* Other\n  * [#351](https://github.com/auditboard/ember-scoped-css/pull/351) Update README with scoped CSS example ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#350](https://github.com/auditboard/ember-scoped-css/pull/350) Revise installation and configuration sections in README ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#349](https://github.com/auditboard/ember-scoped-css/pull/349) Update README to remove outdated installation section ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember-scoped-css`\n  * [#345](https://github.com/auditboard/ember-scoped-css/pull/345) Closes [#342](https://github.com/soxhub/ember-scoped-css/issues/342): document @scope ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* Other\n  * [#354](https://github.com/auditboard/ember-scoped-css/pull/354) Make release-plan use node 24 ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember-scoped-css`\n  * [#337](https://github.com/auditboard/ember-scoped-css/pull/337) Refactor internal path management to prepare for windows support ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
