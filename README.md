@@ -87,6 +87,43 @@ export default defineConfig({
 });
 ```
 
+<details><summary>notes for vite projects</summary>
+
+  If you're `import.meta.glob`ing large chunks of your codebase, you'll want to make sure that your globs exclude CSS files
+
+  For example:
+
+
+  ❌ Don't do this
+  ```js
+  ...import.meta.glob('./templates/**/*', { eager: true })
+  ```
+
+  ✅ Do this
+  ```js
+  ...import.meta.glob('./templates/**/*.{gjs,gts}', { eager: true }),
+  ```
+  or better yet, for small projects:
+  ```js
+  ...import.meta.glob('./templates/{top,level,folders}/{sub,folders}.{gjs,gts}', { eager: true }),
+  ```
+
+  This way you don't import CSS yourself, which would make CSS go through Vite's default CSS processing.
+  We need the scoped-css plugins to process the CSS instead of Vite's default behaviors.
+
+
+</details>
+
+If you have a rollup config:
+```js
+import * as scopedCss from 'ember-scoped-css/build';
+
+// ...
+plugins: [
+    scopedCss.rollupPlugin(),
+]
+```
+
 and then in your `babel.config.mjs`, add a template-transform:
 ```js
 import * as scopedCSS from "ember-scoped-css/build";
@@ -109,15 +146,6 @@ module.exports = {
 
 ```
 
-If you have a rollup config:
-```js
-import * as scopedCss from 'ember-scoped-css/build';
-
-// ...
-plugins: [
-    scopedCss.rollupPlugin(),
-]
-```
 
 ### TypeScript
 
