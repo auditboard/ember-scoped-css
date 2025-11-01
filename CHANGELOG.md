@@ -1,5 +1,24 @@
 # Changelog
 
+## Release (2025-11-01)
+
+* ember-scoped-css 1.1.2 (patch)
+* v2-addon-ts-glint-2 0.0.1 (patch)
+
+#### :memo: Documentation
+* Other
+  * [#357](https://github.com/auditboard/ember-scoped-css/pull/357) Address issue about import.meta.glob mentioned in #356 ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `v2-addon-ts-glint-2`
+  * [#347](https://github.com/auditboard/ember-scoped-css/pull/347) Demo `<style scoped>` in Glint 2 ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :house: Internal
+* `ember-scoped-css`
+  * [#358](https://github.com/auditboard/ember-scoped-css/pull/358) Switch from `esbuild` to `tsdown` for watch mode ([@gossi](https://github.com/gossi))
+
+#### Committers: 2
+- Thomas Gossmann ([@gossi](https://github.com/gossi))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-10-30)
 
 * ember-scoped-css 1.1.1 (patch)
