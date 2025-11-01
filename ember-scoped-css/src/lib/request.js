@@ -18,13 +18,14 @@ function parse(request) {
 }
 
 export function isScopedCSSRequest(request) {
-  let [, , stuff] = request.split(separator);
+  return request.includes(key);
+  // let [, , stuff] = request.split(separator);
 
-  if (!stuff) return false;
+  // if (!stuff) return false;
 
-  let [k] = stuff.split('?');
+  // let [k] = stuff.split('?');
 
-  return k === key;
+  // return k === key;
 }
 
 export function decodeScopedCSSRequest(request) {
@@ -41,4 +42,12 @@ export function makeRequest(postfix, cssId, cssContent) {
   let id = postfix + '-' + hash(cssContent);
 
   return `./${id}${separator}${cssId}${separator}${key}?css=${encodeURIComponent(cssContent)}`;
+}
+
+export function makeSeparateFileRequest(postfix, id, localCssPath) {
+  // let id = postfix + '-' + hash(cssContent);
+
+
+
+  return `./${localCssPath.replace('.css', `${separator}${postfix}${separator}${key}`)}`;
 }

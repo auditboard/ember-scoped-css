@@ -16,7 +16,7 @@ import {
   hashFromModulePath,
   isRelevantFile,
 } from '../lib/path/utils.js';
-import { makeRequest } from '../lib/request.js';
+import { makeRequest, makeSeparateFileRequest } from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
 
 const noopPlugin = {
@@ -92,7 +92,10 @@ export function createPlugin(config) {
         config.layerName,
       );
 
-      let cssRequest = makeRequest(postfix, info.id, scopedCss);
+      let cssRequest = makeSeparateFileRequest(postfix, info.id, localCssPath);
+
+      console.log('separate CSS file', {cssRequest, localCssPath, postfix, info});
+
 
       /**
        * With this we don't need a JS plugin
