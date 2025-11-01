@@ -55,14 +55,15 @@
     }
   },
   "scripts": {
-    "build": "./build.sh",
-    "prepack": "./build.sh",
+    "build": "tsdown",
+    "prepack": "tsdown",
     "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\"",
     "lint:fix": "concurrently \"pnpm:lint:*:fix\" --names \"fix:\"",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
     "lint:prettier:fix": "prettier . -w",
     "lint:prettier": "prettier . -c",
+    "start": "tsdown --watch",
     "test": "vitest"
   },
   "dependencies": {
@@ -95,11 +96,10 @@
     "concurrently": "^9.1.2",
     "content-tag": "^3.1.1",
     "ember-template-lint": "^6.1.0",
-    "esbuild": "^0.25.0",
-    "esbuild-plugin-vitest-cleaner": "^0.5.1",
     "eslint": "^9.36.0",
     "jscodeshift": "^17.3.0",
     "prettier": "^3.6.2",
+    "tsdown": "^0.15.12",
     "typescript": "^5.2.2",
     "vitest": "^3.0.6",
     "webpack": "^5.98.0"
