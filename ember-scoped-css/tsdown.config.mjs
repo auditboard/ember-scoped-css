@@ -19,6 +19,6 @@ export default defineConfig([
   {
     entry: ['src/runtime/test-support.ts', 'src/runtime/index.ts'],
     outDir: 'dist/runtime',
-    sourcemap: true
+    sourcemap: true,
   },
 ]);
