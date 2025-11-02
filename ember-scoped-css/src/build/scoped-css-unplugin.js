@@ -1,10 +1,16 @@
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { cwd } from 'node:process';
 
 import { createUnplugin } from 'unplugin';
 
 import { rewriteCss } from '../lib/css/rewrite.js';
-import { decodeScopedCSSRequest, isScopedCSSRequest } from '../lib/request.js';
+import {
+  decodeSeparateCSSFileRequest,
+  decodeStyleElementCSSRequest,
+  isSeparateCSSFileRequest,
+  isStyleElementCSSRequest,
+} from '../lib/request.js';
 
 /**
  * The plugin that handles CSS requests for `<style>` elements and transforms
@@ -15,8 +21,28 @@ export default createUnplugin((options = {}) => {
     name: 'ember-scoped-css-unplugin',
 
     resolveId(id, importer) {
-      if (isScopedCSSRequest(id)) {
-        const parsed = decodeScopedCSSRequest(id);
+      // handles: some-file.css?scoped=[postfix]
+      // this is only run in rollup, vite handles it differently
+      if (isSeparateCSSFileRequest(id)) {
+        const parsed = decodeSeparateCSSFileRequest(id);
+
+        // we change the id and drop the query string, this makes it so rollup
+        // understands it at CSS and can load it appropriately
+        return {
+          id: path.resolve(
+            path.dirname(importer),
+            path.basename(parsed.fileName),
+          ),
+          meta: {
+            'scoped-css': {
+              postfix: parsed.postfix,
+            },
+          },
+        };
+      }
+
+      if (isStyleElementCSSRequest(id)) {
+        const parsed = decodeStyleElementCSSRequest(id);
 
         return {
           id: path.resolve(
@@ -33,6 +59,14 @@ export default createUnplugin((options = {}) => {
     },
 
     load(id) {
+      // this is only for vite
+      if (isSeparateCSSFileRequest(id)) {
+        const parsed = decodeSeparateCSSFileRequest(id);
+
+        return readFileSync(parsed.fileName, 'utf-8');
+      }
+
+      // this is for the `<style>` tag related loading
       const meta = this.getModuleInfo(id)?.meta?.['scoped-css'];
 
       if (meta) {
@@ -41,18 +75,19 @@ export default createUnplugin((options = {}) => {
     },
 
     transform(code, id) {
-      if (id.includes('.css?scoped=')) {
-        const [_, qs] = id.split('?');
-        const search = new URLSearchParams(qs);
+      // rollup: transform separate CSS file
+      const meta = this.getModuleInfo(id)?.meta?.['scoped-css'];
 
+      if (meta) {
+        return rewriteCss(code, meta.postfix, '', options.layerName);
+      }
+
+      // vite: transform separate CSS file
+      if (isSeparateCSSFileRequest(id)) {
+        const parsed = decodeSeparateCSSFileRequest(id);
         const filePath = path.relative(id, cwd());
 
-        return rewriteCss(
-          code,
-          search.get('scoped'),
-          filePath,
-          options.layerName,
-        );
+        return rewriteCss(code, parsed.postfix, filePath, options.layerName);
       }
     },
 

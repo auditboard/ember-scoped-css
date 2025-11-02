@@ -16,7 +16,10 @@ import {
   hashFromModulePath,
   isRelevantFile,
 } from '../lib/path/utils.js';
-import { makeRequestForStyleElement } from '../lib/request.js';
+import {
+  makeRequestForSeparateCSSFile,
+  makeRequestForStyleElement,
+} from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
 
 const noopPlugin = {
@@ -85,7 +88,7 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let cssRequest = `./${path.basename(localCssPath)}?scoped=${postfix}`;
+      let cssRequest = makeRequestForSeparateCSSFile(postfix, localCssPath);
 
       /**
        * With this we don't need a JS plugin
