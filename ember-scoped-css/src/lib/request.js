@@ -1,53 +1,32 @@
-const key = 'styles.ember-scoped.css';
-const separator = '____';
+const key = 'ember-scoped.css';
 
-import { hash } from './path/hash-from-absolute-path.js';
+export function isScopedCSSRequest(request) {
+  return request.includes(key);
+}
 
-function parse(request) {
+export function decodeScopedCSSRequest(request) {
   let [left, qps] = request.split('?');
-  let [dotSlashKey, cssId] = left.split(separator);
-  let key = dotSlashKey.slice(2);
+
+  left = left.slice(2).replace(`.${key}`, '');
+
+  let [postfix, hash] = left.split('-');
 
   let search = new URLSearchParams(qps);
 
   return {
-    from: key,
+    hash,
+    postfix,
     css: search.get('css'),
-    cssId,
   };
 }
 
-export function isScopedCSSRequest(request) {
-  return request.includes(key);
-  // let [, , stuff] = request.split(separator);
-
-  // if (!stuff) return false;
-
-  // let [k] = stuff.split('?');
-
-  // return k === key;
-}
-
-export function decodeScopedCSSRequest(request) {
-  let params = parse(request);
-
-  return {
-    postfix: params.from,
-    css: params.css,
-    cssId: params.cssId,
-  };
-}
-
-export function makeRequest(postfix, cssId, cssContent) {
-  let id = postfix + '-' + hash(cssContent);
-
-  return `./${id}${separator}${cssId}${separator}${key}?css=${encodeURIComponent(cssContent)}`;
-}
-
-export function makeSeparateFileRequest(postfix, id, localCssPath) {
-  // let id = postfix + '-' + hash(cssContent);
-
-
-
-  return `./${localCssPath.replace('.css', `${separator}${postfix}${separator}${key}`)}`;
+/**
+ * Makes request URL for embedding `<style>` as `<link>` into the `<head>`
+ *
+ * @param {string} hash the hash for the file being linked
+ * @param {string} postfix the hash of the file that _includes_ the linked file
+ * @param {string} cssContents the contents of the CSS file
+ */
+export function makeRequestForStyleElement(hash, postfix, cssContents) {
+  return `./${postfix}-${hash}.${key}?css=${encodeURIComponent(cssContents)}`;
 }

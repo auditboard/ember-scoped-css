@@ -16,7 +16,7 @@ import {
   hashFromModulePath,
   isRelevantFile,
 } from '../lib/path/utils.js';
-import { makeRequest, makeSeparateFileRequest } from '../lib/request.js';
+import { makeRequestForStyleElement } from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
 
 const noopPlugin = {
@@ -85,17 +85,7 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let scopedCss = rewriteCss(
-        info.css,
-        postfix,
-        localCssPath,
-        config.layerName,
-      );
-
-      let cssRequest = makeSeparateFileRequest(postfix, info.id, localCssPath);
-
-      console.log('separate CSS file', {cssRequest, localCssPath, postfix, info});
-
+      let cssRequest = `./${path.basename(localCssPath)}?scoped=${postfix}`;
 
       /**
        * With this we don't need a JS plugin
@@ -147,7 +137,11 @@ export function createPlugin(config) {
               return;
             }
 
-            let cssRequest = makeRequest(postfix, info.id, scopedCss);
+            let cssRequest = makeRequestForStyleElement(
+              info.hash,
+              postfix,
+              scopedCss,
+            );
 
             env.meta.jsutils.importForSideEffect(cssRequest);
           }
