@@ -6,7 +6,6 @@
 import { buildMacros } from '@embroider/macros/babel';
 import { scopedCSS, scopedCSSTemplate } from 'ember-scoped-css/babel';
 
-
 import {
   babelCompatSupport,
   templateCompatSupport,
