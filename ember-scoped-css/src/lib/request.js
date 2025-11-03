@@ -1,6 +1,7 @@
 import path from 'node:path';
 
 const KEY = 'ember-scoped.css';
+const SEP = '___';
 
 export const request = {
   is: {
@@ -20,14 +21,14 @@ export const request = {
      * @param {string} cssContents the contents of the CSS file
      */
     create(hash, postfix, cssContents) {
-      return `./${postfix}-${hash}.${KEY}?css=${encodeURIComponent(cssContents)}`;
+      return `./${postfix}${SEP}${hash}.${KEY}?css=${encodeURIComponent(cssContents)}`;
     },
     decode(request) {
       let [left, qps] = request.split('?');
 
       left = left.slice(2).replace(`.${KEY}`, '');
 
-      let [postfix, hash] = left.split('-');
+      let [postfix, hash] = left.split(SEP);
 
       let search = new URLSearchParams(qps);
 
@@ -35,6 +36,7 @@ export const request = {
         hash,
         postfix,
         css: search.get('css'),
+        from: search.get('from'),
       };
     },
   },

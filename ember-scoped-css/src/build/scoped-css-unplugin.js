@@ -1,11 +1,15 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { cwd } from 'node:process';
 
 import { createUnplugin } from 'unplugin';
 
 import { rewriteCss } from '../lib/css/rewrite.js';
 import { request } from '../lib/request.js';
+
+const META = {
+  inline: 'scoped-css:inline',
+  colocated: 'scoped-css:colocated',
+}
 
 /**
  * The plugin that handles CSS requests for `<style>` elements and transforms
@@ -29,7 +33,7 @@ export default createUnplugin((options = {}) => {
     (() => {
       /**
        *
-       * @param {string} id the request id / what was improted
+       * @param {string} id the request id / what was imported
        * @param {string} filePath  path on disk
        * @returns
        */
@@ -48,7 +52,7 @@ export default createUnplugin((options = {}) => {
         return {
           id: filePath,
           meta: {
-            'scoped-css:colocated': {
+            [META.colocated]: {
               postfix: parsed.postfix,
               fileName: relativeFilePath,
               css,
@@ -73,8 +77,8 @@ export default createUnplugin((options = {}) => {
             return buildResponse(id, filePath);
           }
         },
-        transform(code, id) {
-          const meta = this.getModuleInfo(id)?.meta?.['scoped-css:colocated'];
+        load(code, id) {
+          const meta = this.getModuleInfo(id)?.meta?.[META.colocated];
 
           if (meta) {
             return meta.css;
@@ -91,7 +95,7 @@ export default createUnplugin((options = {}) => {
               let filePath = id.split('?')[0];
               let response = buildResponse(id, filePath);
 
-              return response.meta['scoped-css:colocated'].css;
+              return response.meta[META.colocated].css;
             }
           },
         },
@@ -105,46 +109,77 @@ export default createUnplugin((options = {}) => {
      *   <style>...</style>
      * </template>
      */
-    {
-      name: 'ember-scoped-css:inline',
-      resolveId(id, importer) {
-        if (request.is.inline(id)) {
-          const parsed = request.inline.decode(id);
+    (() => {
+      /**
+       * @param {string} id the request id / what was imported
+       */
+      function buildResponse(id, filePath) {
+        const parsed = request.inline.decode(id);
 
-          return {
-            id: path.resolve(
-              path.dirname(importer),
-              `${path.basename(importer, path.extname(importer))}-${parsed.id}.css`,
-            ),
-            meta: {
-              'scoped-css:inline': {
-                css: parsed.css,
-                postfix: parsed.postfix,
-                fileName: path.relative(cwd(), importer),
-              },
+        const relativeFilePath = path.relative(CWD, filePath);
+
+        const css = rewriteCss(
+          parsed.css,
+          parsed.postfix,
+          `<inline>/${relativeFilePath}`,
+          options.layerName,
+        );
+
+        const nextId = filePath.split('?')[0];
+
+        return {
+          id: nextId,
+          meta: {
+            [META.inline]: {
+              css,
+              postfix: parsed.postfix,
+              fileName: relativeFilePath,
             },
-          };
-        }
-      },
-      load(id) {
-        const meta = this.getModuleInfo(id)?.meta?.['scoped-css:inline'];
+          },
+        };
+      }
 
-        if (meta) {
-          return meta.css;
-        }
-      },
-      transform(code, id) {
-        const meta = this.getModuleInfo(id)?.meta?.['scoped-css:inline'];
+      return {
+        name: 'ember-scoped-css:inline',
+        resolveId(id, importer) {
+          if (request.is.inline(id)) {
+            const parsed = request.inline.decode(id);
 
-        if (meta) {
-          return rewriteCss(
-            code,
-            meta.postfix,
-            `<inline>/${meta.fileName}`,
-            options.layerName,
-          );
-        }
-      },
-    },
+            const filePath = path.resolve(
+              path.dirname(importer),
+              `${path.basename(importer, path.extname(importer))}-${parsed.postfix}.css`,
+            );
+
+            return buildResponse(id, filePath);
+          }
+        },
+        // transform(code, id) {
+        //   const meta = this.getModuleInfo(id)?.meta?.[META.inline];
+
+        //   console.log('transform', { id, meta });
+        //   if (meta) {
+        //     return code;
+        //     //return meta.css;
+        //   }
+        // },
+        load(id) {
+          const meta = this.getModuleInfo(id)?.meta?.[META.inline];
+
+          if (meta) {
+            return meta.css;
+          }
+        },
+        // vite: {
+        //   load(id) {
+        //     if (request.is.inline(id)) {
+        //       let filePath = id.split('?')[0];
+        //       let response = buildResponse(id, filePath);
+
+        //       return response.meta[META.inline].css;
+        //     }
+        //   },
+        // },
+      };
+    })(),
   ];
 });

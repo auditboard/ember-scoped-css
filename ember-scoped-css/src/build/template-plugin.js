@@ -131,7 +131,7 @@ export function createPlugin(config) {
               return;
             }
 
-            let cssRequest = request.inline.create(info.hash, postfix, css);
+            let cssRequest = request.inline.create(info.id, postfix, css);
 
             env.meta.jsutils.importForSideEffect(cssRequest);
           }
