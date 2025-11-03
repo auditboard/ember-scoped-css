@@ -18,9 +18,19 @@ const components = { WithClass, Third, Forth, ScopedFoo, ScopedInlineFoo, InAppB
 
 
 <template>
+    <div>
     {{#each-in components as |ComponentName Component|}}
         <Frame @name={{ComponentName}}>
             <Component @title="title arg" @message="This is a message." />
         </Frame>
     {{/each-in}}
+    </div>
+
+    <style scoped>
+        div {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        }
+    </style>
 </template>
