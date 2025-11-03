@@ -1,4 +1,4 @@
-import "./e4b9579df-e2e456b66.css"
+import "./alert.css"
 import { precompileTemplate } from '@ember/template-compilation';
 import { setComponentTemplate } from '@ember/component';
 import templateOnly from '@ember/component/template-only';
