@@ -54,7 +54,7 @@ export function inline(options = {}) {
 
         const filePath = path.resolve(
           path.dirname(importer),
-          `${path.basename(importer, path.extname(importer))}-${parsed.postfix}.css`,
+          `${path.basename(importer, path.extname(importer))}-${parsed.hash}.css`,
         );
 
         return buildResponse(id, filePath);
