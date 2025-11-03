@@ -104,7 +104,7 @@ export default createUnplugin((options = {}) => {
       // vite: transform separate CSS file
       if (isSeparateCSSFileRequest(id)) {
         const parsed = decodeSeparateCSSFileRequest(id);
-        const filePath = meta.fileName ?? path.relative(cwd(), id);
+        const filePath = meta?.fileName ?? path.relative(cwd(), id);
 
         return rewriteCss(code, parsed.postfix, filePath, options.layerName);
       }
