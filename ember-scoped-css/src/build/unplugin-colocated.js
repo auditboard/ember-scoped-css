@@ -26,21 +26,13 @@ export function colocated(options = {}) {
     const parsed = request.colocated.decode(id);
     const relativeFilePath = path.relative(CWD, filePath);
 
-    let code = readFileSync(filePath, 'utf-8');
-    let css = rewriteCss(
-      code,
-      parsed.postfix,
-      relativeFilePath,
-      options.layerName,
-    );
-
     return {
       id: filePath,
       meta: {
-        [META.colocated]: {
+        [META]: {
           postfix: parsed.postfix,
           fileName: relativeFilePath,
-          css,
+          fullPath: filePath,
         },
       },
     };
@@ -59,14 +51,25 @@ export function colocated(options = {}) {
           path.basename(parsed.fileName),
         );
 
+        this.addWatchFile(filePath);
+
         return buildResponse(id, filePath);
       }
     },
     load(id) {
-      const meta = this.getModuleInfo(id)?.meta?.[META.colocated];
+      const meta = this.getModuleInfo(id)?.meta?.[META];
 
       if (meta) {
-        return meta.css;
+        let code = readFileSync(meta.fullPath, 'utf-8');
+
+        let css = rewriteCss(
+          code,
+          meta.postfix,
+          meta.fileName,
+          options.layerName,
+        );
+
+        return css;
       }
     },
     vite: {
@@ -78,7 +81,7 @@ export function colocated(options = {}) {
           let filePath = id.split('?')[0];
           let response = buildResponse(id, filePath);
 
-          return response.meta[META.colocated].css;
+          return response.meta[META].css;
         }
       },
     },

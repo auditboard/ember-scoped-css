@@ -16,12 +16,12 @@ export const request = {
     /**
      * Makes request URL for embedding `<style>` as `<link>` into the `<head>`
      *
-     * @param {string} hash the hash for the file being linked
+     * @param {string} cssHash the hash of the CSS contents
      * @param {string} postfix the hash of the file that _includes_ the linked file
      * @param {string} cssContents the contents of the CSS file
      */
-    create(hash, postfix, cssContents) {
-      return `./${postfix}${SEP}${hash}.${KEY}?css=${encodeURIComponent(cssContents)}`;
+    create(cssHash, postfix, cssContents) {
+      return `./${postfix}${SEP}${cssHash}.${KEY}?css=${encodeURIComponent(cssContents)}`;
     },
     decode(request) {
       let [left, qps] = request.split('?');
@@ -44,11 +44,12 @@ export const request = {
     /**
      * Makes request URL for embedding separate CSS File as `<link>` into the `<head>`
      *
+     * @param {string} cssHash the hash of the CSS contents
      * @param {string} postfix the hash of the file that _includes_ the linked file
      * @param {string} filePath path to the separate CSS File
      */
-    create(postfix, filePath) {
-      return `./${path.basename(filePath)}?scoped=${postfix}`;
+    create(cssHash, postfix, filePath) {
+      return `./${path.basename(filePath)}?scoped=${postfix}&cssHash=${cssHash}`;
     },
     decode(request) {
       const [fileName, qs] = request.split('?');
@@ -56,6 +57,7 @@ export const request = {
 
       return {
         fileName,
+        cssHash: search.get('cssHash'),
         postfix: search.get('scoped'),
       };
     },

@@ -37,7 +37,7 @@ export function inline(options = {}) {
     return {
       id: nextId,
       meta: {
-        [META.inline]: {
+        [META]: {
           css,
           postfix: parsed.postfix,
           fileName: relativeFilePath,
@@ -61,7 +61,7 @@ export function inline(options = {}) {
       }
     },
     load(id) {
-      const meta = this.getModuleInfo(id)?.meta?.[META.inline];
+      const meta = this.getModuleInfo(id)?.meta?.[META];
 
       if (meta) {
         return meta.css;

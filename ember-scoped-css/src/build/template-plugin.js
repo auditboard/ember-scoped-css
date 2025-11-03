@@ -85,7 +85,7 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let cssRequest = request.colocated.create(postfix, localCssPath);
+      let cssRequest = request.colocated.create(info.id, postfix, localCssPath);
 
       /**
        * With this we don't need a JS plugin
