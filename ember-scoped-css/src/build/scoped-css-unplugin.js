@@ -32,13 +32,23 @@ export default createUnplugin((options = {}) => {
             path.dirname(importer),
             path.basename(parsed.fileName),
           );
+          const relativeFilePath = path.relative(CWD, filePath);
+          
+          let code = readFileSync(filePath, 'utf-8');
+          let css = rewriteCss(
+            code,
+            parsed.postfix,
+            relativeFilePath,
+            options.layerName,
+          );
 
           return {
             id: filePath,
             meta: {
               'scoped-css:colocated': {
                 postfix: parsed.postfix,
-                fileName: path.relative(CWD, filePath),
+                fileName: relativeFilePath,
+                css,
               },
             },
           };
@@ -48,24 +58,14 @@ export default createUnplugin((options = {}) => {
         const meta = this.getModuleInfo(id)?.meta?.['scoped-css:colocated'];
 
         if (meta) {
-          let code = readFileSync(meta.fileName, 'utf-8');
-
-          return rewriteCss(
-            code,
-            meta.postfix,
-            meta.fileName,
-            options.layerName,
-          );
+          return meta.css;
         }
       },
       transform(code, id) {
         const meta = this.getModuleInfo(id)?.meta?.['scoped-css:colocated'];
 
         if (meta) {
-          const parsed = request.colocated.decode(id);
-          const filePath = meta?.fileName ?? path.relative(cwd(), id);
-
-          return rewriteCss(code, parsed.postfix, filePath, options.layerName);
+          return meta.css;
         }
       },
     },
