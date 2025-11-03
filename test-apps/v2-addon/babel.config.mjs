@@ -1,15 +1,15 @@
-import * as scopedCSS from 'ember-scoped-css/build';
+import { scopedCSS, scopedCSSTemplate } from 'ember-scoped-css/babel';
 
 export default {
   presets: [['@babel/preset-typescript']],
   plugins: [
     ['@babel/plugin-transform-typescript', { allowDeclareFields: true }],
-    scopedCSS.babelPlugin,
+    scopedCSS(),
     [
       'babel-plugin-ember-template-compilation',
       {
         targetFormat: 'hbs',
-        transforms: [scopedCSS.templatePlugin({})],
+        transforms: [scopedCSSTemplate({})],
       },
     ],
     '@embroider/addon-dev/template-colocation-plugin',

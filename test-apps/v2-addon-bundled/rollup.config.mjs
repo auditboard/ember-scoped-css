@@ -2,7 +2,7 @@ import { babel } from '@rollup/plugin-babel';
 import { Addon } from '@embroider/addon-dev/rollup';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
-import * as scopedCss from 'ember-scoped-css/build';
+import { scopedCSS } from 'ember-scoped-css/rollup';
 
 const addon = new Addon({
   srcDir: 'src',
@@ -18,7 +18,7 @@ export default {
   output: addon.output(),
 
   plugins: [
-    scopedCss.rollupPlugin(),
+    scopedCss(),
     addon.publicEntrypoints(['index.js']),
     addon.dependencies(),
     babel({

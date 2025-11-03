@@ -1,7 +1,7 @@
 import { Addon } from '@embroider/addon-dev/rollup';
 
 import { babel } from '@rollup/plugin-babel';
-import * as scopedCss from 'ember-scoped-css/build';
+import { scopedCSS } from 'ember-scoped-css/rollup';
 import { execaCommand } from 'execa';
 import { fixBadDeclarationOutput } from 'fix-bad-declaration-output';
 
@@ -16,7 +16,7 @@ export default {
   output: addon.output(),
 
   plugins: [
-    scopedCss.rollupPlugin(),
+    scopedCSS(),
     // These are the modules that users should be able to import from your
     // addon. Anything not listed here may get optimized away.
     // By default all your JavaScript modules (**/*.js) will be importable.
