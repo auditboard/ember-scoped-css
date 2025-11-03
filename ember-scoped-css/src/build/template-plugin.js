@@ -17,8 +17,7 @@ import {
   isRelevantFile,
 } from '../lib/path/utils.js';
 import {
-  makeRequestForSeparateCSSFile,
-  makeRequestForStyleElement,
+request,
 } from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
 
@@ -88,7 +87,7 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let cssRequest = makeRequestForSeparateCSSFile(postfix, localCssPath);
+      let cssRequest = request.colocated.create(postfix, localCssPath);
 
       /**
        * With this we don't need a JS plugin
@@ -134,7 +133,7 @@ export function createPlugin(config) {
               return;
             }
 
-            let cssRequest = makeRequestForStyleElement(
+            let cssRequest = request.inline.create(
               info.hash,
               postfix,
               css,

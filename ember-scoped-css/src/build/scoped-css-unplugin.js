@@ -16,6 +16,8 @@ import { request } from '../lib/request.js';
  *       resolver and also can enrich metadata to it (for better debugging)
  */
 export default createUnplugin((options = {}) => {
+  const CWD = process.cwd();
+
   return [
     {
       name: 'ember-scoped-css:colocated',
@@ -36,7 +38,7 @@ export default createUnplugin((options = {}) => {
             meta: {
               'scoped-css:colocated': {
                 postfix: parsed.postfix,
-                fileName: filePath
+                fileName: path.relative(CWD, filePath),
               },
             },
           };
