@@ -18,7 +18,7 @@ export default {
   output: addon.output(),
 
   plugins: [
-    scopedCss(),
+    scopedCSS(),
     addon.publicEntrypoints(['index.js']),
     addon.dependencies(),
     babel({
