@@ -13,18 +13,18 @@ export default <template>
 
 
 export const SecondScoped = <template>
-  <h1>Second Scoped</h1>
+  <h6>Second Scoped</h6>
 
   <style scoped>
-    h1 { color: rgb(200, 0, 200); }
+    h6 { color: rgb(200, 0, 200); }
   </style>
 </template>;
 
 
 export const ActuallyInline = <template>
-  <h1>Actually Inline</h1>
+  <h6>Actually Inline</h6>
 
   <style scoped inline>
-    h1 { color: rgb(200, 0, 0); }
+    h6 { color: rgb(200, 0, 0); }
   </style>
 </template>

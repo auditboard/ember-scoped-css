@@ -3,7 +3,6 @@ import { createUnplugin } from 'unplugin';
 import { colocated } from './unplugin-colocated.js';
 import { inline } from './unplugin-inline.js';
 
-
 /**
  * The plugin that handles CSS requests for `<style>` elements and transforms
  * for existing files
