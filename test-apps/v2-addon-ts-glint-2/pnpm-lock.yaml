@@ -20,16 +20,16 @@ importers:
         version: 2.3.0(@babel/core@7.28.5)
     devDependencies:
       '@babel/core':
-        specifier: ^7.25.2
+        specifier: ^7.28.5
         version: 7.28.5
       '@babel/eslint-parser':
         specifier: ^7.25.1
         version: 7.28.5(ba0b2925f7cf9452809916413b0064d0)
       '@babel/plugin-transform-typescript':
-        specifier: ^7.25.2
+        specifier: ^7.28.5
         version: 7.28.5(@babel/core@7.28.5)
       '@babel/runtime':
-        specifier: ^7.25.6
+        specifier: ^7.28.4
         version: 7.28.4
       '@ember/app-tsconfig':
         specifier: ^1.0.0
@@ -74,7 +74,7 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5
       '@rollup/plugin-babel':
-        specifier: ^6.0.4
+        specifier: ^6.1.0
         version: 6.1.0(@babel/core@7.28.5)(rollup@4.52.5)
       '@types/qunit':
         specifier: ^2.19.12
@@ -83,7 +83,7 @@ importers:
         specifier: ^2.2.5
         version: 2.4.1
       concurrently:
-        specifier: ^9.0.1
+        specifier: ^9.2.1
         version: 9.2.1
       ember-page-title:
         specifier: ^8.2.0
@@ -134,7 +134,7 @@ importers:
         specifier: ^3.4.0
         version: 3.5.0
       rollup:
-        specifier: ^4.22.5
+        specifier: ^4.52.5
         version: 4.52.5
       testem:
         specifier: ^3.15.1
