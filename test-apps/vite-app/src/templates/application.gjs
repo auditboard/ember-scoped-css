@@ -6,31 +6,37 @@ import InAppBasic from '../components/in-app/basic.gts';
 import InAppCallsAtClass from '../components/in-app/at-class-ts/calls-has-at-class.gts';
 
 const Frame = <template>
-    <fieldset>
-        <legend>{{@name}}</legend>
-        
-        {{yield}}
-    </fieldset>
+  <fieldset>
+    <legend>{{@name}}</legend>
+
+    {{yield}}
+  </fieldset>
 </template>;
 
-
-const components = { WithClass, Third, Forth, ScopedFoo, ScopedInlineFoo, InAppBasic, InAppCallsAtClass };
-
+const components = {
+  WithClass,
+  Third,
+  Forth,
+  ScopedFoo,
+  ScopedInlineFoo,
+  InAppBasic,
+  InAppCallsAtClass,
+};
 
 <template>
-    <div>
+  <div>
     {{#each-in components as |ComponentName Component|}}
-        <Frame @name={{ComponentName}}>
-            <Component @title="title arg" @message="This is a message." />
-        </Frame>
+      <Frame @name={{ComponentName}}>
+        <Component @title="title arg" @message="This is a message." />
+      </Frame>
     {{/each-in}}
-    </div>
+  </div>
 
-    <style scoped>
-        div {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        }
-    </style>
+  <style scoped>
+    div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  </style>
 </template>
