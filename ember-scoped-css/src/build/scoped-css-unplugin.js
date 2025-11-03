@@ -12,6 +12,11 @@ import {
   isStyleElementCSSRequest,
 } from '../lib/request.js';
 
+const ORIGIN = {
+  File: 'separate-file',
+  Style: 'style-element',
+};
+
 /**
  * The plugin that handles CSS requests for `<style>` elements and transforms
  * for existing files
@@ -20,6 +25,9 @@ export default createUnplugin((options = {}) => {
   return {
     name: 'ember-scoped-css-unplugin',
 
+    // vite: CSS files are resolved by vite. We use their resolver to also get
+    // HMR. That is, for all non-physical CSS files, we extend vite by our
+    // resolver and also can enrich metadata to it (for better debugging)
     resolveId(id, importer) {
       // handles: some-file.css?scoped=[postfix]
       // this is only run in rollup, vite handles it differently
@@ -36,6 +44,8 @@ export default createUnplugin((options = {}) => {
           meta: {
             'scoped-css': {
               postfix: parsed.postfix,
+              origin: ORIGIN.File,
+              fileName: parsed.fileName,
             },
           },
         };
@@ -52,6 +62,9 @@ export default createUnplugin((options = {}) => {
           meta: {
             'scoped-css': {
               css: parsed.css,
+              postfix: parsed.postfix,
+              origin: ORIGIN.Style,
+              fileName: path.relative(cwd(), importer),
             },
           },
         };
@@ -76,16 +89,22 @@ export default createUnplugin((options = {}) => {
 
     transform(code, id) {
       // rollup: transform separate CSS file
+      // vite: transform <style> CSS
       const meta = this.getModuleInfo(id)?.meta?.['scoped-css'];
 
       if (meta) {
-        return rewriteCss(code, meta.postfix, '', options.layerName);
+        return rewriteCss(
+          code,
+          meta.postfix,
+          `${meta.origin === ORIGIN.Style ? '<inline>/' : ''}${meta.fileName}`,
+          options.layerName,
+        );
       }
 
       // vite: transform separate CSS file
       if (isSeparateCSSFileRequest(id)) {
         const parsed = decodeSeparateCSSFileRequest(id);
-        const filePath = path.relative(id, cwd());
+        const filePath = meta.fileName ?? path.relative(cwd(), id);
 
         return rewriteCss(code, parsed.postfix, filePath, options.layerName);
       }

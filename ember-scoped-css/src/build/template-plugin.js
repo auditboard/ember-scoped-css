@@ -124,12 +124,6 @@ export function createPlugin(config) {
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
             let info = getCSSContentInfo(css);
-            let scopedCss = rewriteCss(
-              info.css,
-              postfix,
-              `<inline>/` + localCssPath,
-              config.layerName,
-            );
 
             addInfo(info);
 
@@ -143,7 +137,7 @@ export function createPlugin(config) {
             let cssRequest = makeRequestForStyleElement(
               info.hash,
               postfix,
-              scopedCss,
+              css,
             );
 
             env.meta.jsutils.importForSideEffect(cssRequest);

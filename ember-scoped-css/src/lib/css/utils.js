@@ -55,7 +55,7 @@ export function getCSSContentInfo(css) {
 
   let id = hash(css);
 
-  return { classes, tags, css, id };
+  return { classes, tags, css, id, hash: id.slice(4) };
 }
 
 function getClassesAndTags(sel, classes, tags) {
