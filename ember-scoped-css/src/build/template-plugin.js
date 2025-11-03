@@ -5,6 +5,7 @@
  */
 
 import path from 'node:path';
+import process from 'node:process';
 
 import { rewriteCss } from '../lib/css/rewrite.js';
 import { getCSSContentInfo, getCSSInfo } from '../lib/css/utils.js';
@@ -34,6 +35,7 @@ export function createPlugin(config) {
    */
   return function scopedCss(env) {
     let cwd = process.cwd();
+
     let isRelevant = isRelevantFile(env.filename, {
       additionalRoots: config.additionalRoots,
       cwd,
