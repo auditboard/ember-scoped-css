@@ -1,44 +1,65 @@
-const key = 'styles.ember-scoped.css';
-const separator = '____';
+import path from 'node:path';
 
-import { hash } from './path/hash-from-absolute-path.js';
+const KEY = 'ember-scoped.css';
+const SEP = '___';
 
-function parse(request) {
-  let [left, qps] = request.split('?');
-  let [dotSlashKey, cssId] = left.split(separator);
-  let key = dotSlashKey.slice(2);
+export const request = {
+  is: {
+    inline(request) {
+      return request.includes(KEY);
+    },
+    colocated(request) {
+      return request.includes('.css?scoped=');
+    },
+  },
+  inline: {
+    /**
+     * Makes request URL for embedding `<style>` as `<link>` into the `<head>`
+     *
+     * @param {string} cssHash the hash of the CSS contents
+     * @param {string} postfix the hash of the file that _includes_ the linked file
+     * @param {string} cssContents the contents of the CSS file
+     */
+    create(cssHash, postfix, cssContents) {
+      return `./${postfix}${SEP}${cssHash}.${KEY}?css=${encodeURIComponent(cssContents)}`;
+    },
+    decode(request) {
+      let [left, qps] = request.split('?');
 
-  let search = new URLSearchParams(qps);
+      left = left.slice(2).replace(`.${KEY}`, '');
 
-  return {
-    from: key,
-    css: search.get('css'),
-    cssId,
-  };
-}
+      let [postfix, hash] = left.split(SEP);
 
-export function isScopedCSSRequest(request) {
-  let [, , stuff] = request.split(separator);
+      let search = new URLSearchParams(qps);
 
-  if (!stuff) return false;
+      return {
+        hash,
+        postfix,
+        css: search.get('css'),
+        from: search.get('from'),
+      };
+    },
+  },
+  colocated: {
+    /**
+     * Makes request URL for embedding separate CSS File as `<link>` into the `<head>`
+     *
+     * @param {string} cssHash the hash of the CSS contents
+     * @param {string} postfix the hash of the file that _includes_ the linked file
+     * @param {string} filePath path to the separate CSS File
+     */
+    create(cssHash, postfix, filePath) {
+      return `./${path.basename(filePath)}?scoped=${postfix}&cssHash=${cssHash}`;
+    },
+    decode(request) {
+      const [fileName, qs] = request.split('?');
+      const search = new URLSearchParams(qs);
 
-  let [k] = stuff.split('?');
-
-  return k === key;
-}
-
-export function decodeScopedCSSRequest(request) {
-  let params = parse(request);
-
-  return {
-    postfix: params.from,
-    css: params.css,
-    cssId: params.cssId,
-  };
-}
-
-export function makeRequest(postfix, cssId, cssContent) {
-  let id = postfix + '-' + hash(cssContent);
-
-  return `./${id}${separator}${cssId}${separator}${key}?css=${encodeURIComponent(cssContent)}`;
-}
+      return {
+        fileName,
+        cssHash: search.get('cssHash'),
+        postfix: search.get('scoped'),
+      };
+    },
+  },
+};

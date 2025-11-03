@@ -16,7 +16,7 @@ import {
   hashFromModulePath,
   isRelevantFile,
 } from '../lib/path/utils.js';
-import { makeRequest } from '../lib/request.js';
+import { request } from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
 
 const noopPlugin = {
@@ -85,14 +85,7 @@ export function createPlugin(config) {
     if (info) {
       addInfo(info);
 
-      let scopedCss = rewriteCss(
-        info.css,
-        postfix,
-        localCssPath,
-        config.layerName,
-      );
-
-      let cssRequest = makeRequest(postfix, info.id, scopedCss);
+      let cssRequest = request.colocated.create(info.id, postfix, localCssPath);
 
       /**
        * With this we don't need a JS plugin
@@ -128,12 +121,6 @@ export function createPlugin(config) {
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
             let info = getCSSContentInfo(css);
-            let scopedCss = rewriteCss(
-              info.css,
-              postfix,
-              `<inline>/` + localCssPath,
-              config.layerName,
-            );
 
             addInfo(info);
 
@@ -144,7 +131,7 @@ export function createPlugin(config) {
               return;
             }
 
-            let cssRequest = makeRequest(postfix, info.id, scopedCss);
+            let cssRequest = request.inline.create(info.id, postfix, css);
 
             env.meta.jsutils.importForSideEffect(cssRequest);
           }

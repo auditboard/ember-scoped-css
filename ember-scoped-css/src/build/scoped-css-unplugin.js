@@ -1,39 +1,16 @@
-import path from 'node:path';
-
 import { createUnplugin } from 'unplugin';
 
-import { decodeScopedCSSRequest, isScopedCSSRequest } from '../lib/request.js';
+import { colocated } from './unplugin-colocated.js';
+import { inline } from './unplugin-inline.js';
+
 /**
- * The plugin that handles CSS requests from other transform (e.g.: babel)
+ * The plugin that handles CSS requests for `<style>` elements and transforms
+ * for existing files
  *
- * This plugin takes no options because the CSS transform has already happened by the time
- * we handle it here.
+ * vite: CSS files are resolved by vite. We use their resolver to also get
+ *       HMR. That is, for all non-physical CSS files, we extend vite by our
+ *       resolver and also can enrich metadata to it (for better debugging)
  */
-export default createUnplugin(() => {
-  return {
-    name: 'ember-scoped-css-unplugin',
-
-    resolveId(id, importer) {
-      if (isScopedCSSRequest(id)) {
-        let parsed = decodeScopedCSSRequest(id);
-
-        return {
-          id: path.resolve(path.dirname(importer), parsed.postfix + '.css'),
-          meta: {
-            'scoped-css': {
-              css: parsed.css,
-            },
-          },
-        };
-      }
-    },
-
-    load(id) {
-      let meta = this.getModuleInfo(id)?.meta?.['scoped-css'];
-
-      if (meta) {
-        return meta.css;
-      }
-    },
-  };
+export default createUnplugin((options = {}) => {
+  return [colocated(options), inline(options)];
 });

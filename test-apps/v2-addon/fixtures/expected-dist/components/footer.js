@@ -1,4 +1,4 @@
-import "./e9a64d6f1-e6c5e4d1f.css"
+import "./footer.css"
 import { concat } from '@ember/helper';
 import { precompileTemplate } from '@ember/template-compilation';
 import { setComponentTemplate } from '@ember/component';
