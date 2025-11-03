@@ -51,6 +51,9 @@ export function colocated(options = {}) {
           path.basename(parsed.fileName),
         );
 
+        /**
+         * Rollup doesn't normally watch CSS files
+         */
         this.addWatchFile(filePath);
 
         return buildResponse(id, filePath);
@@ -74,14 +77,25 @@ export function colocated(options = {}) {
     },
     vite: {
       /**
-       * @param {string} id location on disk
+       * There may not be meta for this request yet.
+       *
+       * @param {*} id
        */
       load(id) {
         if (request.is.colocated(id)) {
-          let filePath = id.split('?')[0];
-          let response = buildResponse(id, filePath);
+          const parsed = request.colocated.decode(id);
 
-          return response.meta[META].css;
+          let code = readFileSync(parsed.fileName, 'utf-8');
+          let relativeFilePath = path.relative(CWD, parsed.fileName);
+
+          let css = rewriteCss(
+            code,
+            parsed.postfix,
+            relativeFilePath,
+            options.layerName,
+          );
+
+          return css;
         }
       },
     },
