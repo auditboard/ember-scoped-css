@@ -5,17 +5,7 @@ import { cwd } from 'node:process';
 import { createUnplugin } from 'unplugin';
 
 import { rewriteCss } from '../lib/css/rewrite.js';
-import {
-  decodeSeparateCSSFileRequest,
-  decodeStyleElementCSSRequest,
-  isSeparateCSSFileRequest,
-  isStyleElementCSSRequest,
-} from '../lib/request.js';
-
-const ORIGIN = {
-  File: 'separate-file',
-  Style: 'style-element',
-};
+import { request } from '../lib/request.js';
 
 /**
  * The plugin that handles CSS requests for `<style>` elements and transforms
@@ -32,60 +22,73 @@ export default createUnplugin((options = {}) => {
       resolveId(id, importer) {
         // handles: some-file.css?scoped=[postfix]
         // this is only run in rollup, vite handles it differently
-        if (isSeparateCSSFileRequest(id)) {
-          const parsed = decodeSeparateCSSFileRequest(id);
+        if (request.is.colocated(id)) {
+          const parsed = request.colocated.decode(id);
 
-          // we change the id and drop the query string, this makes it so rollup
-          // understands it at CSS and can load it appropriately
-          return {
-            id: path.resolve(
+          // This should end up pointing at the actual file on disk
+          const filePath = path.resolve(
               path.dirname(importer),
               path.basename(parsed.fileName),
-            ),
+            );
+
+          return {
+            id: filePath,
             meta: {
-              'scoped-css': {
+              'scoped-css:colocated': {
                 postfix: parsed.postfix,
-                origin: ORIGIN.File,
-                fileName: parsed.fileName,
+                fileName: filePath
               },
             },
           };
         }
       },
       load(id) {
-        // this is only for vite
-        if (isSeparateCSSFileRequest(id)) {
-          const parsed = decodeSeparateCSSFileRequest(id);
+        const meta = this.getModuleInfo(id)?.meta?.['scoped-css:colocated'];
 
-          return readFileSync(parsed.fileName, 'utf-8');
+        if (meta) {
+          let code = readFileSync(meta.fileName, 'utf-8');
+            return rewriteCss(
+            code,
+            meta.postfix,
+            meta.fileName,
+            options.layerName,
+          );
         }
       },
       transform(code, id) {
-        if (isSeparateCSSFileRequest(id)) {
-          const meta = this.getModuleInfo(id)?.meta?.['scoped-css'];
-          const parsed = decodeSeparateCSSFileRequest(id);
+        const meta = this.getModuleInfo(id)?.meta?.['scoped-css:colocated'];
+
+        if (meta) {
+          const parsed = request.colocated.decode(id);
           const filePath = meta?.fileName ?? path.relative(cwd(), id);
 
           return rewriteCss(code, parsed.postfix, filePath, options.layerName);
         }
       },
     },
+
+    /**
+     * Plugin for supporting the styles from
+     *
+     * <template>
+     *   <style>...</style>
+     * </template>
+     */
     {
       name: 'ember-scoped-css:inline',
       resolveId(id, importer) {
-        if (isStyleElementCSSRequest(id)) {
-          const parsed = decodeStyleElementCSSRequest(id);
+        if (request.is.inline(id)) {
+          const parsed = request.inline.decode(id);
 
           return {
             id: path.resolve(
               path.dirname(importer),
-              `${path.basename(importer, path.extname(importer))}-${parsed.hash}.css`,
+              `${path.basename(importer, path.extname(importer))}-${parsed.id}.css`,
             ),
             meta: {
-              'scoped-css': {
+              'scoped-css:inline': {
                 css: parsed.css,
                 postfix: parsed.postfix,
-                origin: ORIGIN.Style,
                 fileName: path.relative(cwd(), importer),
               },
             },
@@ -93,20 +96,20 @@ export default createUnplugin((options = {}) => {
         }
       },
       load(id) {
-        const meta = this.getModuleInfo(id)?.meta?.['scoped-css'];
+        const meta = this.getModuleInfo(id)?.meta?.['scoped-css:inline'];
 
         if (meta) {
           return meta.css;
         }
       },
       transform(code, id) {
-        const meta = this.getModuleInfo(id)?.meta?.['scoped-css'];
+        const meta = this.getModuleInfo(id)?.meta?.['scoped-css:inline'];
 
         if (meta) {
           return rewriteCss(
             code,
             meta.postfix,
-            `${meta.origin === ORIGIN.Style ? '<inline>/' : ''}${meta.fileName}`,
+            `<inline>/${meta.fileName}`,
             options.layerName,
           );
         }

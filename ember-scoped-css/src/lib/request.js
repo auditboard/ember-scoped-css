@@ -2,6 +2,21 @@ import path from 'node:path';
 
 const KEY = 'ember-scoped.css';
 
+export const request = {
+  is: {
+    inline: isStyleElementCSSRequest,
+    colocated: isSeparateCSSFileRequest,
+  },
+  inline: {
+    create: makeRequestForStyleElement,
+    decode: decodeStyleElementCSSRequest,
+  },
+  colocated: {
+    create: makeRequestForSeparateCSSFile,
+    decode: decodeSeparateCSSFileRequest,
+  },
+};
+
 export function isStyleElementCSSRequest(request) {
   return request.includes(KEY);
 }
