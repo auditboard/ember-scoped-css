@@ -43,8 +43,8 @@ export function decodeSeparateCSSFileRequest(request) {
 
   return {
     fileName,
-    postfix: search.get('scoped')
-  }
+    postfix: search.get('scoped'),
+  };
 }
 
 /**
