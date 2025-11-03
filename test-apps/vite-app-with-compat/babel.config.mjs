@@ -1,7 +1,6 @@
 import { createRequire } from 'node:module';
 import { scopedCSSTemplate } from 'ember-scoped-css/babel';
 
-
 import {
   babelCompatSupport,
   templateCompatSupport,
