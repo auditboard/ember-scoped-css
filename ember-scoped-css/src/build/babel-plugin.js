@@ -4,8 +4,6 @@ function _isRelevantFile(state, cwd) {
   let fileName = state.file.opts.filename;
   let additionalRoots = state.opts?.additionalRoots;
 
-
-
   return isRelevantFile(fileName, {
     additionalRoots,
     cwd,
@@ -19,7 +17,7 @@ function _isRelevantFile(state, cwd) {
  */
 export default (config) => (env, options, workingDirectory) => {
   // not really a deep merge, but the idea is to use one or the other and not mix the configs
-  options = {...config, ...options};
+  options = { ...config, ...options };
 
   /**
    * This babel plugin does two things:

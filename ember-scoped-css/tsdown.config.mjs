@@ -2,10 +2,7 @@ import { defineConfig } from 'tsdown';
 
 export default defineConfig([
   {
-    entry: [
-      'src/build/babel.js',
-      'src/build/rollup.js',
-    ],
+    entry: ['src/build/babel.js', 'src/build/rollup.js'],
     outDir: 'dist/cjs',
     format: 'cjs',
     sourcemap: 'inline',
