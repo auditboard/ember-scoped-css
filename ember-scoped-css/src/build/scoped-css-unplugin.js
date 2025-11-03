@@ -29,9 +29,9 @@ export default createUnplugin((options = {}) => {
 
           // This should end up pointing at the actual file on disk
           const filePath = path.resolve(
-              path.dirname(importer),
-              path.basename(parsed.fileName),
-            );
+            path.dirname(importer),
+            path.basename(parsed.fileName),
+          );
 
           return {
             id: filePath,
@@ -49,7 +49,8 @@ export default createUnplugin((options = {}) => {
 
         if (meta) {
           let code = readFileSync(meta.fileName, 'utf-8');
-            return rewriteCss(
+
+          return rewriteCss(
             code,
             meta.postfix,
             meta.fileName,

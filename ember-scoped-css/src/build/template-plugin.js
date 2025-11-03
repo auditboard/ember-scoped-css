@@ -16,9 +16,7 @@ import {
   hashFromModulePath,
   isRelevantFile,
 } from '../lib/path/utils.js';
-import {
-request,
-} from '../lib/request.js';
+import { request } from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
 
 const noopPlugin = {
@@ -133,11 +131,7 @@ export function createPlugin(config) {
               return;
             }
 
-            let cssRequest = request.inline.create(
-              info.hash,
-              postfix,
-              css,
-            );
+            let cssRequest = request.inline.create(info.hash, postfix, css);
 
             env.meta.jsutils.importForSideEffect(cssRequest);
           }

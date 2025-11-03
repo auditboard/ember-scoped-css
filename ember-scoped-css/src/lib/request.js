@@ -12,7 +12,6 @@ export const request = {
     },
   },
   inline: {
-
     /**
      * Makes request URL for embedding `<style>` as `<link>` into the `<head>`
      *
