@@ -1,0 +1,89 @@
+{
+  "name": "vite-app-layer",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "author": "NullVoxPopuli",
+  "scripts": {
+    "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\" --prefixColors auto",
+    "format": "prettier . --write",
+    "lint:prettier": "prettier . --check",
+    "lint:fix": "concurrently \"pnpm:lint:*:fix\" --names \"fix:\" --prefixColors auto && pnpm format",
+    "lint:hbs": "ember-template-lint .",
+    "lint:hbs:fix": "ember-template-lint . --fix",
+    "lint:js": "eslint . --cache",
+    "lint:js:fix": "eslint . --fix",
+    "start": "vite",
+    "test": "pnpm test:ember:dev && pnpm test:ember:prod",
+    "test:fixture": "pnpm vite build && compare-fixture fixtures/expected-dist dist",
+    "test:ember:dev": "NODE_ENV=development vite build --mode test && pnpm dist:ember:test",
+    "dist:ember:test": "ember test --path dist --config-file ./testem.cjs --test-port 0",
+    "test:ember:prod": "vite build --mode test --outDir dist-prod && ember test --path dist-prod --config-file ./testem.cjs --test-port 0"
+  },
+  "type": "module",
+  "imports": {
+    "#src/*": "./src/*",
+    "#utils": "./src/utils.js",
+    "#routes/*": "./src/routes/*",
+    "#components/*": "./src/components/*"
+  },
+  "exports": {
+    "./tests/*": "./tests/*",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@glimmer/component": "2.0.0",
+    "ember-resolver": "13.1.0",
+    "ember-scoped-css": "workspace:*",
+    "ember-source": "6.4.0-alpha.3",
+    "v2-addon": "workspace:*",
+    "v2-addon-ts": "workspace:*"
+  },
+  "devDependencies": {
+    "@babel/core": "7.28.5",
+    "@babel/plugin-transform-runtime": "7.28.5",
+    "@babel/plugin-transform-typescript": "^7.28.5",
+    "@babel/runtime": "7.28.4",
+    "@ember/optional-features": "2.2.0",
+    "@ember/test-helpers": "^5.2.1",
+    "@ember/test-waiters": "^4.1.0",
+    "@embroider/core": "4.0.1",
+    "@embroider/macros": "1.17.1",
+    "@embroider/vite": "1.0.2",
+    "@rollup/plugin-babel": "6.1.0",
+    "babel-plugin-ember-template-compilation": "2.4.1",
+    "concurrently": "9.2.1",
+    "decorator-transforms": "^2.3.0",
+    "ember-cli": "^6.3.1",
+    "ember-eslint": "0.5.0",
+    "ember-qunit": "^9.0.2",
+    "ember-template-lint": "6.1.0",
+    "eslint": "9.36.0",
+    "prettier": "3.6.2",
+    "prettier-plugin-ember-template-tag": "2.0.5",
+    "qunit": "^3.0.0-alpha.4",
+    "qunit-dom": "^3.4.0",
+    "typescript": "^5.7.3",
+    "vite": "6.2.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "@embroider/macros": "1.17.1",
+      "@glimmer/component": "2.0.0"
+    }
+  },
+  "overrides": {
+    "@embroider/macros": "1.17.1",
+    "@glimmer/component": "2.0.0"
+  },
+  "engines": {
+    "node": ">= 22.16"
+  },
+  "ember": {
+    "edition": "octane"
+  },
+  "ember-addon": {
+    "type": "app",
+    "version": 2
+  }
+}
