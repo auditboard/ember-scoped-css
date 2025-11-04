@@ -70,7 +70,7 @@ This build tool can emit CSS in a `@layer`.
 ## Installation
 
 ```bash
-pnpn add -D ember-scoped-css
+npm install --save-dev ember-scoped-css
 ```
 
 ### Configuration
