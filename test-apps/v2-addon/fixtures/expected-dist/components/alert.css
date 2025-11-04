@@ -1,6 +1,4 @@
 /* src/components/alert.css */
-@layer components {
-
 div.e4b9579df {
   width: 400px;
   border: 1px solid black;
@@ -18,6 +16,4 @@ div.e4b9579df {
 .message_e4b9579df {
   font-style: italic;
   font-size: 1em;
-}
-
 }
