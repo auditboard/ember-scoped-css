@@ -187,7 +187,7 @@ export function rewriteCss(css, postfix, fileName, layerName) {
   return [
     `/* ${fileName} */`,
     layerName ? `@layer ${layerName} {` : '',
-    rewrittenCss,
+    rewrittenCss.trimEnd(),
     layerName ? `}` : '',
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 }
