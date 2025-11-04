@@ -184,10 +184,14 @@ export function rewriteCss(css, postfix, fileName, layerName) {
 
   const rewrittenCss = ast.toString();
 
-  return [
-    `/* ${fileName} */`,
-    layerName ? `@layer ${layerName} {` : '',
-    rewrittenCss.trimEnd(),
-    layerName ? `}` : '',
-  ].filter(Boolean).join('\n') + '\n';
+  return (
+    [
+      `/* ${fileName} */`,
+      layerName ? `@layer ${layerName} {` : '',
+      rewrittenCss.trimEnd(),
+      layerName ? `}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n') + '\n'
+  );
 }
