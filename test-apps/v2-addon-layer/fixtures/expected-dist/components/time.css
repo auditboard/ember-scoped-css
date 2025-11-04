@@ -1,4 +1,6 @@
 /* src/components/time.css */
-h1.e3dfc1780 {
+@layer design-system {
+h1.edbaa90ce {
   color: red;
+}
 }

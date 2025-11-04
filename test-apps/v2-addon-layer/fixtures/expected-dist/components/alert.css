@@ -1,19 +1,21 @@
 /* src/components/alert.css */
-div.e4b9579df {
+@layer design-system {
+div.ef8c4f8c3 {
   width: 400px;
   border: 1px solid black;
   padding: 0px 15px;
   margin-top: 15px;
 }
 
-.header_e4b9579df {
+.header_ef8c4f8c3 {
   margin-top: 0;
   background-color: lightslategray;
   padding: 15px;
   margin: 0px -15px;
 }
 
-.message_e4b9579df {
+.message_ef8c4f8c3 {
   font-style: italic;
   font-size: 1em;
+}
 }

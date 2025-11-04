@@ -5,7 +5,7 @@ import templateOnly from '@ember/component/template-only';
 
 ;
 
-var alert = setComponentTemplate(precompileTemplate("\n  <div class=\"e4b9579df\">\n    <h3 class=\"header_e4b9579df\">\n      {{@title}}\n    </h3>\n    <p class=\"message_e4b9579df {{@some}}\">\n      {{@message}}\n    </p>\n  </div>\n", {
+var alert = setComponentTemplate(precompileTemplate("\n  <div class=\"ef8c4f8c3\">\n    <h3 class=\"header_ef8c4f8c3\">\n      {{@title}}\n    </h3>\n    <p class=\"message_ef8c4f8c3 {{@some}}\">\n      {{@message}}\n    </p>\n  </div>\n", {
   strictMode: true
 }), templateOnly());
 

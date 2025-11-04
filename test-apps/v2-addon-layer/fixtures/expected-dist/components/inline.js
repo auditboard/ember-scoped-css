@@ -8,13 +8,13 @@ import templateOnly from '@ember/component/template-only';
 
 ;
 
-var inline = setComponentTemplate(precompileTemplate("\n  <h1 class=\"e1fcda1af\">Time</h1>\n\n  \n  <style>\n    @layer firstLayer {\n      h1 { color: rgb(0, 200, 0); }\n    }\n  </style>\n", {
+var inline = setComponentTemplate(precompileTemplate("\n  <h1 class=\"eeb9f1fae\">Time</h1>\n\n  \n  <style>\n    @layer firstLayer {\n      h1 { color: rgb(0, 200, 0); }\n    }\n  </style>\n", {
   strictMode: true
 }), templateOnly());
-const SecondScoped = setComponentTemplate(precompileTemplate("\n  <h6 class=\"e1fcda1af\">Second Scoped</h6>\n\n  \n", {
+const SecondScoped = setComponentTemplate(precompileTemplate("\n  <h6 class=\"eeb9f1fae\">Second Scoped</h6>\n\n  \n", {
   strictMode: true
 }), templateOnly());
-const ActuallyInline = setComponentTemplate(precompileTemplate("\n  <h6 class=\"e1fcda1af\">Actually Inline</h6>\n\n  <style scoped inline>/* src/components/inline.css */\n\n    h6.e1fcda1af { color: rgb(200, 0, 0); }\n</style>\n", {
+const ActuallyInline = setComponentTemplate(precompileTemplate("\n  <h6 class=\"eeb9f1fae\">Actually Inline</h6>\n\n  <style scoped inline>/* src/components/inline.css */\n@layer design-system {\n\n    h6.eeb9f1fae { color: rgb(200, 0, 0); }\n}\n</style>\n", {
   strictMode: true
 }), templateOnly());
 

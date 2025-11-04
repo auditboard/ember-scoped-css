@@ -1,11 +1,13 @@
 /* src/components/footer.css */
-.alert_e9a64d6f1 {
+@layer design-system {
+.alert_ea7505261 {
   border: 1px solid black;
 }
-div.e9a64d6f1 {
+div.ea7505261 {
   color: green;
 }
-p.e9a64d6f1 {
+p.ea7505261 {
   font-style: italic;
   text-decoration: underline;
+}
 }
