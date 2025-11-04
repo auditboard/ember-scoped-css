@@ -6,7 +6,6 @@ settings:
   peersSuffixMaxLength: 40
 
 overrides:
-  '@embroider/macros': 1.17.1
   '@glimmer/component': 2.0.0
 
 importers:
@@ -54,8 +53,8 @@ importers:
         specifier: ^4.1.0
         version: 4.2.5(@glint/template@1.7.0)
       '@embroider/macros':
-        specifier: 1.17.1
-        version: 1.17.1(@glint/template@1.7.0)
+        specifier: ^1.18.0
+        version: 1.19.2(@glint/template@1.7.0)
       '@embroider/vite':
         specifier: ^1.1.5
         version: 1.3.6(63f19e1d7054d937bc3d0efcd56b9ad3)
@@ -801,8 +800,8 @@ packages:
     resolution: {integrity: sha512-e51BLGoG0YFEZSnEMeYqlQryi3lDCIrW4mHhti3lrnKEyIO30nPkrlCe6Z4zcBkMJPi4rJo1cecQc8UuJU5f+w==}
     engines: {node: 12.* || 14.* || >= 16}
 
-  '@embroider/macros@1.17.1':
-    resolution: {integrity: sha512-pi039RDy2CvgM+RwJ9NMFU4wYMKlSp9p+WyHFfQpZ2e/HL78O1KM1+MEaKnIve6MrXvo7QD7/Kn6MpMTzV1MSQ==}
+  '@embroider/macros@1.19.2':
+    resolution: {integrity: sha512-lCG8Y58ZGz9kFvvEJjs3c8VDKDtLYV6iszEuQDyBgOtf1F+zizuZJFchLHSP4Vw5ND3Q4iF5I7tFQLGh0wODDg==}
     engines: {node: 12.* || 14.* || >= 16}
     peerDependencies:
       '@glint/template': ^1.0.0
@@ -812,10 +811,6 @@ packages:
 
   '@embroider/reverse-exports@0.1.2':
     resolution: {integrity: sha512-TgjQalfB42RnwdRVApjcvHSVjBe+7MJfCZV0Cs1jv2QgnFGr/6f5X19PKvmF4FU4xbBf7yOsIWrVvYvidWnXlw==}
-
-  '@embroider/shared-internals@3.0.0':
-    resolution: {integrity: sha512-5J5ipUMCAinQS38WW7wedruq5Z4VnHvNo+ZgOduw0PtI9w0CQWx7/HE+98PBDW8jclikeF+aHwF317vc1hwuzg==}
-    engines: {node: 12.* || 14.* || >= 16}
 
   '@embroider/shared-internals@3.0.1':
     resolution: {integrity: sha512-d7RQwDwqqHo7YvjE9t1rtIrCCYtbSoO0uRq2ikVhRh4hGS5OojZNu2ZtS0Wqrg+V72CRtMFr/hibTvHNsRM2Lg==}
@@ -5926,7 +5921,7 @@ snapshots:
     dependencies:
       '@ember/test-waiters': 4.1.1(@glint/template@1.7.0)
       '@embroider/addon-shim': 1.10.0
-      '@embroider/macros': 1.17.1(@glint/template@1.7.0)
+      '@embroider/macros': 1.19.2(@glint/template@1.7.0)
       '@simple-dom/interface': 1.4.0
       decorator-transforms: 2.3.0(@babel/core@7.28.5)
       dom-element-descriptors: 0.5.1
@@ -5938,7 +5933,7 @@ snapshots:
   '@ember/test-waiters@4.1.1(@glint/template@1.7.0)':
     dependencies:
       '@embroider/addon-shim': 1.10.0
-      '@embroider/macros': 1.17.1(@glint/template@1.7.0)
+      '@embroider/macros': 1.19.2(@glint/template@1.7.0)
     transitivePeerDependencies:
       - '@glint/template'
       - supports-color
@@ -5984,7 +5979,7 @@ snapshots:
       '@babel/runtime': 7.28.4
       '@babel/traverse': 7.28.5
       '@embroider/core': 4.2.5(@glint/template@1.7.0)
-      '@embroider/macros': 1.17.1(@glint/template@1.7.0)
+      '@embroider/macros': 1.19.2(@glint/template@1.7.0)
       '@types/babel__code-frame': 7.0.6
       assert-never: 1.4.0
       babel-import-util: 3.0.1
@@ -6030,7 +6025,7 @@ snapshots:
       '@babel/core': 7.28.5
       '@babel/parser': 7.28.5
       '@babel/traverse': 7.28.5
-      '@embroider/macros': 1.17.1(@glint/template@1.7.0)
+      '@embroider/macros': 1.19.2(@glint/template@1.7.0)
       '@embroider/reverse-exports': 0.1.2
       '@embroider/shared-internals': 3.0.1
       assert-never: 1.4.0
@@ -6061,9 +6056,9 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@embroider/macros@1.17.1(@glint/template@1.7.0)':
+  '@embroider/macros@1.19.2(@glint/template@1.7.0)':
     dependencies:
-      '@embroider/shared-internals': 3.0.0
+      '@embroider/shared-internals': 3.0.1
       assert-never: 1.4.0
       babel-import-util: 3.0.1
       ember-cli-babel: 7.26.11
@@ -6080,24 +6075,6 @@ snapshots:
     dependencies:
       mem: 8.1.1
       resolve.exports: 2.0.3
-
-  '@embroider/shared-internals@3.0.0':
-    dependencies:
-      babel-import-util: 3.0.1
-      debug: 4.4.3
-      ember-rfc176-data: 0.3.18
-      fs-extra: 9.1.0
-      is-subdir: 1.2.0
-      js-string-escape: 1.0.1
-      lodash: 4.17.21
-      minimatch: 3.1.2
-      pkg-entry-points: 1.1.1
-      resolve-package-path: 4.0.3
-      resolve.exports: 2.0.3
-      semver: 7.7.3
-      typescript-memoize: 1.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@embroider/shared-internals@3.0.1':
     dependencies:
@@ -6121,7 +6098,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.5
       '@embroider/core': 4.2.5(@glint/template@1.7.0)
-      '@embroider/macros': 1.17.1(@glint/template@1.7.0)
+      '@embroider/macros': 1.19.2(@glint/template@1.7.0)
       '@embroider/reverse-exports': 0.1.2
       '@rollup/pluginutils': 5.3.0(rollup@4.52.5)
       assert-never: 1.4.0
@@ -7917,7 +7894,7 @@ snapshots:
     dependencies:
       '@ember/test-helpers': 5.4.0(606434c4629b199144ba551ea2a79ec3)
       '@embroider/addon-shim': 1.10.0
-      '@embroider/macros': 1.17.1(@glint/template@1.7.0)
+      '@embroider/macros': 1.19.2(@glint/template@1.7.0)
       qunit: 2.24.2
       qunit-theme-ember: 1.0.0
     transitivePeerDependencies:

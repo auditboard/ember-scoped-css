@@ -6,7 +6,6 @@ settings:
   peersSuffixMaxLength: 40
 
 overrides:
-  '@embroider/macros': 1.17.1
   '@glimmer/component': 2.0.0
 
 importers:
@@ -811,6 +810,15 @@ packages:
 
   '@embroider/macros@1.17.1':
     resolution: {integrity: sha512-pi039RDy2CvgM+RwJ9NMFU4wYMKlSp9p+WyHFfQpZ2e/HL78O1KM1+MEaKnIve6MrXvo7QD7/Kn6MpMTzV1MSQ==}
+    engines: {node: 12.* || 14.* || >= 16}
+    peerDependencies:
+      '@glint/template': ^1.0.0
+    peerDependenciesMeta:
+      '@glint/template':
+        optional: true
+
+  '@embroider/macros@1.19.1':
+    resolution: {integrity: sha512-KgPan7fiyoDGfr6SMdMELhcgUXK6pU/QICSK0yFFzsXVBJYM2fHAXCic5WCBETtv7xsvi4byziahSz5HpqYs/A==}
     engines: {node: 12.* || 14.* || >= 16}
     peerDependencies:
       '@glint/template': ^1.0.0
@@ -5345,7 +5353,7 @@ snapshots:
       '@babel/core': 7.28.5
       '@babel/parser': 7.28.4
       '@babel/traverse': 7.28.4
-      '@embroider/macros': 1.17.1(@glint/template@1.7.0)
+      '@embroider/macros': 1.19.1(@glint/template@1.7.0)
       '@embroider/reverse-exports': 0.1.2
       '@embroider/shared-internals': 3.0.1
       assert-never: 1.4.0
@@ -5386,6 +5394,21 @@ snapshots:
       lodash: 4.17.21
       resolve: 1.22.10
       semver: 7.7.1
+    optionalDependencies:
+      '@glint/template': 1.7.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@embroider/macros@1.19.1(@glint/template@1.7.0)':
+    dependencies:
+      '@embroider/shared-internals': 3.0.1
+      assert-never: 1.4.0
+      babel-import-util: 3.0.1
+      ember-cli-babel: 7.26.11
+      find-up: 5.0.0
+      lodash: 4.17.21
+      resolve: 1.22.11
+      semver: 7.7.2
     optionalDependencies:
       '@glint/template': 1.7.0
     transitivePeerDependencies:

@@ -6,7 +6,6 @@ settings:
   peersSuffixMaxLength: 40
 
 overrides:
-  '@embroider/macros': 1.17.1
   '@glimmer/component': 2.0.0
 
 importers:
@@ -740,8 +739,8 @@ packages:
     resolution: {integrity: sha512-T1JIKt3h4VkpCsLfyBhAJYsGbNLoug/PP4a4bU+bnOzEcmLxRMAuECIiw7ngxlWFHH+OrWEqN5sIQ11IuOMAfw==}
     engines: {node: 12.* || 14.* || >= 16}
 
-  '@embroider/macros@1.17.1':
-    resolution: {integrity: sha512-pi039RDy2CvgM+RwJ9NMFU4wYMKlSp9p+WyHFfQpZ2e/HL78O1KM1+MEaKnIve6MrXvo7QD7/Kn6MpMTzV1MSQ==}
+  '@embroider/macros@1.19.1':
+    resolution: {integrity: sha512-KgPan7fiyoDGfr6SMdMELhcgUXK6pU/QICSK0yFFzsXVBJYM2fHAXCic5WCBETtv7xsvi4byziahSz5HpqYs/A==}
     engines: {node: 12.* || 14.* || >= 16}
     peerDependencies:
       '@glint/template': ^1.0.0
@@ -751,10 +750,6 @@ packages:
 
   '@embroider/reverse-exports@0.1.2':
     resolution: {integrity: sha512-TgjQalfB42RnwdRVApjcvHSVjBe+7MJfCZV0Cs1jv2QgnFGr/6f5X19PKvmF4FU4xbBf7yOsIWrVvYvidWnXlw==}
-
-  '@embroider/shared-internals@3.0.0':
-    resolution: {integrity: sha512-5J5ipUMCAinQS38WW7wedruq5Z4VnHvNo+ZgOduw0PtI9w0CQWx7/HE+98PBDW8jclikeF+aHwF317vc1hwuzg==}
-    engines: {node: 12.* || 14.* || >= 16}
 
   '@embroider/shared-internals@3.0.1':
     resolution: {integrity: sha512-d7RQwDwqqHo7YvjE9t1rtIrCCYtbSoO0uRq2ikVhRh4hGS5OojZNu2ZtS0Wqrg+V72CRtMFr/hibTvHNsRM2Lg==}
@@ -4370,7 +4365,7 @@ snapshots:
       '@babel/core': 7.28.5
       '@babel/parser': 7.28.4
       '@babel/traverse': 7.28.4
-      '@embroider/macros': 1.17.1
+      '@embroider/macros': 1.19.1
       '@embroider/reverse-exports': 0.1.2
       '@embroider/shared-internals': 3.0.1
       assert-never: 1.4.0
@@ -4401,9 +4396,9 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@embroider/macros@1.17.1':
+  '@embroider/macros@1.19.1':
     dependencies:
-      '@embroider/shared-internals': 3.0.0
+      '@embroider/shared-internals': 3.0.1
       assert-never: 1.4.0
       babel-import-util: 3.0.1
       ember-cli-babel: 7.26.11
@@ -4418,24 +4413,6 @@ snapshots:
     dependencies:
       mem: 8.1.1
       resolve.exports: 2.0.3
-
-  '@embroider/shared-internals@3.0.0':
-    dependencies:
-      babel-import-util: 3.0.1
-      debug: 4.4.3
-      ember-rfc176-data: 0.3.18
-      fs-extra: 9.1.0
-      is-subdir: 1.2.0
-      js-string-escape: 1.0.1
-      lodash: 4.17.21
-      minimatch: 3.1.2
-      pkg-entry-points: 1.1.1
-      resolve-package-path: 4.0.3
-      resolve.exports: 2.0.3
-      semver: 7.7.2
-      typescript-memoize: 1.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@embroider/shared-internals@3.0.1':
     dependencies:
