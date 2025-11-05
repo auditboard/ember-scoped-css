@@ -3,6 +3,7 @@ blueprints/*/files/
 
 # compiled output
 dist/
+fixtures
 
 # misc
 coverage/
