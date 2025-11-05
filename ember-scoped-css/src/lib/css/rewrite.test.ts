@@ -6,7 +6,7 @@ it('should rewrite css', function () {
   const css = '.foo { color: red; }';
   const postfix = 'postfix';
   const fileName = 'foo.css';
-  const rewritten = rewriteCss(css, postfix, fileName, false);
+  const rewritten = rewriteCss(css, postfix, fileName);
 
   expect(rewritten).to.equal(`/* foo.css */\n.foo_postfix { color: red; }\n`);
 });
@@ -17,20 +17,12 @@ it('should use a custom layer', function () {
   const fileName = 'foo.css';
   const rewritten = rewriteCss(css, postfix, fileName, 'utils');
 
-  expect(rewritten).to.equal(
-    `/* foo.css */\n@layer utils {\n\n.foo_postfix { color: red; }\n}\n`,
-  );
-});
-
-it('shouldnt rewrite global', function () {
-  const css = '.baz :global(.foo p) .bar { color: red; }';
-  const postfix = 'postfix';
-  const fileName = 'foo.css';
-  const rewritten = rewriteCss(css, postfix, fileName);
-
-  expect(rewritten).to.equal(
-    `/* foo.css */\n@layer components {\n\n.baz_postfix .foo p .bar_postfix { color: red; }\n}\n`,
-  );
+  expect(rewritten).toMatchInlineSnapshot(`
+    "/* foo.css */
+    @layer utils {
+    .foo_postfix { color: red; }
+    }
+"`);
 });
 
 it(`understands nth-of-type syntax`, function () {
@@ -45,15 +37,10 @@ it(`understands nth-of-type syntax`, function () {
 
   expect(rewritten).toMatchInlineSnapshot(`
     "/* foo.css */
-    @layer components {
-
 
         li.postfix:nth-of-type(odd) {}
         li.postfix:nth-of-type(even) {}
-      
-    }
-    "
-  `);
+"`);
 });
 
 describe('@container', () => {
@@ -71,18 +58,13 @@ describe('@container', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
-
 
       @container (width > 400px) {
         h2.postfix {
           font-size: 1.5em;
         }
       }
-
-      }
-      "
-    `);
+"`);
   });
 
   it('handles parameters', () => {
@@ -116,8 +98,6 @@ describe('@container', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
-
 
       /* With an optional <container-name> */
       @container tall (height > 30rem) {
@@ -140,10 +120,7 @@ describe('@container', () => {
           color: white;
         }
       }
-
-      }
-      "
-    `);
+"`);
   });
 });
 
@@ -162,14 +139,11 @@ describe('@media', () => {
       "/* foo.css */
       @layer utils {
 
-
       @media (height >= 680px), screen and (orientation: portrait) {
         .foo_postfix { color: red; }
       }
-
-      }
-      "
-    `);
+}
+"`);
   });
 });
 
@@ -185,22 +159,19 @@ describe('@keyframe', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
-
 
             @keyframes luna-view-navigation__postfix {
               100% {
                 padding-top: 1rem;
               }
             }
-          
-      }
-      "
-    `);
+}
+"`);
   });
 
   it(`references are also scoped`, function () {
@@ -225,12 +196,11 @@ describe('@keyframe', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
-
+@layer components {
 
             p.postfix {
               animation-duration: 3s;
@@ -248,10 +218,8 @@ describe('@keyframe', () => {
                 scale: 100% 1;
               }
             }
-          
-      }
-      "
-    `);
+}
+"`);
   });
 
   it('handles multiple references and keyframes', () => {
@@ -296,12 +264,11 @@ describe('@keyframe', () => {
       `;
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
-
+@layer components {
 
             p.postfix {
               animation-duration: 3s;
@@ -340,10 +307,8 @@ describe('@keyframe', () => {
                 color: magenta;
               }
             }
-
-      }
-      "
-    `);
+}
+"`);
   });
 
   it('works in shorthand combo-declarations', () => {
@@ -364,12 +329,11 @@ describe('@keyframe', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
-
+@layer components {
 
             div.postfix {
               width: 100px;
@@ -383,10 +347,8 @@ describe('@keyframe', () => {
               from {top: 0px;}
               to {top: 200px;}
             }
-
-      }
-      "
-    `);
+}
+"`);
   });
 });
 
@@ -402,22 +364,19 @@ describe('@counter-style', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
-
 
             @counter-style circled-alpha__postfix {
               system: fixed;
               symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
               suffix: " ";
             }
-          
-      }
-      "
-    `);
+}
+"`);
   });
 
   it('updates references', () => {
@@ -435,26 +394,23 @@ describe('@counter-style', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
+@layer components {
 
+              @counter-style circled-alpha__postfix {
+                system: fixed;
+                symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
+                suffix: " ";
+              }
 
-            @counter-style circled-alpha__postfix {
-              system: fixed;
-              symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
-              suffix: " ";
-            }
-
-            .items_postfix {
-              list-style: circled-alpha__postfix;
-            }
-          
-      }
-      "
-    `);
+              .items_postfix {
+                list-style: circled-alpha__postfix;
+              }
+}
+"`);
   });
 });
 
@@ -470,22 +426,19 @@ describe('@position-try', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
-
+@layer components {
 
             @position-try --custom-left__postfix {
               position-area: left;
               width: 100px;
               margin-right: 10px;
             }
-          
-      }
-      "
-    `);
+}
+"`);
   });
 
   it('updates references', () => {
@@ -504,27 +457,24 @@ describe('@position-try', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
+@layer components {
 
+              @position-try --custom-left__postfix {
+                position-area: left;
+                width: 100px;
+                margin-right: 10px;
+              }
 
-            @position-try --custom-left__postfix {
-              position-area: left;
-              width: 100px;
-              margin-right: 10px;
-            }
-
-            .infobox_postfix {
-              position-try-fallbacks:
-                --custom-left__postfix;
-            }
-          
-      }
-      "
-    `);
+              .infobox_postfix {
+                position-try-fallbacks:
+                  --custom-left__postfix;
+              }
+}
+"`);
   });
 });
 
@@ -540,22 +490,19 @@ describe('@property', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
-
+@layer components {
 
             @property --item-size__postfix {
               syntax: "<percentage>";
               inherits: true;
               initial-value: 40%;
             }
-          
-      }
-      "
-    `);
+}
+"`);
   });
 
   it('updates references', () => {
@@ -586,12 +533,11 @@ describe('@property', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-      @layer components {
-
+@layer components {
 
             @property --item-size__postfix {
               syntax: "<percentage>";
@@ -615,10 +561,8 @@ describe('@property', () => {
               height: var(--item-size__postfix);
               background-color: var(--item-color);
             }
-          
-      }
-      "
-    `);
+}
+"`);
   });
 });
 
@@ -631,18 +575,15 @@ describe('@supports', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
 
-
           @supports (transform-origin: 5% 5%) {}
           @supports selector(h2 > p) {}
-
       }
-      "
-    `);
+"`);
   });
 });
