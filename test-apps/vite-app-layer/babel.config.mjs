@@ -1,5 +1,5 @@
 import { buildMacros } from '@embroider/macros/babel';
-import * as scopedCSS from 'ember-scoped-css/build';
+import { scopedCSS } from 'ember-scoped-css/babel';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -17,7 +17,7 @@ export default {
           'ember-cli-htmlbars-inline-precompile',
           'htmlbars-inline-precompile',
         ],
-        transforms: [scopedCSS.templatePlugin({ layerName: 'project-name' })],
+        transforms: [scopedCSS.template({ layerName: 'project-name' })],
       },
     ],
     [
