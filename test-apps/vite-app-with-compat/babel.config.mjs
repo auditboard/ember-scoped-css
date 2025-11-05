@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { scopedCSSTemplate } from 'ember-scoped-css/babel';
+import { scopedCSS } from 'ember-scoped-css/babel';
 
 import {
   babelCompatSupport,
@@ -20,7 +20,7 @@ export default {
           'ember-cli-htmlbars-inline-precompile',
           'htmlbars-inline-precompile',
         ],
-        transforms: [...templateCompatSupport(), scopedCSSTemplate({})],
+        transforms: [...templateCompatSupport(), scopedCSS.template({})],
       },
     ],
     [

@@ -1,4 +1,4 @@
-import { scopedCSS, scopedCSSTemplate } from 'ember-scoped-css/babel';
+import { scopedCSS } from 'ember-scoped-css/babel';
 
 export default {
   presets: [['@babel/preset-typescript']],
@@ -9,7 +9,7 @@ export default {
       'babel-plugin-ember-template-compilation',
       {
         targetFormat: 'hbs',
-        transforms: [scopedCSSTemplate({})],
+        transforms: [scopedCSS.template({})],
       },
     ],
     '@embroider/addon-dev/template-colocation-plugin',

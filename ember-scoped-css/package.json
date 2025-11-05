@@ -26,16 +26,17 @@
       "types": "./declarations/runtime/index.d.ts",
       "default": "./dist/runtime/index.js"
     },
-    "./vite": {
-      "import": "./src/build/vite.js"
+    "./babel": {
+      "import": "./src/build/public-exports/babel.js",
+      "require": "./dist/cjs/babel.js"
     },
     "./rollup": {
-      "import": "./src/build/rollup.js",
+      "import": "./src/build/public-exports/rollup.js",
       "require": "./dist/cjs/rollup.js"
     },
-    "./babel": {
-      "import": "./src/build/babel.js",
-      "require": "./dist/cjs/babel.js"
+    "./vite": {
+      "import": "./src/build/public-exports/vite.js",
+      "require": "./dist/cjs/vite.js"
     },
     "./template-registry": {
       "types": "./template-registry.d.ts",

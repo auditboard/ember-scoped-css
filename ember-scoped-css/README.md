@@ -156,7 +156,7 @@ plugins: [
 In your `babel.config.mjs`, add a template-transform:
 
 ```js
-import { scopedCSS, scopedCSSTemplate } from 'ember-scoped-css/babel';
+import { scopedCSS } from 'ember-scoped-css/babel';
 
 module.exports = {
   plugins: [
@@ -166,7 +166,7 @@ module.exports = {
       'babel-plugin-ember-template-compilation',
       {
         // ...
-        transforms: [scopedCSSTemplate({})],
+        transforms: [scopedCSS.template({})],
       },
     ],
     // ...
@@ -175,16 +175,15 @@ module.exports = {
 };
 ```
 
-There are two exports, but you made only need on:
+There are two plugins, but you made only need one:
 
-- `scopedCSS()` - for the runtime (ie. if you use the helpers) (optional)
-- `scopedCSSTemplate()` - transforms your template (required)
+- `scopedCSS()` - handles removing the import for scopedCSS (which you'd use in GJS and GTS for intellisense, and TypeScript)
+- `scopedCSS.template()` - transforms your template
 
-##### Configuration Options (`scopedCSSTemplate()`)
+##### Configuration Options (`scopedCSS.template()`)
 
 - `layerName: string` - Wrap your CSS in a `@layer` with this given name
-- `additionalRoots: string[]` - When you want to procss more folders. For example you want
-  to support pods structure, but pods in here
+- `additionalRoots: string[]` - When you want to procss more folders. For example you want to support pods structure
 
 ### TypeScript
 

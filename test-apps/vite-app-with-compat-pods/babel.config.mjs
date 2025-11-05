@@ -1,4 +1,4 @@
-import { scopedCSSTemplate } from 'ember-scoped-css/babel';
+import { scopedCSS } from 'ember-scoped-css/babel';
 
 import { createRequire } from 'node:module';
 
@@ -30,7 +30,7 @@ export default {
         ],
         transforms: [
           ...templateCompatSupport(),
-          scopedCSSTemplate({
+          scopedCSS.template({
             additionalRoots: ['pods'],
           }),
         ],

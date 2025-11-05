@@ -1,4 +1,4 @@
-import { scopedCSSTemplate } from 'ember-scoped-css/babel';
+import { scopedCSS } from 'ember-scoped-css/babel';
 
 /**
  * This babel.config is not used for publishing.
@@ -31,7 +31,7 @@ export default {
       'babel-plugin-ember-template-compilation',
       {
         transforms: [
-          scopedCSSTemplate({}),
+          scopedCSS.template({}),
           ...(isCompat ? templateCompatSupport() : macros.templateMacros),
         ],
       },

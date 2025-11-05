@@ -15,7 +15,7 @@ function _isRelevantFile(state, cwd) {
  * @param {object} options - the options for scoped-css -- this is also available in each visitor's state.opts
  * @param {string} workingDirectory
  */
-export default (config) => (env, options, workingDirectory) => {
+export const scopedCSS = (config) => (env, options, workingDirectory) => {
   // not really a deep merge, but the idea is to use one or the other and not mix the configs
   options = { ...config, ...options };
 
