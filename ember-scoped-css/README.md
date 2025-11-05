@@ -75,18 +75,15 @@ npm install --save-dev ember-scoped-css
 
 ### Configuration
 
-Configuration happens in multiple locations to take over a portion of the build step.
+Configuration happens in multiple locations to take over the need portion of your build steps.
 
-- `vite.config.js` - Likely in apps
-- `rollup.config.js` - Likely in addons
-- `babel.config.js` - For all of them
-
-Each tool will take over different tasks, so they differ a little in the
-configuration they take.
+- `vite.config.*` 
+- `rollup.config.*` 
+- `babel.config.*` 
 
 #### Vite
 
-In your `vite.config.js`, import and add the `scopedCSS` plugin:
+In your `vite.config.*`, import and add the `scopedCSS` plugin:
 
 ```js
 import { defineConfig } from 'vite';
@@ -100,6 +97,7 @@ export default defineConfig({
   ],
 });
 ```
+
 
 <details><summary>notes for vite projects</summary>
 
@@ -153,12 +151,12 @@ plugins: [
 
 #### Babel
 
-In your `babel.config.mjs`, add a template-transform:
+In your `babel.config.*`, add the plugins:
 
 ```js
 import { scopedCSS } from 'ember-scoped-css/babel';
 
-module.exports = {
+export default {
   plugins: [
     // ...
     scopedCSS(),
