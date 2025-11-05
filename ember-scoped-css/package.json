@@ -26,6 +26,18 @@
       "types": "./declarations/runtime/index.d.ts",
       "default": "./dist/runtime/index.js"
     },
+    "./babel": {
+      "import": "./src/build/public-exports/babel.js",
+      "require": "./dist/cjs/babel.js"
+    },
+    "./rollup": {
+      "import": "./src/build/public-exports/rollup.js",
+      "require": "./dist/cjs/rollup.js"
+    },
+    "./vite": {
+      "import": "./src/build/public-exports/vite.js",
+      "require": "./dist/cjs/vite.js"
+    },
     "./template-registry": {
       "types": "./template-registry.d.ts",
       "default": "./src/noop.js"
@@ -34,25 +46,10 @@
       "types": "./declarations/runtime/test-support.d.ts",
       "default": "./dist/runtime/test-support.js"
     },
-    "./build": {
-      "import": "./src/build/index.js",
-      "require": "./dist/cjs/index.cjs"
-    },
-    "./vite": {
-      "import": "./src/build/vite.js"
-    },
     "./helpers/scoped-class": {
       "default": "./classic-app-support/helpers/scoped-class.js"
     },
-    "./addon-main.cjs": "./addon-main.cjs",
-    "./babel-plugin": {
-      "import": "./src/build/babel-plugin.js",
-      "require": "./dist/cjs/babel-plugin.cjs"
-    },
-    "./template-plugin": {
-      "import": "./src/build/template-plugin.js",
-      "require": "./dist/cjs/template-plugin.cjs"
-    }
+    "./addon-main.cjs": "./addon-main.cjs"
   },
   "scripts": {
     "build": "tsdown",

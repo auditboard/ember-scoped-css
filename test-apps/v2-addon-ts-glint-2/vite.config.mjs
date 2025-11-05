@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import { extensions, ember, classicEmberSupport } from '@embroider/vite';
 import { babel } from '@rollup/plugin-babel';
-import * as scopedCSS from 'ember-scoped-css/build';
+import { scopedCSS } from 'ember-scoped-css/rollup';
 
 // For scenario testing
 const isCompat = Boolean(process.env.ENABLE_COMPAT_BUILD);

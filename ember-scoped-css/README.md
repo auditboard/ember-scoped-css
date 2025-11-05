@@ -15,7 +15,9 @@ const greeting = "hello world";
   </style>
 </template>
 ```
+
 becomes the equivelent of;
+
 ```gjs
 import './abcd1234.css'; // containing your CSS, but with selectors scoped
 const greeting = "hello world";
@@ -28,7 +30,7 @@ const greeting = "hello world";
 This is a build-time-only addon, so there is no need to worry about runtime performance.
 
 You can also write your styles as a co-located `.css` file, right next to your `.gjs`/`.gts` files.
-Every selector you write in your styles is automatically scoped to the component. 
+Every selector you write in your styles is automatically scoped to the component.
 So you can develop your component with styles isolated from the rest of the application and you don't have to worry about CSS selectors collisions or issues with the CSS cascade.
 
 _See [Usage](#usage) for details_.
@@ -37,7 +39,7 @@ If you want to read more specifics on how this addon achieves isolation with CSS
 
 As selectors are scoped/renamed during the build process. So there is no performance hit when running the app.
 
-The philosophy of `ember-scoped-css` is to stick as close to CSS and HTML as possible and not introduce new syntax or concepts unless it is absolutely necessary. 
+The philosophy of `ember-scoped-css` is to stick as close to CSS and HTML as possible and not introduce new syntax or concepts unless it is absolutely necessary.
 
 You may also find the docs on [CSS `@layer`](https://developer.mozilla.org/en-US/docs/Web/CSS/@layer) interesting.
 This build tool can emit CSS in a `@layer`.
@@ -53,7 +55,7 @@ This build tool can emit CSS in a `@layer`.
 | -------- | ----------- | ---------------------- | --- |
 | vite | >= 1.0.0 | 🚫 | [main][docs-main]
 | gjs / gts library (no hbs) | >= 1.0.0 | 🚫 | [main][docs-main]
-| webpack | <= 0.24.3 | <= 10.0.0 | [0.24.3][docs-2] 
+| webpack | <= 0.24.3 | <= 10.0.0 | [0.24.3][docs-2]
 | hbs | <= 0.24.3 | <= 10.0.0 | [0.24.3][docs-2]
 | ember-template-imports@v4 or babel-plugin-ember-template-compilation@2.2.5+ | 0.19.0 | 10.0.0 | [0.19][docs-3] - [0.24][docs-2]
 | ember-template-imports@v3 or babel-plugin-ember-template-compilation@2.2.1 or rollup-plugin-glimmer-template-tag | <= 0.18.0 | <= 9.0.0 | [0.18][docs-4]
@@ -73,7 +75,16 @@ npm install --save-dev ember-scoped-css
 
 ### Configuration
 
-In your `vite.config.js`, import and add the `scopedCSS` plugin:
+Configuration happens in multiple locations to take over the need portion of your build steps.
+
+- `vite.config.*` 
+- `rollup.config.*` 
+- `babel.config.*` 
+
+#### Vite
+
+In your `vite.config.*`, import and add the `scopedCSS` plugin:
+
 ```js
 import { defineConfig } from 'vite';
 import { scopedCSS } from 'ember-scoped-css/vite';
@@ -87,23 +98,27 @@ export default defineConfig({
 });
 ```
 
+
 <details><summary>notes for vite projects</summary>
 
   If you're `import.meta.glob`ing large chunks of your codebase, you'll want to make sure that your globs exclude CSS files
 
   For example:
 
-
   ❌ Don't do this
+  
   ```js
   ...import.meta.glob('./templates/**/*', { eager: true })
   ```
 
   ✅ Do this
+
   ```js
   ...import.meta.glob('./templates/**/*.{gjs,gts}', { eager: true }),
   ```
+
   or better yet, for small projects:
+
   ```js
   ...import.meta.glob('./templates/{top,level,folders}/{sub,folders}.{gjs,gts}', { eager: true }),
   ```
@@ -111,53 +126,76 @@ export default defineConfig({
   This way you don't import CSS yourself, which would make CSS go through Vite's default CSS processing.
   We need the scoped-css plugins to process the CSS instead of Vite's default behaviors.
 
-
 </details>
 
+##### Configuration Options
+
+- `layerName: string` - Wrap your CSS in a `@layer` with this given name
+
+#### Rollup
+
 If you have a rollup config:
+
 ```js
-import * as scopedCss from 'ember-scoped-css/build';
+import { scopedCSS } from 'ember-scoped-css/rollup';
 
 // ...
 plugins: [
-    scopedCss.rollupPlugin(),
+    scopedCSS(),
 ]
 ```
 
-and then in your `babel.config.mjs`, add a template-transform:
-```js
-import * as scopedCSS from "ember-scoped-css/build";
+##### Configuration Options
 
-module.exports = {
+- `layerName: string` - Wrap your CSS in a `@layer` with this given name
+
+#### Babel
+
+In your `babel.config.*`, add the plugins:
+
+```js
+import { scopedCSS } from 'ember-scoped-css/babel';
+
+export default {
   plugins: [
     // ...
-    [scopedCSS.babelPlugin, {}],
+    scopedCSS(),
     [
       'babel-plugin-ember-template-compilation',
       {
         // ...
-        transforms: [scopedCSS.templatePlugin({})],
+        transforms: [scopedCSS.template({})],
       },
     ],
     // ...
   ],
   // ...
 };
-
 ```
 
+There are two plugins, but you made only need one:
+
+- `scopedCSS()` - handles removing the import for scopedCSS (which you'd use in GJS and GTS for intellisense, and TypeScript)
+- `scopedCSS.template()` - transforms your template
+
+##### Configuration Options (`scopedCSS.template()`)
+
+- `layerName: string` - Wrap your CSS in a `@layer` with this given name
+- `additionalRoots: string[]` - When you want to procss more folders. For example you want to support pods structure
 
 ### TypeScript
 
 If you use TypeScript, or rely on information from TypeScript, you'll want to add the special attributes to the `<style>` element's attributes list.
 These attributes don't exist in normal HTML, which is why they'd error without this change:
 
-Requires 
+Requires
+
 - @glint/ember-tsc 1.0.5 or higher
 - @glint/template 1.7.0 or higher
 - @glint/tsserver-plugin 2.0.5 or higher
 
 In `types/index.d.ts` (or similar for apps) or `unpublished-development-types/index.d.ts` (for libraries), we'll declaration merge merge the known attributes for the `<style>` tag:
+
 ```ts
 import '@glint/template';
 
@@ -172,6 +210,7 @@ declare global {
 ### template-lint
 
 If you use [ember-template-lint](https://github.com/ember-template-lint/ember-template-lint) for linting the `<template>...</template>` regions of your components, you'll need to allow the `<style>` attribute to be used. The easiest way is to disable the [`no-forbidden-elements`](https://github.com/ember-template-lint/ember-template-lint/blob/main/docs/rule/no-forbidden-elements.md) rule:
+
 ```js
 // the template-lintrc
 { // ...
@@ -186,28 +225,6 @@ If you use [ember-template-lint](https://github.com/ember-template-lint/ember-te
     },
   ],
 }
-```
-
-
-### Configuration Options
-
-All forms of `scopedCss` take an options hash except for the rollup and vite plugins.
-
-Configuration is in the two locations in the babel config and should match, for example:
-
-
-```js
-plugins: [
-  [scopedCSS.babelPlugin, { layerName: 'my-library' }],
-
-  [
-    'babel-plugin-ember-template-compilation',
-    {
-      targetFormat: 'hbs',
-      transforms: [scopedCSS.templatePlugin({ layerName: 'my-libarry' })],
-    },
-  ],
-],
 ```
 
 ## Usage
@@ -305,10 +322,9 @@ NOTE: that if you're using pods, css co-located with templates/routes/etc will n
 
 </details>
 
-
 <details><summary>Difference with @scope</summary>
 
-  The [`@scope`](https://developer.mozilla.org/en-US/docs/Web/CSS/@scope) at-rule will scope all CSS defined within a `<style>` tag to the parent element. 
+  The [`@scope`](https://developer.mozilla.org/en-US/docs/Web/CSS/@scope) at-rule will scope all CSS defined within a `<style>` tag to the parent element.
 
 ```html
 <div>
@@ -344,6 +360,7 @@ But the nice thing is that you don't need to use classes with `@scope`.
 A _potential_ downside to `@scope` is that it operates deeply -- where as `<style scoped>` will only apply its styles to the immediate component -- meaning that nested elements / components don't accidentally get surprise styles.
 
 For example:
+
 ```gjs
 const Inner = <template>
   <p>
@@ -367,8 +384,8 @@ const Outer = <template>
 ```
 
 Where as with `<style scoped>`
-```gjs
 
+```gjs
 const Inner = <template>
   <p>
     inner (not red)
@@ -388,10 +405,7 @@ const Outer = <template>
 </template>
 ```
 
-
 </details>
-
-
 
 ### Passing classes as arguments to a component
 
@@ -446,10 +460,9 @@ test('MyComponent has hello-class', async function (assert) {
 'use strict';
 
 module.exports = {
-	plugins: [
+  plugins: [
 +    'ember-scoped-css/src/template-lint/plugin'
   ],
-
 ```
 
 2. Add `scoped-class-helper` rule to `.template-lintrc.js`
@@ -458,14 +471,13 @@ module.exports = {
 'use strict';
 
 module.exports = {
-	plugins: [
+  plugins: [
     'ember-scoped-css/src/template-lint/plugin'
   ],
   rules: {
 +    'scoped-class-helper': 'error',
 +    'no-forbidden-elements': ['meta', 'html', 'script'], // style removed
   }
-
 ```
 
 ## License

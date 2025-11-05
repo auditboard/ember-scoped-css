@@ -1,4 +1,5 @@
-import * as scopedCSS from 'ember-scoped-css/build';
+import { scopedCSS } from 'ember-scoped-css/babel';
+
 /**
  * This babel.config is not used for publishing.
  * It's only for the local editing experience
@@ -30,7 +31,7 @@ export default {
       'babel-plugin-ember-template-compilation',
       {
         transforms: [
-          scopedCSS.templatePlugin({}),
+          scopedCSS.template({}),
           ...(isCompat ? templateCompatSupport() : macros.templateMacros),
         ],
       },

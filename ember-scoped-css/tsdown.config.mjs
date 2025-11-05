@@ -2,11 +2,7 @@ import { defineConfig } from 'tsdown';
 
 export default defineConfig([
   {
-    entry: [
-      'src/build/index.js',
-      'src/build/babel-plugin.js',
-      'src/build/template-plugin.js',
-    ],
+    entry: ['src/build/public-exports/*.js'],
     outDir: 'dist/cjs',
     format: 'cjs',
     sourcemap: 'inline',

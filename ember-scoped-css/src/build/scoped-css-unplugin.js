@@ -11,6 +11,6 @@ import { inline } from './unplugin-inline.js';
  *       HMR. That is, for all non-physical CSS files, we extend vite by our
  *       resolver and also can enrich metadata to it (for better debugging)
  */
-export default createUnplugin((options = {}) => {
+export const unplugin = createUnplugin((options = {}) => {
   return [colocated(options), inline(options)];
 });
