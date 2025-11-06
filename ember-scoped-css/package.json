@@ -28,15 +28,15 @@
     },
     "./babel": {
       "import": "./src/build/public-exports/babel.js",
-      "require": "./dist/cjs/babel.js"
+      "require": "./dist/cjs/babel.cjs"
     },
     "./rollup": {
       "import": "./src/build/public-exports/rollup.js",
-      "require": "./dist/cjs/rollup.js"
+      "require": "./dist/cjs/rollup.cjs"
     },
     "./vite": {
       "import": "./src/build/public-exports/vite.js",
-      "require": "./dist/cjs/vite.js"
+      "require": "./dist/cjs/vite.cjs"
     },
     "./template-registry": {
       "types": "./template-registry.d.ts",
