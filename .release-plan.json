@@ -1,60 +1,24 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "major",
-      "oldVersion": "1.1.1",
-      "newVersion": "2.0.0",
+      "impact": "patch",
+      "oldVersion": "2.0.0",
+      "newVersion": "2.0.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
-        },
-        {
           "impact": "patch",
           "reason": "Appears in changelog section :bug: Bug Fix"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "impact": "patch",
-      "oldVersion": "1.0.0",
-      "newVersion": "1.0.1",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
-        }
-      ],
-      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
+      "oldVersion": "1.0.1"
     },
     "v2-addon-ts-glint-2": {
-      "impact": "major",
-      "oldVersion": "0.0.0",
-      "newVersion": "1.0.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :memo: Documentation"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
-        }
-      ],
-      "pkgJSONPath": "./test-apps/v2-addon-ts-glint-2/package.json"
+      "oldVersion": "1.0.0"
     }
   },
-  "description": "## Release (2025-11-05)\n\n* ember-scoped-css 2.0.0 (major)\n* stylelint-ember-scoped-css 1.0.1 (patch)\n* v2-addon-ts-glint-2 1.0.0 (major)\n\n#### :boom: Breaking Change\n* `ember-scoped-css`, `v2-addon-ts-glint-2`\n  * [#360](https://github.com/auditboard/ember-scoped-css/pull/360) Unify Public Build API ([@gossi](https://github.com/gossi))\n* `ember-scoped-css`\n  * [#362](https://github.com/auditboard/ember-scoped-css/pull/362) No default `@layer` name ([@gossi](https://github.com/gossi))\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#359](https://github.com/auditboard/ember-scoped-css/pull/359) Fix reload problem with separate CSS files ([@gossi](https://github.com/gossi))\n\n#### :memo: Documentation\n* Other\n  * [#357](https://github.com/auditboard/ember-scoped-css/pull/357) Address issue about import.meta.glob mentioned in #356 ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `v2-addon-ts-glint-2`\n  * [#347](https://github.com/auditboard/ember-scoped-css/pull/347) Demo `<style scoped>` in Glint 2 ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* `ember-scoped-css`, `stylelint-ember-scoped-css`, `v2-addon-ts-glint-2`\n  * [#364](https://github.com/auditboard/ember-scoped-css/pull/364) Update build deps ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* Other\n  * [#363](https://github.com/auditboard/ember-scoped-css/pull/363) Fix vite pods test ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember-scoped-css`\n  * [#358](https://github.com/auditboard/ember-scoped-css/pull/358) Switch from `esbuild` to `tsdown` for watch mode ([@gossi](https://github.com/gossi))\n\n#### Committers: 2\n- Thomas Gossmann ([@gossi](https://github.com/gossi))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2025-11-07)\n\n* ember-scoped-css 2.0.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#365](https://github.com/auditboard/ember-scoped-css/pull/365) Specify cjs extension for cjs exported modules ([@ts-micw](https://github.com/ts-micw))\n\n#### Committers: 1\n- [@ts-micw](https://github.com/ts-micw)\n"
 }

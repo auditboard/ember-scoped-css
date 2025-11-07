@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-11-07)
+
+* ember-scoped-css 2.0.1 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#365](https://github.com/auditboard/ember-scoped-css/pull/365) Specify cjs extension for cjs exported modules ([@ts-micw](https://github.com/ts-micw))
+
+#### Committers: 1
+- [@ts-micw](https://github.com/ts-micw)
+
 ## Release (2025-11-05)
 
 * ember-scoped-css 2.0.0 (major)
