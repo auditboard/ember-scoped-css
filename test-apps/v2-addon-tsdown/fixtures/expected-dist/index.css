@@ -1,8 +1,3 @@
-/* src/components/time.css */
-h1.e227860bf {
-  color: red;
-}
-
 /* src/components/alert.css */
 div.ef9808f67 {
   width: 400px;
@@ -42,6 +37,11 @@ p.e89b8fbcc {
 /* <inline>/src/components/inline-css-a429dce1a164746b7f8ad15dc067290e.css */
 
     h6.eb86dbfce { color: rgb(200, 0, 200); }
+
+/* src/components/time.css */
+h1.e227860bf {
+  color: red;
+}
 
 
 /*# sourceMappingURL=index.css.map*/
