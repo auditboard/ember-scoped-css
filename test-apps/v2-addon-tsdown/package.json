@@ -49,7 +49,8 @@
     "eslint": "^9.36.0",
     "prettier": "^3.6.2",
     "tsdown": "^0.16.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"

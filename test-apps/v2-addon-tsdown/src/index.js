@@ -1,5 +1,3 @@
-// import './test.css' // <-- this import spices things up
-
 export { default as Time } from './components/time.gts';
 export { default as Alert } from './components/alert.gjs';
 export { default as Footer } from './components/footer.gjs';
