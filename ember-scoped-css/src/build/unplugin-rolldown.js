@@ -1,6 +1,5 @@
 import path, { basename } from 'node:path';
 
-// eslint-disable-next-line n/no-unpublished-import
 import { Lang, parse } from '@ast-grep/napi';
 
 import { request } from '../lib/request.js';
@@ -117,26 +116,27 @@ export function rolldown() {
           const styleImports = extractStyleImports(code);
 
           if (styleImports.length > 0) {
-            const sanitizedStyleImports = styleImports.map(cssImport => {
+            const sanitizedStyleImports = styleImports.map((cssImport) => {
               if (request.is.colocated(cssImport)) {
                 const parsed = request.colocated.decode(cssImport);
 
-                return path.join(path.dirname(id),path.basename(parsed.fileName));
+                return path.join(
+                  path.dirname(id),
+                  path.basename(parsed.fileName),
+                );
               }
 
               if (request.is.inline(cssImport)) {
                 const parsed = request.inline.decode(cssImport);
 
                 return path.join(path.dirname(id), `inline-${parsed.hash}.css`);
-
               }
 
               return cssImport;
-            })
+            });
 
             styleImportMap.set(id, sanitizedStyleImports);
           }
-
 
           return null;
         },
@@ -198,16 +198,21 @@ export function rolldown() {
               // check if there is a similar file, but with CSS extension.
               // Mostly that will do the job and we can put the import statement
               // back in later
-              const importedFrom = moduleToChunkMap.entries().find(([filePath]) => {
-                return filePath === styleImport;
-              });
+              const importedFrom = moduleToChunkMap
+                .entries()
+                .find(([filePath]) => {
+                  return filePath === styleImport;
+                });
 
               if (importedFrom) {
                 const importedFromFile = importedFrom[1];
-                const cssFileName = importedFromFile.replace(/\.(m|c)?js$/, '.css');
+                const cssFileName = importedFromFile.replace(
+                  /\.(m|c)?js$/,
+                  '.css',
+                );
 
                 if (outputCssFiles.has(cssFileName)) {
-                  chunkCss.add(cssFileName)
+                  chunkCss.add(cssFileName);
                 }
               }
 
@@ -235,7 +240,6 @@ export function rolldown() {
           }
         }
 
-
         // Inject CSS imports into chunks
         /** @type {OutputChunk} */
         for (const chunk of Object.values(bundle)) {
@@ -260,8 +264,6 @@ export function rolldown() {
           if (!cssFiles || cssFiles.size === 0) {
             continue;
           }
-
-
 
           /** @type {Kinds<JavaScriptTypes>[]} */
           const excludeTokens = ['import_statement', 'expression_statement'];

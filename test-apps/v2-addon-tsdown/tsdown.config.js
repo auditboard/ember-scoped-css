@@ -20,6 +20,6 @@ export default defineConfig({
     babel({
       babelHelpers: 'bundled',
       extensions: ['.js', '.ts', '.gjs', '.gts'],
-    })
+    }),
   ],
 });
