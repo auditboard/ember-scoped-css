@@ -12,6 +12,9 @@ importers:
 
   .:
     dependencies:
+      '@ast-grep/napi':
+        specifier: ^0.39.9
+        version: 0.39.9
       '@babel/parser':
         specifier: ^7.28.5
         version: 7.28.5
@@ -52,9 +55,6 @@ importers:
         specifier: ^2.3.10
         version: 2.3.10
     devDependencies:
-      '@ast-grep/napi':
-        specifier: ^0.39.9
-        version: 0.39.9
       '@babel/core':
         specifier: ^7.28.5
         version: 7.28.5

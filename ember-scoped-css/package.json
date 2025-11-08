@@ -68,6 +68,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@ast-grep/napi": "^0.39.9",
     "@babel/parser": "^7.28.5",
     "@embroider/addon-shim": "^1.9.0",
     "babel-import-util": "^3.0.1",
@@ -83,7 +84,6 @@
     "unplugin": "^2.3.10"
   },
   "devDependencies": {
-    "@ast-grep/napi": "^0.39.9",
     "@babel/core": "^7.28.5",
     "@babel/eslint-parser": "^7.26.8",
     "@nullvoxpopuli/eslint-configs": "^5.3.4",

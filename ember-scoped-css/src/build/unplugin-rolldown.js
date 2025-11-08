@@ -8,10 +8,10 @@ import { request } from '../lib/request.js';
 /**
  * JSDoc type imports
  *
- * @typedef {import('@ast-grep/napi/lang/JavaScript').default} JavaScriptTypes
- * @template T
- * @typedef {import('@ast-grep/napi/types/staticTypes').Kinds<T>} Kinds
- * @typedef {import('@ast-grep/napi').SgNode<JavaScriptTypes>} SgNode
+ * typedef {import('@ast-grep/napi/lang/JavaScript').default} JavaScriptTypes
+ * template T
+ * typedef {import('@ast-grep/napi/types/staticTypes').Kinds<T>} Kinds
+ * typedef {import('@ast-grep/napi').SgNode<JavaScriptTypes>} SgNode
  * @typedef {import('rolldown').Plugin} Plugin
  * @typedef {import('rolldown').OutputChunk} OutputChunk
  * @typedef {import('rolldown').NormalizedOutputOptions} NormalizedOutputOptions
