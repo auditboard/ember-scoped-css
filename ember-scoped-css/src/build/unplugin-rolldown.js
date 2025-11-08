@@ -79,6 +79,8 @@ const extractStyleImports = (code) => {
 };
 
 /**
+ * This is mostly based on: https://github.com/bosh-code/tsdown-plugin-inject-css
+ * With a little addition to make it work for the virtual CSS files of this project
  */
 export function rolldown() {
   // Track style imports per module
