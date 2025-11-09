@@ -5,6 +5,7 @@ import * as template from '../template-plugin.js';
 export const scopedCSS = {
   vite: unplugin.vite,
   rollup: unplugin.rollup,
+  rolldown: unplugin.rolldown,
   babel: babel.scopedCSS,
   template: template.createPlugin,
 };
