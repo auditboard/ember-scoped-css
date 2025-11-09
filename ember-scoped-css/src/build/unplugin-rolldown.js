@@ -164,7 +164,7 @@ export function rolldown() {
        * @param {NormalizedOutputOptions} options
        * @param {OutputBundle} bundle
        */
-      generateBundle(options, bundle) {
+      async generateBundle(options, bundle) {
         // Gather all CSS files that have been bundled
         const outputCssFiles = new Set();
 
@@ -180,9 +180,16 @@ export function rolldown() {
         const chunkCssMap = new Map();
 
         for (const [moduleId, styleImports] of styleImportMap.entries()) {
-          const chunkName = moduleToChunkMap.get(moduleId);
+          let chunkName = moduleToChunkMap.get(moduleId);
 
           if (chunkName) {
+            // search for real chunk name
+            const resolvedChunkName = Object.entries(bundle).find(
+              ([_, chunkInfo]) => chunkInfo.preliminaryFileName === chunkName,
+            );
+
+            chunkName = resolvedChunkName ? resolvedChunkName[0] : chunkName;
+
             if (!chunkCssMap.has(chunkName)) {
               chunkCssMap.set(chunkName, new Set());
             }
@@ -213,13 +220,39 @@ export function rolldown() {
 
               if (importedFrom) {
                 const importedFromFile = importedFrom[1];
-                const cssFileName = importedFromFile.replace(
-                  /\.(m|c)?js$/,
-                  '.css',
-                );
 
-                if (outputCssFiles.has(cssFileName)) {
-                  chunkCss.add(cssFileName);
+                if (importedFromFile.includes('!~{000}~')) {
+                  // search by very vague heuristics
+                  // Build a RegExp from the dynamic string while escaping all
+                  // regex-special chars except for the placeholder which we
+                  // want to turn into a capture group.
+                  const placeholder = '!~{000}~';
+                  const escapeRegex = (s) =>
+                    s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                  // Escape the whole string, then replace the escaped placeholder
+                  // with a capturing group and swap the JS extension to .css.
+                  const pattern = escapeRegex(importedFromFile)
+                    .replace(escapeRegex(placeholder), '(.+)')
+                    .replace(/\\\.(m|c)?js$/, '\\.css');
+
+                  const re = new RegExp('^' + pattern + '$');
+
+                  // Add any output CSS files that match the generated regexp
+                  for (const outCss of outputCssFiles) {
+                    if (re.test(outCss)) {
+                      chunkCss.add(outCss);
+                    }
+                  }
+                } else {
+                  const cssFileName = importedFromFile.replace(
+                    /\.(m|c)?js$/,
+                    '.css',
+                  );
+
+                  if (outputCssFiles.has(cssFileName)) {
+                    chunkCss.add(cssFileName);
+                  }
                 }
               }
 

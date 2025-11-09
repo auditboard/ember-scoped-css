@@ -10,7 +10,7 @@ const addon = new Addon({
 });
 
 export default defineConfig({
-  entry: ['src/index.js', 'src/test.js'],
+  entry: ['src/index.js', 'src/card.gjs'],
   sourcemap: true,
   clean: true,
   plugins: [
