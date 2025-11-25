@@ -1,0 +1,106 @@
+{
+  "name": "v2-addon-ts-with-cjs-babel",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The default blueprint for Embroider v2 addons.",
+  "keywords": [
+    "ember-addon"
+  ],
+  "repository": "",
+  "license": "MIT",
+  "author": "",
+  "files": [
+    "addon-main.cjs",
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup --config",
+    "lint": "concurrently 'npm:lint:*(!fix)' --names 'lint:'",
+    "lint:fix": "concurrently 'npm:lint:*:fix' --names 'fix:'",
+    "lint:hbs": "ember-template-lint . --no-error-on-unmatched-pattern",
+    "lint:js": "eslint . --cache",
+    "lint:hbs:fix": "ember-template-lint . --fix --no-error-on-unmatched-pattern",
+    "lint:js:fix": "eslint . --fix",
+    "lint:types": "glint",
+    "start": "rollup --config --watch",
+    "test:fixture": "pnpm build && compare-fixture fixtures/expected-dist dist",
+    "prepack": "rollup --config"
+  },
+  "dependencies": {
+    "@embroider/addon-shim": "^1.9.0",
+    "decorator-transforms": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-decorators": "^7.28.0",
+    "@babel/preset-typescript": "^7.28.5",
+    "@babel/runtime": "^7.28.4",
+    "@embroider/addon-dev": "^8.1.0",
+    "@glimmer/component": "2.0.0",
+    "@glint/core": "^1.5.2",
+    "@glint/environment-ember-loose": "^1.5.2",
+    "@glint/environment-ember-template-imports": "^1.5.2",
+    "@glint/template": "^1.7.0",
+    "@nullvoxpopuli/eslint-configs": "^5.3.4",
+    "@rollup/plugin-babel": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@tsconfig/ember": "^3.0.9",
+    "@types/rsvp": "^4.0.5",
+    "compare-fixture": "^1.0.1",
+    "concurrently": "^9.2.1",
+    "ember-scoped-css": "workspace:*",
+    "ember-source": "^5.9.0",
+    "ember-template-lint": "^6.1.0",
+    "eslint": "^9.36.0",
+    "execa": "^9.5.2",
+    "fix-bad-declaration-output": "^1.1.4",
+    "prettier": "^3.6.2",
+    "rollup": "^4.52.5",
+    "rollup-plugin-copy": "^3.5.0",
+    "typescript": "^5.4.5"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "ember": {
+    "edition": "octane"
+  },
+  "ember-addon": {
+    "version": 2,
+    "type": "addon",
+    "main": "addon-main.cjs",
+    "app-js": {
+      "./components/at-class-ts/at-class-more-complex.js": "./dist/_app_/components/at-class-ts/at-class-more-complex.js",
+      "./components/at-class-ts/component-at-class.js": "./dist/_app_/components/at-class-ts/component-at-class.js",
+      "./components/at-class-ts/has-at-class.js": "./dist/_app_/components/at-class-ts/has-at-class.js",
+      "./components/issue-368/full.js": "./dist/_app_/components/issue-368/full.js",
+      "./components/issue-368/scoped-usage-in-class.js": "./dist/_app_/components/issue-368/scoped-usage-in-class.js",
+      "./components/issue-368/to.js": "./dist/_app_/components/issue-368/to.js",
+      "./components/strict-class.js": "./dist/_app_/components/strict-class.js",
+      "./components/strict.js": "./dist/_app_/components/strict.js",
+      "./components/with-a-class.js": "./dist/_app_/components/with-a-class.js"
+    }
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./addon-main.js": "./addon-main.cjs"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@glimmer/component": "2.0.0"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}
