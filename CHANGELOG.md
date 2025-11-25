@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-11-25)
+
+* ember-scoped-css 2.0.2 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#369](https://github.com/auditboard/ember-scoped-css/pull/369) #368: Fix support for cjs babel.config files ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-11-07)
 
 * ember-scoped-css 2.0.1 (patch)
