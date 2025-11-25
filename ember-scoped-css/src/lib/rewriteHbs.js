@@ -1,4 +1,4 @@
-import recast from 'ember-template-recast';
+import * as recast from 'ember-template-recast';
 
 import { renameClass } from './renameClass.js';
 
