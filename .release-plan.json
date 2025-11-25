@@ -2,8 +2,8 @@
   "solution": {
     "ember-scoped-css": {
       "impact": "patch",
-      "oldVersion": "2.0.0",
-      "newVersion": "2.0.1",
+      "oldVersion": "2.0.1",
+      "newVersion": "2.0.2",
       "tagName": "latest",
       "constraints": [
         {
@@ -20,5 +20,5 @@
       "oldVersion": "1.0.0"
     }
   },
-  "description": "## Release (2025-11-07)\n\n* ember-scoped-css 2.0.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#365](https://github.com/auditboard/ember-scoped-css/pull/365) Specify cjs extension for cjs exported modules ([@ts-micw](https://github.com/ts-micw))\n\n#### Committers: 1\n- [@ts-micw](https://github.com/ts-micw)\n"
+  "description": "## Release (2025-11-25)\n\n* ember-scoped-css 2.0.2 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#369](https://github.com/auditboard/ember-scoped-css/pull/369) #368: Fix support for cjs babel.config files ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
