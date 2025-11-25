@@ -71,15 +71,8 @@
     "type": "addon",
     "main": "addon-main.cjs",
     "app-js": {
-      "./components/at-class-ts/at-class-more-complex.js": "./dist/_app_/components/at-class-ts/at-class-more-complex.js",
-      "./components/at-class-ts/component-at-class.js": "./dist/_app_/components/at-class-ts/component-at-class.js",
-      "./components/at-class-ts/has-at-class.js": "./dist/_app_/components/at-class-ts/has-at-class.js",
-      "./components/issue-368/full.js": "./dist/_app_/components/issue-368/full.js",
       "./components/issue-368/scoped-usage-in-class.js": "./dist/_app_/components/issue-368/scoped-usage-in-class.js",
-      "./components/issue-368/to.js": "./dist/_app_/components/issue-368/to.js",
-      "./components/strict-class.js": "./dist/_app_/components/strict-class.js",
-      "./components/strict.js": "./dist/_app_/components/strict.js",
-      "./components/with-a-class.js": "./dist/_app_/components/with-a-class.js"
+      "./components/issue-368/to.js": "./dist/_app_/components/issue-368/to.js"
     }
   },
   "exports": {
