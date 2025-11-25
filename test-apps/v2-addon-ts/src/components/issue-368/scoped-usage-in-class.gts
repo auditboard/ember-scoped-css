@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 
 import { scopedClass } from 'ember-scoped-css';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface FieldSignature<T> {
   Element: HTMLInputElement;
   Args: {
