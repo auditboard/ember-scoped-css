@@ -168,7 +168,12 @@ export function isPodTemplate(filePath) {
     return false;
   }
 
-  return filePath.endsWith('template.js') || filePath.endsWith('template.hbs');
+  return (
+    filePath.endsWith('template.js') ||
+    filePath.endsWith('template.hbs') ||
+    filePath.endsWith('template.gjs') ||
+    filePath.endsWith('template.gts')
+  );
 }
 
 /**
