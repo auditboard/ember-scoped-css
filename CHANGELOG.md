@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-12-02)
+
+* ember-scoped-css 2.0.3 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#371](https://github.com/auditboard/ember-scoped-css/pull/371) Fix issue with template.gjs in a pod-folder ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-11-25)
 
 * ember-scoped-css 2.0.2 (patch)
