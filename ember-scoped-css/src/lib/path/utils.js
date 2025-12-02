@@ -149,6 +149,8 @@ export function cssPathFor(fileName) {
   if (isPod(fileName)) {
     cssPath = fileName
       .replace(/template\.js$/, 'styles.css')
+      .replace(/template\.gjs/, 'styles.css')
+      .replace(/template\.gts/, 'styles.css')
       .replace(/template\.hbs/, 'styles.css');
   }
 
