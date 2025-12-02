@@ -149,6 +149,8 @@ export function cssPathFor(fileName) {
   if (isPod(fileName)) {
     cssPath = fileName
       .replace(/template\.js$/, 'styles.css')
+      .replace(/template\.gjs/, 'styles.css')
+      .replace(/template\.gts/, 'styles.css')
       .replace(/template\.hbs/, 'styles.css');
   }
 
@@ -166,7 +168,12 @@ export function isPodTemplate(filePath) {
     return false;
   }
 
-  return filePath.endsWith('template.js') || filePath.endsWith('template.hbs');
+  return (
+    filePath.endsWith('template.js') ||
+    filePath.endsWith('template.hbs') ||
+    filePath.endsWith('template.gjs') ||
+    filePath.endsWith('template.gts')
+  );
 }
 
 /**
