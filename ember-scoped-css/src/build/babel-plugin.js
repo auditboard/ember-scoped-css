@@ -1,5 +1,8 @@
-import { fixFilename } from '../lib/path/template-transform-paths.js';
-import { hashFromModulePath, isRelevantFile } from '../lib/path/utils.js';
+import {
+  appPath,
+  hashFromModulePath,
+  isRelevantFile,
+} from '../lib/path/utils.js';
 import { renameClass } from '../lib/renameClass.js';
 
 function _isRelevantFile(state, cwd) {
@@ -37,9 +40,9 @@ export const scopedCSS = (config) => (env, options, workingDirectory) => {
             return;
           }
 
-          let absolutePath = fixFilename(state.filename);
+          let modulePath = appPath(state.filename);
 
-          state.postfix = hashFromModulePath(absolutePath);
+          state.postfix = hashFromModulePath(modulePath);
         },
       },
       ImportDeclaration(path, state) {
