@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-12-05)
+
+* ember-scoped-css 2.0.4 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#375](https://github.com/auditboard/ember-scoped-css/pull/375) Fix: allow scopedClass to be called in js/ts ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-12-02)
 
 * ember-scoped-css 2.0.3 (patch)
