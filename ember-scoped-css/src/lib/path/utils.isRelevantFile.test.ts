@@ -20,6 +20,13 @@ describe('isRelevantFile()', () => {
 
       expect(result).toBeTruthy();
     });
+
+    it('for /routes/', () => {
+      let file = path.join(paths.viteApp, 'app/routes/application.gts');
+      let result = isRelevantFile(file, { cwd: paths.viteApp });
+
+      expect(result).toBeTruthy();
+    });
   });
 
   describe('the file is not relevant', () => {

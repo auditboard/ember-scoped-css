@@ -259,6 +259,7 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   let roots = [
     leadingSlashPath.componentsDir,
     leadingSlashPath.templatesDir,
+    leadingslashPath.routesDir,
     ...(additionalRoots || []),
   ];
 
