@@ -1,0 +1,10 @@
+.alert {
+  border: 1px solid black;
+}
+div {
+  color: green;
+}
+p {
+  font-style: italic;
+  text-decoration: underline;
+}
