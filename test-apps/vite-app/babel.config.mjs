@@ -8,6 +8,7 @@ const macros = buildMacros({});
 
 export default {
   plugins: [
+    scopedCSS(),
     ['@babel/plugin-transform-typescript', { allowDeclareFields: true }],
     [
       'babel-plugin-ember-template-compilation',

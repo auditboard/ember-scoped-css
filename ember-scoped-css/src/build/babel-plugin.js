@@ -1,4 +1,6 @@
-import { isRelevantFile } from '../lib/path/utils.js';
+import { fixFilename } from '../lib/path/template-transform-paths.js';
+import { hashFromModulePath, isRelevantFile } from '../lib/path/utils.js';
+import { renameClass } from '../lib/renameClass.js';
 
 function _isRelevantFile(state, cwd) {
   let fileName = state.file.opts.filename;
@@ -34,6 +36,10 @@ export const scopedCSS = (config) => (env, options, workingDirectory) => {
 
             return;
           }
+
+          let absolutePath = fixFilename(state.filename);
+
+          state.postfix = hashFromModulePath(absolutePath);
         },
       },
       ImportDeclaration(path, state) {
@@ -57,6 +63,38 @@ export const scopedCSS = (config) => (env, options, workingDirectory) => {
           }
 
           path.remove();
+        }
+      },
+      /**
+       * Rename usages in JS/TS/GJS/GTS
+       */
+      CallExpression(path, state) {
+        if (state.canSkip) {
+          return;
+        }
+
+        if (
+          path.node.callee.type === 'Identifier' &&
+          path.node.callee.name === state.file.opts?.importedScopedClass
+        ) {
+          if (
+            path.node.arguments.length !== 1 ||
+            path.node.arguments[0].type !== 'StringLiteral'
+          ) {
+            throw new Error(
+              `The scopedClass helper only accepts a single, non-dynamic, string literal argument.`,
+            );
+          }
+
+          const original = path.node.arguments[0].value;
+          const renamed = renameClass(
+            original,
+            state.postfix,
+            new Set([original]),
+          );
+          const transformedString = env.types.stringLiteral(renamed);
+
+          path.replaceWith(transformedString);
         }
       },
       /**
