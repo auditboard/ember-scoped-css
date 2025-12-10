@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2025-12-10)
+
+* v2-addon-with-rollup-plugin-import-css null (patch)
+
+#### :house: Internal
+* `v2-addon-with-rollup-plugin-import-css`
+  * [#377](https://github.com/auditboard/ember-scoped-css/pull/377) Add test with rollup-plugin-import-css ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-12-05)
 
 * ember-scoped-css 2.0.4 (patch)
