@@ -1,24 +1,26 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "patch",
-      "oldVersion": "2.0.3",
-      "newVersion": "2.0.4",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
-        }
-      ],
-      "pkgJSONPath": "./ember-scoped-css/package.json"
+      "oldVersion": "2.0.4"
     },
     "stylelint-ember-scoped-css": {
       "oldVersion": "1.0.1"
     },
     "v2-addon-ts-glint-2": {
       "oldVersion": "1.0.0"
+    },
+    "v2-addon-with-rollup-plugin-import-css": {
+      "impact": "patch",
+      "newVersion": null,
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
+        }
+      ],
+      "pkgJSONPath": "./test-apps/v2-addon-with-rollup-plugin-import-css/package.json"
     }
   },
-  "description": "## Release (2025-12-05)\n\n* ember-scoped-css 2.0.4 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#375](https://github.com/auditboard/ember-scoped-css/pull/375) Fix: allow scopedClass to be called in js/ts ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2025-12-10)\n\n* v2-addon-with-rollup-plugin-import-css null (patch)\n\n#### :house: Internal\n* `v2-addon-with-rollup-plugin-import-css`\n  * [#377](https://github.com/auditboard/ember-scoped-css/pull/377) Add test with rollup-plugin-import-css ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }

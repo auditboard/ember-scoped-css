@@ -54,5 +54,6 @@
     "type": "addon",
     "version": 2,
     "app-js": {}
-  }
+  },
+  "version": null
 }
