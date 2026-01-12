@@ -51,11 +51,6 @@ export function colocated(options = {}) {
           path.basename(parsed.fileName),
         );
 
-        /**
-         * Rollup doesn't normally watch CSS files
-         */
-        this.addWatchFile(filePath);
-
         return buildResponse(id, filePath);
       }
     },
@@ -63,6 +58,8 @@ export function colocated(options = {}) {
       const meta = this.getModuleInfo(id)?.meta?.[META];
 
       if (meta) {
+        this.addWatchFile(meta.fullPath);
+
         let code = readFileSync(meta.fullPath, 'utf-8');
 
         let css = rewriteCss(
