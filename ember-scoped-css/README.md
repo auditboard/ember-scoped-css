@@ -77,9 +77,10 @@ npm install --save-dev ember-scoped-css
 
 Configuration happens in multiple locations to take over the need portion of your build steps.
 
-- `vite.config.*` 
-- `rollup.config.*` 
-- `babel.config.*` 
+- `vite.config.*`
+- `rollup.config.*`
+- `babel.config.*`
+- `tsdown.config.*`
 
 #### Vite
 
@@ -97,7 +98,6 @@ export default defineConfig({
   ],
 });
 ```
-
 
 <details><summary>notes for vite projects</summary>
 
@@ -138,6 +138,23 @@ If you have a rollup config:
 
 ```js
 import { scopedCSS } from 'ember-scoped-css/rollup';
+
+// ...
+plugins: [
+    scopedCSS(),
+]
+```
+
+##### Configuration Options
+
+- `layerName: string` - Wrap your CSS in a `@layer` with this given name
+
+#### Rolldown / TSdown
+
+If you have a rolldown/tsdown config:
+
+```js
+import { scopedCSS } from 'ember-scoped-css/rolldown';
 
 // ...
 plugins: [

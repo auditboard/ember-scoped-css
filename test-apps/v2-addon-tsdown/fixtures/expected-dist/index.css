@@ -1,0 +1,35 @@
+/* src/components/alert.css */
+div.ef9808f67 {
+  width: 400px;
+  border: 1px solid black;
+  padding: 0px 15px;
+  margin-top: 15px;
+}
+
+.header_ef9808f67 {
+  margin-top: 0;
+  background-color: lightslategray;
+  padding: 15px;
+  margin: 0px -15px;
+}
+
+.message_ef9808f67 {
+  font-style: italic;
+  font-size: 1em;
+}
+
+/* <inline>/src/components/inline-css-d542ca65446c00a9a005e6e4fe7e0bbc.css */
+
+    h1.eb86dbfce { color: rgb(0, 0, 200); }
+
+/* <inline>/src/components/inline-css-a429dce1a164746b7f8ad15dc067290e.css */
+
+    h6.eb86dbfce { color: rgb(200, 0, 200); }
+
+/* src/components/time.css */
+h1.e227860bf {
+  color: red;
+}
+
+
+/*# sourceMappingURL=index.css.map*/
