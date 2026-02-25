@@ -1,11 +1,15 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "patch",
-      "oldVersion": "2.0.3",
-      "newVersion": "2.0.4",
+      "impact": "minor",
+      "oldVersion": "2.0.4",
+      "newVersion": "2.1.0",
       "tagName": "latest",
       "constraints": [
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        },
         {
           "impact": "patch",
           "reason": "Appears in changelog section :bug: Bug Fix"
@@ -18,7 +22,19 @@
     },
     "v2-addon-ts-glint-2": {
       "oldVersion": "1.0.0"
+    },
+    "v2-addon-with-rollup-plugin-import-css": {
+      "impact": "patch",
+      "newVersion": null,
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
+        }
+      ],
+      "pkgJSONPath": "./test-apps/v2-addon-with-rollup-plugin-import-css/package.json"
     }
   },
-  "description": "## Release (2025-12-05)\n\n* ember-scoped-css 2.0.4 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#375](https://github.com/auditboard/ember-scoped-css/pull/375) Fix: allow scopedClass to be called in js/ts ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-02-25)\n\n* ember-scoped-css 2.1.0 (minor)\n* v2-addon-with-rollup-plugin-import-css null (patch)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#373](https://github.com/auditboard/ember-scoped-css/pull/373) Allow /routes/ to be relevant ([@evoactivity](https://github.com/evoactivity))\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#380](https://github.com/auditboard/ember-scoped-css/pull/380) Fix CSS file watching in Rollup/Vite ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* `v2-addon-with-rollup-plugin-import-css`\n  * [#377](https://github.com/auditboard/ember-scoped-css/pull/377) Add test with rollup-plugin-import-css ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- Liam Potter ([@evoactivity](https://github.com/evoactivity))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }

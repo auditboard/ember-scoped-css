@@ -1,5 +1,26 @@
 # Changelog
 
+## Release (2026-02-25)
+
+* ember-scoped-css 2.1.0 (minor)
+* v2-addon-with-rollup-plugin-import-css null (patch)
+
+#### :rocket: Enhancement
+* `ember-scoped-css`
+  * [#373](https://github.com/auditboard/ember-scoped-css/pull/373) Allow /routes/ to be relevant ([@evoactivity](https://github.com/evoactivity))
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#380](https://github.com/auditboard/ember-scoped-css/pull/380) Fix CSS file watching in Rollup/Vite ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :house: Internal
+* `v2-addon-with-rollup-plugin-import-css`
+  * [#377](https://github.com/auditboard/ember-scoped-css/pull/377) Add test with rollup-plugin-import-css ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 2
+- Liam Potter ([@evoactivity](https://github.com/evoactivity))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2025-12-05)
 
 * ember-scoped-css 2.0.4 (patch)
