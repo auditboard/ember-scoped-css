@@ -1,5 +1,6 @@
 {
   "name": "v2-addon-with-rollup-plugin-import-css",
+  "private": true,
   "keywords": [
     "ember-addon"
   ],
