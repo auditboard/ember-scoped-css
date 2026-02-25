@@ -1,5 +1,10 @@
 # Changelog
 
+
+
+
+
+
 ## Release (2026-02-25)
 
 * ember-scoped-css 2.1.0 (minor)
