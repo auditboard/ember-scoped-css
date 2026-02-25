@@ -21,7 +21,7 @@
     "concurrently": "^9.2.1",
     "ember-source": "^6.2.0",
     "prettier": "^3.6.2",
-    "release-plan": "^0.16.0"
+    "release-plan": "^0.17.4"
   },
   "packageManager": "pnpm@10.8.0",
   "volta": {
