@@ -1,0 +1,18 @@
+div {
+  width: 400px;
+  border: 1px solid black;
+  padding: 0px 15px;
+  margin-top: 15px;
+}
+
+.header {
+  margin-top: 0;
+  background-color: lightslategray;
+  padding: 15px;
+  margin: 0px -15px;
+}
+
+.message {
+  font-style: italic;
+  font-size: 1em;
+}
