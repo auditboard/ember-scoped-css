@@ -1,6 +1,9 @@
 export const ScopedScss = <template>
   <p class="scss-hi">hello from scss</p>
-  <style scoped lang="scss">
+  <style
+    scoped
+    lang="scss"
+  >
     .scss-hi {
       $color: rgb(200, 0, 100);
 
@@ -18,7 +21,10 @@ export const ScopedScssMixins = <template>
     <span class="card-title">title</span>
     <span class="card-body">body</span>
   </div>
-  <style scoped lang="scss">
+  <style
+    scoped
+    lang="scss"
+  >
     @mixin flex-center($gap: 0px) {
       display: flex;
       align-items: center;
@@ -56,7 +62,10 @@ export const ScopedScssMixins = <template>
 export const ScopedScssAtUse = <template>
   <button type="button" class="btn-primary">click me</button>
   <span class="sr-label">accessible label</span>
-  <style scoped lang="scss">
+  <style
+    scoped
+    lang="scss"
+  >
     @use './mixins' as m;
 
     .btn-primary {

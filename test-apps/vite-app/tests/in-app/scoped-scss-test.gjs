@@ -19,7 +19,7 @@ module('[In App] scoped scss', function (hooks) {
     assert
       .dom('p')
       .hasClass(
-        scopedClass('scss-hi', 'vite-app/components/in-app/scoped-scss'),
+        scopedClass('scss-hi', 'vite-app/components/in-app/scoped-scss')
       );
     assert.dom('p').hasStyle({ color: 'rgb(200, 0, 100)' });
   });
@@ -39,14 +39,18 @@ module('[In App] scoped scss', function (hooks) {
       .hasStyle({ display: 'flex', backgroundColor: 'rgb(240, 240, 255)' });
 
     assert.dom(`.${titleClass}`).exists();
-    assert
-      .dom(`.${titleClass}`)
-      .hasStyle({ fontSize: '18px', fontWeight: '700', color: 'rgb(10, 20, 200)' });
+    assert.dom(`.${titleClass}`).hasStyle({
+      fontSize: '18px',
+      fontWeight: '700',
+      color: 'rgb(10, 20, 200)',
+    });
 
     assert.dom(`.${bodyClass}`).exists();
-    assert
-      .dom(`.${bodyClass}`)
-      .hasStyle({ fontSize: '14px', fontWeight: '400', color: 'rgb(50, 50, 50)' });
+    assert.dom(`.${bodyClass}`).hasStyle({
+      fontSize: '14px',
+      fontWeight: '400',
+      color: 'rgb(50, 50, 50)',
+    });
   });
 
   test('@use from an external partial applies mixins and scopes classes', async function (assert) {
