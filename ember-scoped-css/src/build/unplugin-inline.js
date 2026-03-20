@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { rewriteCss } from '../lib/css/rewrite.js';
@@ -17,6 +18,12 @@ const META = 'scoped-css:inline';
 export function inline(options = {}) {
   const CWD = process.cwd();
 
+  /** @type {import('vite').ResolvedConfig | undefined} */
+  let viteConfig;
+
+  /** @type {((code: string, filename: string, config: unknown) => Promise<{ code: string }>) | undefined} */
+  let preprocessCSS;
+
   /**
    * @param {string} id the request id / what was imported
    */
@@ -25,22 +32,14 @@ export function inline(options = {}) {
 
     const relativeFilePath = path.relative(CWD, filePath);
 
-    const css = rewriteCss(
-      parsed.css,
-      parsed.postfix,
-      `<inline>/${relativeFilePath}`,
-      options.layerName,
-    );
-
-    const nextId = filePath.split('?')[0];
-
     return {
-      id: nextId,
+      id: filePath.split('?')[0],
       meta: {
         [META]: {
-          css,
+          rawCss: parsed.css,
           postfix: parsed.postfix,
           fileName: relativeFilePath,
+          lang: parsed.lang,
         },
       },
     };
@@ -60,12 +59,55 @@ export function inline(options = {}) {
         return buildResponse(id, filePath);
       }
     },
-    load(id) {
+    async load(id) {
       const meta = this.getModuleInfo(id)?.meta?.[META];
 
       if (meta) {
-        return meta.css;
+        let rawCss = meta.rawCss;
+
+        if (meta.lang) {
+          if (!viteConfig || !preprocessCSS) {
+            throw new Error(
+              `[ember-scoped-css] <style scoped lang="${meta.lang}"> requires Vite. ` +
+                `CSS preprocessing via the 'lang' attribute is only supported in Vite builds.`,
+            );
+          }
+
+          const fakeFilename = `${meta.fileName}.${meta.lang}`;
+          const result = await preprocessCSS(rawCss, fakeFilename, viteConfig);
+
+          rawCss = result.code;
+        }
+
+        const css = rewriteCss(
+          rawCss,
+          meta.postfix,
+          `<inline>/${meta.fileName}`,
+          options.layerName,
+        );
+
+        return css;
       }
+    },
+    vite: {
+      async configResolved(config) {
+        viteConfig = config;
+
+        // Resolve Vite's preprocessCSS from the app root to ensure we find
+        // the correct Vite installation (not a stale or missing one).
+        try {
+          const require = createRequire(
+            path.resolve(config.root, 'package.json'),
+          );
+          const vitePath = require.resolve('vite');
+          const viteModule = await import(vitePath);
+
+          preprocessCSS = viteModule.preprocessCSS;
+        } catch {
+          // Vite may not be resolvable from the config root in some setups;
+          // lang= support will throw a clear error at load time if used.
+        }
+      },
     },
   };
 }

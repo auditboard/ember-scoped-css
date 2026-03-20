@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import postcss from 'postcss';
+import scssSyntax from 'postcss-scss';
 import parser from 'postcss-selector-parser';
 
 import { md5 } from '../path/md5.js';
@@ -39,13 +40,17 @@ export function getCSSInfo(cssPath) {
  * to see if we need to leave it alone or transform it
  *
  * @param {string} css the CSS's contents
+ * @param {string} [lang] optional language hint (e.g. 'scss', 'sass', 'less')
  * @return {{ classes: Set<string>, tags: Set<string>, css: string, id: string }}
  */
-export function getCSSContentInfo(css) {
+export function getCSSContentInfo(css, lang) {
   const classes = new Set();
   const tags = new Set();
 
-  const ast = postcss.parse(css);
+  const parseOptions =
+    lang === 'scss' || lang === 'sass' ? { syntax: scssSyntax } : {};
+
+  const ast = postcss.parse(css, parseOptions);
 
   ast.walk((node) => {
     if (node.type === 'rule') {
@@ -84,5 +89,29 @@ if (import.meta.vitest) {
     expect([...classes]).to.have.members(['baz', 'bar']);
     expect(tags.size).to.equal(1);
     expect([...tags]).to.have.members(['div']);
+  });
+
+  it('should parse SCSS nesting syntax without crashing when lang=scss', function () {
+    const scss = `
+      .parent {
+        &:hover { color: blue; }
+        .child { font-size: 14px; }
+        color: red;
+      }
+    `;
+    const { classes } = getCSSContentInfo(scss, 'scss');
+
+    expect([...classes]).to.have.members(['parent', 'child']);
+  });
+
+  it('should parse SCSS nesting syntax without crashing when lang=sass', function () {
+    const scss = `
+      .block {
+        &--modifier { color: green; }
+      }
+    `;
+    const { classes } = getCSSContentInfo(scss, 'sass');
+
+    expect([...classes]).to.have.members(['block']);
   });
 }

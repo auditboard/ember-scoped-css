@@ -2,7 +2,7 @@ import * as babel from '@babel/core';
 import { stripIndent } from 'common-tags';
 import { Preprocessor } from 'content-tag';
 import jscodeshift from 'jscodeshift';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { createPlugin } from './template-plugin.js';
 
@@ -193,4 +193,67 @@ it('scoped inline transforms correctly', async () => {
     </style>",
     ]
   `);
+});
+
+describe('lang attribute (SCSS preprocessor)', () => {
+  it('scoped lang="scss" emits virtual import with lang param and rewrites classes', async () => {
+    let output = await transform(`
+      export const Foo = <template>
+        <div class="foo">hi</div>
+        <style scoped lang="scss">
+          .foo {
+            &:hover { color: blue; }
+            color: red;
+          }
+        </style>
+      </template>;
+    `);
+
+    // The style tag should be removed (it's a virtual module, not inline)
+    expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+      [
+        "<div class="foo_e65d154a1">hi</div>",
+      ]
+    `);
+
+    // The virtual module import should include &lang=scss
+    expect(output).toContain('lang=scss');
+    expect(output).toContain('.ember-scoped.css?css=');
+  });
+
+  it('scoped inline lang="scss" is downgraded to non-inline (warning emitted, style tag removed)', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    let output = await transform(`
+      export const Foo = <template>
+        <div class="foo">hi</div>
+        <style scoped inline lang="scss">
+          .foo {
+            &:hover { color: blue; }
+            color: red;
+          }
+        </style>
+      </template>;
+    `);
+
+    // The style tag should be removed (downgraded to non-inline)
+    expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+      [
+        "<div class="foo_e65d154a1">hi</div>",
+      ]
+    `);
+
+    // A virtual module import should have been emitted with lang=scss
+    expect(output).toContain('lang=scss');
+    expect(output).toContain('.ember-scoped.css?css=');
+
+    // A warning should have been logged
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '<style scoped inline lang="scss"> is not supported',
+      ),
+    );
+
+    warnSpy.mockRestore();
+  });
 });

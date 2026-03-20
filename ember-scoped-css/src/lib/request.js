@@ -19,9 +19,16 @@ export const request = {
      * @param {string} cssHash the hash of the CSS contents
      * @param {string} postfix the hash of the file that _includes_ the linked file
      * @param {string} cssContents the contents of the CSS file
+     * @param {string} [lang] optional preprocessor language (e.g. 'scss', 'sass', 'less')
      */
-    create(cssHash, postfix, cssContents) {
-      return `./${postfix}${SEP}${cssHash}.${KEY}?css=${encodeURIComponent(cssContents)}`;
+    create(cssHash, postfix, cssContents, lang) {
+      let url = `./${postfix}${SEP}${cssHash}.${KEY}?css=${encodeURIComponent(cssContents)}`;
+
+      if (lang) {
+        url += `&lang=${encodeURIComponent(lang)}`;
+      }
+
+      return url;
     },
     decode(request) {
       let [left, qps] = request.split('?');
@@ -37,6 +44,7 @@ export const request = {
         postfix,
         css: search.get('css'),
         from: search.get('from'),
+        lang: search.get('lang'),
       };
     },
   },

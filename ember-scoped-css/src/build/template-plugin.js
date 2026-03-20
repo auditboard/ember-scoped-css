@@ -122,9 +122,37 @@ export function createPlugin(config) {
 
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
-            let info = getCSSContentInfo(css);
+            let lang = getLangAttribute(styleTag);
+            let info = getCSSContentInfo(css, lang);
 
             addInfo(info);
+
+            /**
+             * For <style scoped inline lang="..."> we cannot preprocess at Babel-time
+             * (preprocessing is async and requires Vite's ResolvedConfig).
+             * Downgrade to non-inline: remove the tag and inject via virtual CSS module.
+             */
+            if (hasInlineAttribute(styleTag) && lang) {
+              console.warn(
+                `[ember-scoped-css] <style scoped inline lang="${lang}"> is not supported ` +
+                  `(preprocessing is async and cannot run at Babel-time). ` +
+                  `Downgrading to non-inline: the style tag will be removed and injected as a virtual CSS module.`,
+              );
+
+              let cssRequest = request.inline.create(
+                info.id,
+                postfix,
+                css,
+                lang,
+              );
+
+              env.meta.jsutils.importForSideEffect(cssRequest);
+
+              // Signal ElementNode visitor to remove the tag
+              styleTag.__downgradeInline = true;
+
+              return;
+            }
 
             /**
              * This will be handled in ElementNode traversal
@@ -133,7 +161,7 @@ export function createPlugin(config) {
               return;
             }
 
-            let cssRequest = request.inline.create(info.id, postfix, css);
+            let cssRequest = request.inline.create(info.id, postfix, css, lang);
 
             env.meta.jsutils.importForSideEffect(cssRequest);
           }
@@ -153,6 +181,11 @@ export function createPlugin(config) {
               throw new Error(
                 '<style scoped> tags must be at the root of the template, they cannot be nested',
               );
+            }
+
+            // Downgraded inline+lang: remove the tag (import was already emitted in Template visitor)
+            if (node.__downgradeInline) {
+              return null;
             }
 
             if (hasInlineAttribute(node)) {
@@ -198,6 +231,7 @@ export function createPlugin(config) {
  */
 const SCOPED_ATTRIBUTE_NAME = 'scoped';
 const INLINE_ATTRIBUTE_NAME = 'inline';
+const LANG_ATTRIBUTE_NAME = 'lang';
 
 function hasScopedAttribute(node) {
   if (!node) return;
@@ -217,6 +251,31 @@ function hasInlineAttribute(node) {
   return node.attributes.some(
     (attribute) => attribute.name === INLINE_ATTRIBUTE_NAME,
   );
+}
+
+/**
+ * Returns the value of the `lang` attribute on a `<style>` node, or null if absent.
+ *
+ * @param {object} node
+ * @returns {string | null}
+ */
+function getLangAttribute(node) {
+  if (!node) return null;
+  if (node.tag !== 'style') return null;
+  if (node.type !== 'ElementNode') return null;
+
+  const attr = node.attributes.find(
+    (attribute) => attribute.name === LANG_ATTRIBUTE_NAME,
+  );
+
+  if (!attr) return null;
+
+  // The attribute value is a TextNode child of the AttrNode's value
+  const value = attr.value;
+
+  if (value?.type === 'TextNode') return value.chars || null;
+
+  return null;
 }
 
 function textContent(node) {
