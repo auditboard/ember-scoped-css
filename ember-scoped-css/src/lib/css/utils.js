@@ -93,25 +93,38 @@ if (import.meta.vitest) {
 
   it('should parse SCSS nesting syntax without crashing when lang=scss', function () {
     const scss = `
+      $base-color: #c6538c;
+      $border-dark: rgba($base-color, 0.88);
+
       .parent {
-        &:hover { color: blue; }
-        .child { font-size: 14px; }
+        &:hover { color: $base-color; }
+        .child { border: 1px solid $border-dark; }
         color: red;
       }
     `;
     const { classes } = getCSSContentInfo(scss, 'scss');
 
-    expect([...classes]).to.have.members(['parent', 'child']);
+    expect([...classes]).toMatchInlineSnapshot(`
+      [
+        "parent",
+        "child",
+      ]
+    `);
   });
 
   it('should parse SCSS nesting syntax without crashing when lang=sass', function () {
     const scss = `
+      $base-color: green;
       .block {
-        &--modifier { color: green; }
+        &--modifier { color: $base-color; }
       }
     `;
     const { classes } = getCSSContentInfo(scss, 'sass');
 
-    expect([...classes]).to.have.members(['block']);
+    expect([...classes]).toMatchInlineSnapshot(`
+      [
+        "block",
+      ]
+    `);
   });
 }
