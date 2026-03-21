@@ -1,35 +1,21 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "minor",
-      "oldVersion": "2.1.0",
-      "newVersion": "2.2.0",
+      "impact": "patch",
+      "oldVersion": "2.2.0",
+      "newVersion": "2.2.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
           "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
+          "reason": "Appears in changelog section :memo: Documentation"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "impact": "patch",
-      "oldVersion": "1.0.1",
-      "newVersion": "1.0.2",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
-        }
-      ],
-      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
+      "oldVersion": "1.0.2"
     }
   },
-  "description": "## Release (2026-03-21)\n\n* ember-scoped-css 2.2.0 (minor)\n* stylelint-ember-scoped-css 1.0.2 (patch)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#382](https://github.com/auditboard/ember-scoped-css/pull/382) Add CSS preprocessor support (SCSS/Sass/Less/Stylus) ([@evoactivity](https://github.com/evoactivity))\n\n#### :house: Internal\n* `ember-scoped-css`, `stylelint-ember-scoped-css`\n  * [#383](https://github.com/auditboard/ember-scoped-css/pull/383) Fix broken tests ([@evoactivity](https://github.com/evoactivity))\n\n#### Committers: 1\n- Liam Potter ([@evoactivity](https://github.com/evoactivity))\n"
+  "description": "## Release (2026-03-21)\n\n* ember-scoped-css 2.2.1 (patch)\n\n#### :memo: Documentation\n* `ember-scoped-css`\n  * [#386](https://github.com/auditboard/ember-scoped-css/pull/386) Move preprocessor section under the usage ([@evoactivity](https://github.com/evoactivity))\n  * [#384](https://github.com/auditboard/ember-scoped-css/pull/384) Update readme for preprocessor instructions ([@evoactivity](https://github.com/evoactivity))\n\n#### Committers: 1\n- Liam Potter ([@evoactivity](https://github.com/evoactivity))\n"
 }

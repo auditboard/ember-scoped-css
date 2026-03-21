@@ -2,6 +2,18 @@
 
 ## Release (2026-03-21)
 
+* ember-scoped-css 2.2.1 (patch)
+
+#### :memo: Documentation
+* `ember-scoped-css`
+  * [#386](https://github.com/auditboard/ember-scoped-css/pull/386) Move preprocessor section under the usage ([@evoactivity](https://github.com/evoactivity))
+  * [#384](https://github.com/auditboard/ember-scoped-css/pull/384) Update readme for preprocessor instructions ([@evoactivity](https://github.com/evoactivity))
+
+#### Committers: 1
+- Liam Potter ([@evoactivity](https://github.com/evoactivity))
+
+## Release (2026-03-21)
+
 * ember-scoped-css 2.2.0 (minor)
 * stylelint-ember-scoped-css 1.0.2 (patch)
 
