@@ -38,8 +38,7 @@ function virtualImportUrlsOf(file: string | null | undefined) {
   j(file)
     .find(j.ImportDeclaration, {
       source: {
-        value: (value) =>
-          typeof value === 'string' && value.includes('.ember-scoped.css?css='),
+        value: (value: string) => value.includes('.ember-scoped.css?css='),
       },
     })
     .forEach((path) => {
