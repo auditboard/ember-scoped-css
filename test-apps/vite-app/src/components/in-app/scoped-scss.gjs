@@ -77,3 +77,19 @@ export const ScopedScssAtUse = <template>
     }
   </style>
 </template>;
+
+export const ScopedBEM = <template>
+  <p class="hi hi--modifier">hi</p>
+  <style
+    scoped
+    lang="scss"
+  >
+    .hi {
+      color: rgb(0, 0, 200);
+      &--modifier {
+        font-weight: 700;
+      }
+    }
+
+  </style>
+</template>;

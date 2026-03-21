@@ -287,4 +287,50 @@ describe('lang attribute (SCSS preprocessor)', () => {
 
     warnSpy.mockRestore();
   });
+
+  it('handles scoped lang="scss" BEM constructs', async () => {
+    let output = await transform(`
+    export const Foo = <template>
+      <div class="block block--modifier">hi</div>
+      <style scoped lang="scss">
+        .block {
+          &--modifier { color: green; }
+        }
+      </style>
+    </template>;
+  `);
+
+    expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+    [
+      "<div class="block_e65d154a1 block--modifier_e65d154a1">hi</div>",
+    ]
+  `);
+  });
+
+  it('handles deeply nested BEM constructs', async () => {
+    let output = await transform(`
+    export const Foo = <template>
+      <div class="block block--modifier block--modifier--modifier block--modifier--modifier--modifier">hi</div>
+      <style scoped lang="scss">
+        .block {
+          &--modifier {
+            color: green;
+            &--modifier {
+              color: green;
+              &--modifier {
+                color: green;
+              }
+            }
+          }
+        }
+      </style>
+    </template>;
+  `);
+
+    expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+      [
+        "<div class="block_e65d154a1 block--modifier_e65d154a1 block--modifier--modifier_e65d154a1 block--modifier--modifier--modifier_e65d154a1">hi</div>",
+      ]
+    `);
+  });
 });

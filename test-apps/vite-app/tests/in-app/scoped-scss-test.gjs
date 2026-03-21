@@ -6,6 +6,7 @@ import {
   ScopedScss,
   ScopedScssMixins,
   ScopedScssAtUse,
+  ScopedBEM,
 } from 'vite-app/components/in-app/scoped-scss';
 
 import { scopedClass } from 'ember-scoped-css/test-support';
@@ -75,5 +76,17 @@ module('[In App] scoped scss', function (hooks) {
       width: '1px',
       height: '1px',
     });
+  });
+
+  test('supports BEM classes correctly', async function (assert) {
+    await render(ScopedBEM);
+
+    assert
+      .dom('p')
+      .hasClass(
+        scopedClass('hi--modifier', 'vite-app/components/in-app/scoped-scss')
+      );
+
+    assert.dom('p').hasStyle({ color: 'rgb(0, 0, 200)', fontWeight: '700' });
   });
 });

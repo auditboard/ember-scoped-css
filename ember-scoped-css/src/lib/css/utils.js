@@ -52,15 +52,48 @@ export function getCSSContentInfo(css, lang) {
 
   const ast = postcss.parse(css, parseOptions);
 
+  const isScss = lang === 'scss' || lang === 'sass';
+
   ast.walk((node) => {
     if (node.type === 'rule') {
-      getClassesAndTags(node.selector, classes, tags);
+      const selector = isScss ? resolveNestedSassSelector(node) : node.selector;
+      getClassesAndTags(selector, classes, tags);
     }
   });
 
   let id = hash(css);
 
   return { classes, tags, css, id };
+}
+
+/**
+ * Resolves a nested SCSS selector by substituting `&` with the fully-resolved
+ * parent selector, recursively. This converts e.g. `&--modifier` (child of
+ * `.block`) into `.block--modifier`, and handles arbitrary nesting depth so
+ * that `&--modifier` inside `&--modifier` inside `.block` yields
+ * `.block--modifier--modifier`.
+ *
+ * @param {import('postcss').Rule} node
+ * @return {string}
+ */
+function resolveNestedSassSelector(node) {
+  const { selector } = node;
+
+  if (!selector.includes('&')) {
+    return selector;
+  }
+
+  const parent = node.parent;
+
+  if (!parent || parent.type !== 'rule') {
+    // No parent rule — `&` has nothing to substitute, return as-is
+    return selector;
+  }
+
+  // Recursively resolve the parent first, then substitute into this selector
+  const resolvedParent = resolveNestedSassSelector(parent);
+
+  return selector.replace(/&/g, resolvedParent);
 }
 
 function getClassesAndTags(sel, classes, tags) {
@@ -124,6 +157,34 @@ if (import.meta.vitest) {
     expect([...classes]).toMatchInlineSnapshot(`
       [
         "block",
+        "block--modifier",
+      ]
+    `);
+  });
+
+  it('should parse SCSS deeply nested BEM when lang=sass', function () {
+    const scss = `
+      $base-color: green;
+      .block {
+        &--modifier {
+          color: $base-color;
+          &--modifier {
+            color: $base-color;
+            &--modifier {
+              color: $base-color;
+            }
+          }
+        }
+      }
+    `;
+    const { classes } = getCSSContentInfo(scss, 'sass');
+
+    expect([...classes]).toMatchInlineSnapshot(`
+      [
+        "block",
+        "block--modifier",
+        "block--modifier--modifier",
+        "block--modifier--modifier--modifier",
       ]
     `);
   });
