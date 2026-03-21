@@ -241,8 +241,6 @@ describe('lang attribute (SCSS preprocessor)', () => {
       ]
     `);
 
-    console.log(output);
-
     // The virtual module import should include &lang=scss
     expect(output).toContain('lang=scss');
     expect(output).toContain('.ember-scoped.css?css=');
