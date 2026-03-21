@@ -2,7 +2,10 @@ import { render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 
-import { ScopedFoo, ScopedInlineFoo } from 'vite-app/components/in-app/scoped';
+import {
+  ScopedFoo,
+  ScopedInlineFoo,
+} from 'vite-app-layer/components/in-app/scoped';
 
 import { scopedClass } from 'ember-scoped-css/test-support';
 
@@ -14,7 +17,7 @@ module('[In App] scoped', function (hooks) {
 
     assert
       .dom('p')
-      .hasClass(scopedClass('hi', 'vite-app/components/in-app/scoped'));
+      .hasClass(scopedClass('hi', 'vite-app-layer/components/in-app/scoped'));
     assert.dom('p').hasStyle({ color: 'rgb(0, 0, 200)' });
   });
 
@@ -23,7 +26,9 @@ module('[In App] scoped', function (hooks) {
 
     assert
       .dom('p')
-      .hasClass(scopedClass('hello', 'vite-app/components/in-app/scoped'));
+      .hasClass(
+        scopedClass('hello', 'vite-app-layer/components/in-app/scoped')
+      );
     assert.dom('p').hasStyle({ color: 'rgb(0, 200, 0)' });
   });
 });

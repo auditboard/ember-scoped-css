@@ -36,6 +36,7 @@ jobs:
           - "stylelint-ember-scoped-css"
           - "test-apps/v2-addon-bundled"
           - "test-apps/vite-app"
+          - "test-apps/vite-app-layer"
           - "test-apps/vite-app-with-compat"
           - "test-apps/vite-app-with-compat-pods"
 
@@ -57,6 +58,7 @@ jobs:
           - "stylelint-ember-scoped-css"
           - "test-apps/v2-addon-bundled"
           - "test-apps/vite-app"
+          - "test-apps/vite-app-layer"
           - "test-apps/vite-app-with-compat"
           - "test-apps/vite-app-with-compat-pods"
 

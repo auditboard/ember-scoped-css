@@ -22,7 +22,8 @@ it('should use a custom layer', function () {
     @layer utils {
     .foo_postfix { color: red; }
     }
-"`);
+    "
+  `);
 });
 
 it(`understands nth-of-type syntax`, function () {
@@ -40,7 +41,8 @@ it(`understands nth-of-type syntax`, function () {
 
         li.postfix:nth-of-type(odd) {}
         li.postfix:nth-of-type(even) {}
-"`);
+    "
+  `);
 });
 
 describe('@container', () => {
@@ -64,7 +66,8 @@ describe('@container', () => {
           font-size: 1.5em;
         }
       }
-"`);
+      "
+    `);
   });
 
   it('handles parameters', () => {
@@ -120,7 +123,8 @@ describe('@container', () => {
           color: white;
         }
       }
-"`);
+      "
+    `);
   });
 });
 
@@ -142,8 +146,9 @@ describe('@media', () => {
       @media (height >= 680px), screen and (orientation: portrait) {
         .foo_postfix { color: red; }
       }
-}
-"`);
+      }
+      "
+    `);
   });
 });
 
@@ -170,8 +175,9 @@ describe('@keyframe', () => {
                 padding-top: 1rem;
               }
             }
-}
-"`);
+      }
+      "
+    `);
   });
 
   it(`references are also scoped`, function () {
@@ -200,7 +206,7 @@ describe('@keyframe', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-@layer components {
+      @layer components {
 
             p.postfix {
               animation-duration: 3s;
@@ -218,8 +224,9 @@ describe('@keyframe', () => {
                 scale: 100% 1;
               }
             }
-}
-"`);
+      }
+      "
+    `);
   });
 
   it('handles multiple references and keyframes', () => {
@@ -268,7 +275,7 @@ describe('@keyframe', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-@layer components {
+      @layer components {
 
             p.postfix {
               animation-duration: 3s;
@@ -307,8 +314,9 @@ describe('@keyframe', () => {
                 color: magenta;
               }
             }
-}
-"`);
+      }
+      "
+    `);
   });
 
   it('works in shorthand combo-declarations', () => {
@@ -333,7 +341,7 @@ describe('@keyframe', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-@layer components {
+      @layer components {
 
             div.postfix {
               width: 100px;
@@ -347,8 +355,9 @@ describe('@keyframe', () => {
               from {top: 0px;}
               to {top: 200px;}
             }
-}
-"`);
+      }
+      "
+    `);
   });
 });
 
@@ -375,8 +384,9 @@ describe('@counter-style', () => {
               symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
               suffix: " ";
             }
-}
-"`);
+      }
+      "
+    `);
   });
 
   it('updates references', () => {
@@ -398,19 +408,20 @@ describe('@counter-style', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-@layer components {
+      @layer components {
 
-              @counter-style circled-alpha__postfix {
-                system: fixed;
-                symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
-                suffix: " ";
-              }
+            @counter-style circled-alpha__postfix {
+              system: fixed;
+              symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
+              suffix: " ";
+            }
 
-              .items_postfix {
-                list-style: circled-alpha__postfix;
-              }
-}
-"`);
+            .items_postfix {
+              list-style: circled-alpha__postfix;
+            }
+      }
+      "
+    `);
   });
 });
 
@@ -430,15 +441,16 @@ describe('@position-try', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-@layer components {
+      @layer components {
 
             @position-try --custom-left__postfix {
               position-area: left;
               width: 100px;
               margin-right: 10px;
             }
-}
-"`);
+      }
+      "
+    `);
   });
 
   it('updates references', () => {
@@ -461,20 +473,21 @@ describe('@position-try', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-@layer components {
+      @layer components {
 
-              @position-try --custom-left__postfix {
-                position-area: left;
-                width: 100px;
-                margin-right: 10px;
-              }
+            @position-try --custom-left__postfix {
+              position-area: left;
+              width: 100px;
+              margin-right: 10px;
+            }
 
-              .infobox_postfix {
-                position-try-fallbacks:
-                  --custom-left__postfix;
-              }
-}
-"`);
+            .infobox_postfix {
+              position-try-fallbacks:
+                --custom-left__postfix;
+            }
+      }
+      "
+    `);
   });
 });
 
@@ -494,15 +507,16 @@ describe('@property', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-@layer components {
+      @layer components {
 
             @property --item-size__postfix {
               syntax: "<percentage>";
               inherits: true;
               initial-value: 40%;
             }
-}
-"`);
+      }
+      "
+    `);
   });
 
   it('updates references', () => {
@@ -537,7 +551,7 @@ describe('@property', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-@layer components {
+      @layer components {
 
             @property --item-size__postfix {
               syntax: "<percentage>";
@@ -561,8 +575,9 @@ describe('@property', () => {
               height: var(--item-size__postfix);
               background-color: var(--item-color);
             }
-}
-"`);
+      }
+      "
+    `);
   });
 });
 
@@ -584,6 +599,7 @@ describe('@supports', () => {
           @supports (transform-origin: 5% 5%) {}
           @supports selector(h2 > p) {}
       }
-"`);
+      "
+    `);
   });
 });
