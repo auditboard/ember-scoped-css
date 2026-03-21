@@ -28,6 +28,31 @@ async function transform(file: string, config = {}) {
   return result?.code;
 }
 
+function virtualImportUrlsOf(file: string | null | undefined) {
+  if (!file) return [];
+
+  let j = jscodeshift;
+
+  let result: string[] = [];
+
+  j(file)
+    .find(j.ImportDeclaration, {
+      source: {
+        value: (value) =>
+          typeof value === 'string' && value.includes('.ember-scoped.css?css='),
+      },
+    })
+    .forEach((path) => {
+      let source = path.node.source.value;
+
+      if (typeof source === 'string') {
+        result.push(source);
+      }
+    });
+
+  return result;
+}
+
 function templateContentsOf(file: string | null | undefined) {
   if (!file) return [];
 
@@ -216,6 +241,8 @@ describe('lang attribute (SCSS preprocessor)', () => {
       ]
     `);
 
+    console.log(output);
+
     // The virtual module import should include &lang=scss
     expect(output).toContain('lang=scss');
     expect(output).toContain('.ember-scoped.css?css=');
@@ -244,8 +271,7 @@ describe('lang attribute (SCSS preprocessor)', () => {
     `);
 
     // A virtual module import should have been emitted with lang=scss
-    expect(output).toContain('lang=scss');
-    expect(output).toContain('.ember-scoped.css?css=');
+    expect(virtualImportUrlsOf(output)[0]).toContain('lang=scss');
 
     // A warning should have been logged
     expect(warnSpy).toHaveBeenCalledWith(
