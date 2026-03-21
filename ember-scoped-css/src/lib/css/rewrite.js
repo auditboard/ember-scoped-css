@@ -21,7 +21,7 @@ function isDeclaration(node) {
  * NOTE: "keyframes" is a singular definition, in that it's a block containing keyframes
  *       using `@keyframes {}` with only one thing on the inside doesn't make sense.
  */
-function rewriteReferencable(node, postfix) {
+function rewriteReferenceable(node, postfix) {
   let originalName = node.params;
   let postfixedName = node.params + SEP + postfix;
 
@@ -90,25 +90,25 @@ export function rewriteCss(css, postfix, fileName, layerName) {
    * kind => originalName => postfixedName
    * @type {{ [kind: string]: { [originalName: string]: string }}}
    */
-  const referencables = {
+  const referenceables = {
     keyframes: {},
     'counter-style': {},
     'position-try': {},
     property: {},
   };
 
-  const availableReferencables = new Set(Object.keys(referencables));
+  const availableReferenceables = new Set(Object.keys(referenceables));
 
   function isReferenceable(node) {
     if (node.type !== 'atrule') return;
 
-    return availableReferencables.has(node.name);
+    return availableReferenceables.has(node.name);
   }
 
   function updateDirectReferences(node) {
     if (!node.value) return;
 
-    for (let [, map] of Object.entries(referencables)) {
+    for (let [, map] of Object.entries(referenceables)) {
       if (map[node.value]) {
         node.value = map[node.value];
       }
@@ -118,11 +118,11 @@ export function rewriteCss(css, postfix, fileName, layerName) {
   function updateShorthandContents(node) {
     if (node.prop === 'animation') {
       let parts = node.value.split(' ');
-      let match = parts.filter((x) => referencables.keyframes[x]);
+      let match = parts.filter((x) => referenceables.keyframes[x]);
 
       if (match.length) {
         match.forEach((x) => {
-          let replacement = referencables.keyframes[x];
+          let replacement = referenceables.keyframes[x];
 
           if (!replacement) return;
 
@@ -131,7 +131,9 @@ export function rewriteCss(css, postfix, fileName, layerName) {
       }
     }
 
-    for (let [lookFor, replaceWith] of Object.entries(referencables.property)) {
+    for (let [lookFor, replaceWith] of Object.entries(
+      referenceables.property,
+    )) {
       let lookForVar = `var(${lookFor})`;
       let replaceWithVar = `var(${replaceWith})`;
 
@@ -141,27 +143,27 @@ export function rewriteCss(css, postfix, fileName, layerName) {
 
   /**
    * We have to do two passes:
-   * 1. postfix all the referencable syntax
+   * 1. postfix all the referenceable syntax
    * 2. postfix as normal, but also checking values of CSS properties
-   *    that could match postfixed referencables from step 1
+   *    that could match postfixed referenceables from step 1
    */
 
-  // Step 1: find referencables
+  // Step 1: find referenceables
   ast.walk((node) => {
     /**
      * @keyframes, @counter-style, etc
      */
     if (isReferenceable(node)) {
       let name = node.name;
-      let { originalName, postfixedName } = rewriteReferencable(node, postfix);
+      let { originalName, postfixedName } = rewriteReferenceable(node, postfix);
 
-      referencables[name][originalName] = postfixedName;
+      referenceables[name][originalName] = postfixedName;
 
       return;
     }
   });
 
-  // Step 2: postfix and update refenced referencables
+  // Step 2: postfix and update referenced referenceables
   ast.walk((node) => {
     if (isDeclaration(node)) {
       updateDirectReferences(node);
