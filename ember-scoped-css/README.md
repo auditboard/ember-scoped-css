@@ -99,36 +99,6 @@ export default defineConfig({
 ```
 
 
-### Using CSS preprocessors (eg. SCSS) with Vite
-
-When using Vite, you can write preprocessor languages inside inline `<style>` blocks by using the `lang` attribute. The plugin uses Vite's `preprocessCSS` API to compile your preprocessor code to plain CSS during the build, then extracts and scopes classes from the compiled CSS.
-
-Examples:
-
-```gjs
-<template>
-  <p class="scss-hi">hello from scss</p>
-
-  <style scoped lang="scss">
-    $color: rgb(200, 0, 100);
-
-    .scss-hi {
-      color: $color;
-
-      &:focus {
-        outline: none;
-      }
-    }
-  </style>
-</template>
-```
-
-Notes:
-
-- `lang` preprocessing is only supported when building with Vite. The plugin relies on Vite's `preprocessCSS` function. If you attempt to use `lang` without Vite, the build will throw a clear error.
-- Inline styles with `lang` (for example `<style scoped inline lang="scss">`) are downgraded to a non-inline virtual module because preprocessing is asynchronous and cannot run at synchronous Babel-time; you will see a console warning informing you that the style was converted to a virtual CSS import.
-
-
 <details><summary>notes for vite projects</summary>
 
   If you're `import.meta.glob`ing large chunks of your codebase, you'll want to make sure that your globs exclude CSS files
@@ -288,6 +258,35 @@ With `ember-scoped-css` you define styles in an inline `<style scoped>` block or
 ```
 
 Note that `<style>` (without `scoped`) will continue to work as it does today and be "global styles"
+
+### Using CSS preprocessors (eg. SCSS) with Vite
+
+When using Vite, you can write preprocessor languages inside inline `<style>` blocks by using the `lang` attribute. The plugin uses Vite's `preprocessCSS` API to compile your preprocessor code to plain CSS during the build, then extracts and scopes classes from the compiled CSS.
+
+Examples:
+
+```gjs
+<template>
+  <p class="scss-hi">hello from scss</p>
+
+  <style scoped lang="scss">
+    $color: rgb(200, 0, 100);
+
+    .scss-hi {
+      color: $color;
+
+      &:focus {
+        outline: none;
+      }
+    }
+  </style>
+</template>
+```
+
+Notes:
+
+- `lang` preprocessing is only supported when building with Vite. The plugin relies on Vite's `preprocessCSS` function. If you attempt to use `lang` without Vite, the build will throw a clear error.
+- Inline styles with `lang` (for example `<style scoped inline lang="scss">`) are downgraded to a non-inline virtual module because preprocessing is asynchronous and cannot run at synchronous Babel-time; you will see a console warning informing you that the style was converted to a virtual CSS import.
 
 <details><summary>inline / conditional CSS</summary>
 
