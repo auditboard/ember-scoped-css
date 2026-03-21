@@ -1,5 +1,21 @@
 # Changelog
 
+## Release (2026-03-21)
+
+* ember-scoped-css 2.2.0 (minor)
+* stylelint-ember-scoped-css 1.0.2 (patch)
+
+#### :rocket: Enhancement
+* `ember-scoped-css`
+  * [#382](https://github.com/auditboard/ember-scoped-css/pull/382) Add CSS preprocessor support (SCSS/Sass/Less/Stylus) ([@evoactivity](https://github.com/evoactivity))
+
+#### :house: Internal
+* `ember-scoped-css`, `stylelint-ember-scoped-css`
+  * [#383](https://github.com/auditboard/ember-scoped-css/pull/383) Fix broken tests ([@evoactivity](https://github.com/evoactivity))
+
+#### Committers: 1
+- Liam Potter ([@evoactivity](https://github.com/evoactivity))
+
 ## Release (2026-02-25)
 
 * ember-scoped-css 2.1.0 (minor)
