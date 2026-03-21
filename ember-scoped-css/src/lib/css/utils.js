@@ -57,6 +57,7 @@ export function getCSSContentInfo(css, lang) {
   ast.walk((node) => {
     if (node.type === 'rule') {
       const selector = isScss ? resolveNestedSassSelector(node) : node.selector;
+
       getClassesAndTags(selector, classes, tags);
     }
   });
