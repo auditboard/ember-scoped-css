@@ -17,7 +17,7 @@ module('[In App] at-class-ts', function (hooks) {
       .hasClass(
         scopedClass(
           'text-color',
-          'vite-app/components/in-app/at-class-ts/calls-has-at-class'
+          'vite-app-layer/components/in-app/at-class-ts/calls-has-at-class'
         )
       );
     assert.dom('p').hasStyle({ color: 'rgb(51, 51, 119)' });

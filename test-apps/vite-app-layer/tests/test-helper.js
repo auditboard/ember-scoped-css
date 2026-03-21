@@ -1,9 +1,9 @@
-import Application from 'vite-app/app';
+import Application from 'vite-app-layer/app';
 import * as QUnit from 'qunit';
 import { setApplication } from '@ember/test-helpers';
 import { setup } from 'qunit-dom';
 import { start as qunitStart, setupEmberOnerrorValidation } from 'ember-qunit';
-import config, { enterTestMode } from 'vite-app/config';
+import config, { enterTestMode } from 'vite-app-layer/config';
 
 export function start() {
   enterTestMode();
