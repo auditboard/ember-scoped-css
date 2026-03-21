@@ -242,8 +242,11 @@ describe('lang attribute (SCSS preprocessor)', () => {
     `);
 
     // The virtual module import should include &lang=scss
-    expect(output).toContain('lang=scss');
-    expect(output).toContain('.ember-scoped.css?css=');
+    expect(virtualImportUrlsOf(output)).toMatchInlineSnapshot(`
+      [
+        "./e65d154a1___css-3fbbf8c13a5ef6f5c5395268df4e8f37.ember-scoped.css?css=%0A%20%20%20%20%20%20%20%20%20%20.foo%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%26%3Ahover%20%7B%20color%3A%20blue%3B%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3A%20red%3B%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20&lang=scss",
+      ]
+    `);
   });
 
   it('scoped inline lang="scss" is downgraded to non-inline (warning emitted, style tag removed)', async () => {
