@@ -2,8 +2,8 @@
   "solution": {
     "ember-scoped-css": {
       "impact": "minor",
-      "oldVersion": "2.0.4",
-      "newVersion": "2.1.0",
+      "oldVersion": "2.1.0",
+      "newVersion": "2.2.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -12,14 +12,24 @@
         },
         {
           "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
+          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "oldVersion": "1.0.1"
+      "impact": "patch",
+      "oldVersion": "1.0.1",
+      "newVersion": "1.0.2",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
+        }
+      ],
+      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
     }
   },
-  "description": "## Release (2026-02-25)\n \n* ember-scoped-css 2.1.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#373](https://github.com/auditboard/ember-scoped-css/pull/373) Allow /routes/ to be relevant ([@evoactivity](https://github.com/evoactivity))\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#380](https://github.com/auditboard/ember-scoped-css/pull/380) Fix CSS file watching in Rollup/Vite ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- Liam Potter ([@evoactivity](https://github.com/evoactivity))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-03-21)\n\n* ember-scoped-css 2.2.0 (minor)\n* stylelint-ember-scoped-css 1.0.2 (patch)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#382](https://github.com/auditboard/ember-scoped-css/pull/382) Add CSS preprocessor support (SCSS/Sass/Less/Stylus) ([@evoactivity](https://github.com/evoactivity))\n\n#### :house: Internal\n* `ember-scoped-css`, `stylelint-ember-scoped-css`\n  * [#383](https://github.com/auditboard/ember-scoped-css/pull/383) Fix broken tests ([@evoactivity](https://github.com/evoactivity))\n\n#### Committers: 1\n- Liam Potter ([@evoactivity](https://github.com/evoactivity))\n"
 }
