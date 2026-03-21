@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import postcss from 'postcss';
+import scssSyntax from 'postcss-scss';
 import parser from 'postcss-selector-parser';
 
 import { md5 } from '../path/md5.js';
@@ -39,23 +40,61 @@ export function getCSSInfo(cssPath) {
  * to see if we need to leave it alone or transform it
  *
  * @param {string} css the CSS's contents
+ * @param {string} [lang] optional language hint (e.g. 'scss', 'sass', 'less')
  * @return {{ classes: Set<string>, tags: Set<string>, css: string, id: string }}
  */
-export function getCSSContentInfo(css) {
+export function getCSSContentInfo(css, lang) {
   const classes = new Set();
   const tags = new Set();
 
-  const ast = postcss.parse(css);
+  const parseOptions =
+    lang === 'scss' || lang === 'sass' ? { syntax: scssSyntax } : {};
+
+  const ast = postcss.parse(css, parseOptions);
+
+  const isScss = lang === 'scss' || lang === 'sass';
 
   ast.walk((node) => {
     if (node.type === 'rule') {
-      getClassesAndTags(node.selector, classes, tags);
+      const selector = isScss ? resolveNestedSassSelector(node) : node.selector;
+
+      getClassesAndTags(selector, classes, tags);
     }
   });
 
   let id = hash(css);
 
   return { classes, tags, css, id };
+}
+
+/**
+ * Resolves a nested SCSS selector by substituting `&` with the fully-resolved
+ * parent selector, recursively. This converts e.g. `&--modifier` (child of
+ * `.block`) into `.block--modifier`, and handles arbitrary nesting depth so
+ * that `&--modifier` inside `&--modifier` inside `.block` yields
+ * `.block--modifier--modifier`.
+ *
+ * @param {import('postcss').Rule} node
+ * @return {string}
+ */
+function resolveNestedSassSelector(node) {
+  const { selector } = node;
+
+  if (!selector.includes('&')) {
+    return selector;
+  }
+
+  const parent = node.parent;
+
+  if (!parent || parent.type !== 'rule') {
+    // No parent rule — `&` has nothing to substitute, return as-is
+    return selector;
+  }
+
+  // Recursively resolve the parent first, then substitute into this selector
+  const resolvedParent = resolveNestedSassSelector(parent);
+
+  return selector.replace(/&/g, resolvedParent);
 }
 
 function getClassesAndTags(sel, classes, tags) {
@@ -84,5 +123,70 @@ if (import.meta.vitest) {
     expect([...classes]).to.have.members(['baz', 'bar']);
     expect(tags.size).to.equal(1);
     expect([...tags]).to.have.members(['div']);
+  });
+
+  it('should parse SCSS nesting syntax without crashing when lang=scss', function () {
+    const scss = `
+      $base-color: #c6538c;
+      $border-dark: rgba($base-color, 0.88);
+
+      .parent {
+        &:hover { color: $base-color; }
+        .child { border: 1px solid $border-dark; }
+        color: red;
+      }
+    `;
+    const { classes } = getCSSContentInfo(scss, 'scss');
+
+    expect([...classes]).toMatchInlineSnapshot(`
+      [
+        "parent",
+        "child",
+      ]
+    `);
+  });
+
+  it('should parse SCSS nesting syntax without crashing when lang=sass', function () {
+    const scss = `
+      $base-color: green;
+      .block {
+        &--modifier { color: $base-color; }
+      }
+    `;
+    const { classes } = getCSSContentInfo(scss, 'sass');
+
+    expect([...classes]).toMatchInlineSnapshot(`
+      [
+        "block",
+        "block--modifier",
+      ]
+    `);
+  });
+
+  it('should parse SCSS deeply nested BEM when lang=sass', function () {
+    const scss = `
+      $base-color: green;
+      .block {
+        &--modifier {
+          color: $base-color;
+          &--modifier {
+            color: $base-color;
+            &--modifier {
+              color: $base-color;
+            }
+          }
+        }
+      }
+    `;
+    const { classes } = getCSSContentInfo(scss, 'sass');
+
+    expect([...classes]).toMatchInlineSnapshot(`
+      [
+        "block",
+        "block--modifier",
+        "block--modifier--modifier",
+        "block--modifier--modifier--modifier",
+      ]
+    `);
   });
 }

@@ -1,10 +1,20 @@
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { rewriteCss } from '../lib/css/rewrite.js';
 import { request } from '../lib/request.js';
 
 const META = 'scoped-css:colocated';
+
+/** File extensions that Vite can preprocess via its CSS preprocessor pipeline */
+const PREPROCESSED_EXTENSIONS = new Set([
+  '.scss',
+  '.sass',
+  '.less',
+  '.styl',
+  '.stylus',
+]);
 
 /**
  * Plugin for supporting colocated styles
@@ -15,6 +25,12 @@ const META = 'scoped-css:colocated';
  */
 export function colocated(options = {}) {
   const CWD = process.cwd();
+
+  /** @type {import('vite').ResolvedConfig | undefined} */
+  let viteConfig;
+
+  /** @type {((code: string, filename: string, config: unknown) => Promise<{ code: string }>) | undefined} */
+  let preprocessCSS;
 
   /**
    *
@@ -73,17 +89,54 @@ export function colocated(options = {}) {
       }
     },
     vite: {
+      async configResolved(config) {
+        viteConfig = config;
+
+        // Resolve Vite's preprocessCSS from the app root to ensure we find
+        // the correct Vite installation (not a stale or missing one).
+        try {
+          const require = createRequire(config.root);
+          const vitePath = require.resolve('vite');
+          const viteModule = await import(vitePath);
+
+          preprocessCSS = viteModule.preprocessCSS;
+        } catch {
+          // Vite may not be resolvable from the config root in some setups;
+          // preprocessor support for colocated .scss files will throw a clear
+          // error at load time if used.
+        }
+      },
+
       /**
        * There may not be meta for this request yet.
        *
        * @param {*} id
        */
-      load(id) {
+      async load(id) {
         if (request.is.colocated(id)) {
           const parsed = request.colocated.decode(id);
 
           let code = readFileSync(parsed.fileName, 'utf-8');
           let relativeFilePath = path.relative(CWD, parsed.fileName);
+
+          const ext = path.extname(parsed.fileName).toLowerCase();
+
+          if (PREPROCESSED_EXTENSIONS.has(ext)) {
+            if (!viteConfig || !preprocessCSS) {
+              throw new Error(
+                `[ember-scoped-css] Colocated CSS file with extension '${ext}' requires Vite. ` +
+                  `CSS preprocessing is only supported in Vite builds.`,
+              );
+            }
+
+            const result = await preprocessCSS(
+              code,
+              parsed.fileName,
+              viteConfig,
+            );
+
+            code = result.code;
+          }
 
           let css = rewriteCss(
             code,

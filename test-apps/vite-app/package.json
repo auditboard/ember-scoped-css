@@ -62,6 +62,7 @@
     "prettier-plugin-ember-template-tag": "2.0.5",
     "qunit": "^3.0.0-alpha.4",
     "qunit-dom": "^3.4.0",
+    "sass": "^1.86.0",
     "typescript": "^5.7.3",
     "vite": "6.2.5"
   },
