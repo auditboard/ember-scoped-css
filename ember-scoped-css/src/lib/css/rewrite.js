@@ -99,7 +99,7 @@ export function rewriteCss(css, postfix, fileName, layerName) {
 
   const availableReferencables = new Set(Object.keys(referencables));
 
-  function isReferencable(node) {
+  function isReferenceable(node) {
     if (node.type !== 'atrule') return;
 
     return availableReferencables.has(node.name);
@@ -151,7 +151,7 @@ export function rewriteCss(css, postfix, fileName, layerName) {
     /**
      * @keyframes, @counter-style, etc
      */
-    if (isReferencable(node)) {
+    if (isReferenceable(node)) {
       let name = node.name;
       let { originalName, postfixedName } = rewriteReferencable(node, postfix);
 
