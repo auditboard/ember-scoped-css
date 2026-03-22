@@ -96,7 +96,7 @@ export function inline(options = {}) {
         // Resolve Vite's preprocessCSS from the app root to ensure we find
         // the correct Vite installation (not a stale or missing one).
         try {
-          const require = createRequire(config.root);
+          const require = createRequire(path.join(config.root, 'package.json'));
           const vitePath = require.resolve('vite');
           const viteModule = await import(vitePath);
 
