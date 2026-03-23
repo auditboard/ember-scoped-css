@@ -2,17 +2,13 @@
   "solution": {
     "ember-scoped-css": {
       "impact": "patch",
-      "oldVersion": "2.2.0",
-      "newVersion": "2.2.1",
+      "oldVersion": "2.2.1",
+      "newVersion": "2.2.2",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "patch",
           "reason": "Appears in changelog section :bug: Bug Fix"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :memo: Documentation"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
@@ -21,5 +17,5 @@
       "oldVersion": "1.0.2"
     }
   },
-  "description": "## Release (2026-03-23)\n\n* ember-scoped-css 2.2.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#387](https://github.com/auditboard/ember-scoped-css/pull/387) Set explicit CWD for inline sass ([@TeriyakiBomb](https://github.com/TeriyakiBomb))\n\n#### :memo: Documentation\n* `ember-scoped-css`\n  * [#386](https://github.com/auditboard/ember-scoped-css/pull/386) Move preprocessor section under the usage ([@evoactivity](https://github.com/evoactivity))\n  * [#384](https://github.com/auditboard/ember-scoped-css/pull/384) Update readme for preprocessor instructions ([@evoactivity](https://github.com/evoactivity))\n\n#### Committers: 2\n- Ash Joseph ([@TeriyakiBomb](https://github.com/TeriyakiBomb))\n- Liam Potter ([@evoactivity](https://github.com/evoactivity))\n"
+  "description": "## Release (2026-03-23)\n\n* ember-scoped-css 2.2.2 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#388](https://github.com/auditboard/ember-scoped-css/pull/388) Fix createRequire for colocated plugin ([@evoactivity](https://github.com/evoactivity))\n\n#### Committers: 1\n- Liam ([@evoactivity](https://github.com/evoactivity))\n"
 }
