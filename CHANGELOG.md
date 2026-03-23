@@ -2,6 +2,17 @@
 
 ## Release (2026-03-23)
 
+* ember-scoped-css 2.2.2 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#388](https://github.com/auditboard/ember-scoped-css/pull/388) Fix createRequire for colocated plugin ([@evoactivity](https://github.com/evoactivity))
+
+#### Committers: 1
+- Liam ([@evoactivity](https://github.com/evoactivity))
+
+## Release (2026-03-23)
+
 * ember-scoped-css 2.2.1 (patch)
 
 #### :bug: Bug Fix
