@@ -1,5 +1,22 @@
 # Changelog
 
+## Release (2026-03-23)
+
+* ember-scoped-css 2.2.1 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#387](https://github.com/auditboard/ember-scoped-css/pull/387) Set explicit CWD for inline sass ([@TeriyakiBomb](https://github.com/TeriyakiBomb))
+
+#### :memo: Documentation
+* `ember-scoped-css`
+  * [#386](https://github.com/auditboard/ember-scoped-css/pull/386) Move preprocessor section under the usage ([@evoactivity](https://github.com/evoactivity))
+  * [#384](https://github.com/auditboard/ember-scoped-css/pull/384) Update readme for preprocessor instructions ([@evoactivity](https://github.com/evoactivity))
+
+#### Committers: 2
+- Ash Joseph ([@TeriyakiBomb](https://github.com/TeriyakiBomb))
+- Liam Potter ([@evoactivity](https://github.com/evoactivity))
+
 ## Release (2026-03-21)
 
 * ember-scoped-css 2.2.0 (minor)
