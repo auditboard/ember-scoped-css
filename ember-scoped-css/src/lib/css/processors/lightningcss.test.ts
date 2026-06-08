@@ -48,6 +48,27 @@ describe('lightningcss rewrite — selectors', () => {
   });
 });
 
+describe('lightningcss rewrite — @counter-style', () => {
+  it('renames counter-style and list-style references', () => {
+    const css = `
+      @counter-style thumbs { system: cyclic; symbols: "A"; suffix: " "; }
+      .items { list-style: thumbs; }
+    `;
+
+    expect(rewrite(css, 'postfix')).toMatchInlineSnapshot(`
+      "@counter-style thumbs__postfix {
+        system: cyclic;
+        symbols: "A";
+        suffix: " ";
+      }
+
+      .items_postfix {
+        list-style: thumbs__postfix;
+      }"
+    `);
+  });
+});
+
 describe('lightningcss rewrite — @keyframes', () => {
   it('renames keyframes and animation-name references', () => {
     const css = `

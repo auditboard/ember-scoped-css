@@ -92,6 +92,11 @@ export function rewrite(css, postfix) {
 
           return undefined;
         },
+        'counter-style'(rule) {
+          defs.counterStyle.add(rule.value.name);
+
+          return undefined;
+        },
       },
     },
   });
@@ -111,6 +116,11 @@ export function rewrite(css, postfix) {
             type: 'ident',
             value: rename(rule.value.name.value, postfix),
           };
+
+          return rule;
+        },
+        'counter-style'(rule) {
+          rule.value.name = rename(rule.value.name, postfix);
 
           return rule;
         },
@@ -154,6 +164,22 @@ function scopeDeclaration(decl, defs, postfix) {
     });
 
     return changed ? decl : undefined;
+  }
+
+  if (decl.property === 'list-style' && decl.value?.listStyleType) {
+    const lst = decl.value.listStyleType;
+
+    if (
+      lst.type === 'counter-style' &&
+      lst.value?.type === 'name' &&
+      defs.counterStyle.has(lst.value.value)
+    ) {
+      lst.value.value = rename(lst.value.value, postfix);
+
+      return decl;
+    }
+
+    return undefined;
   }
 
   return undefined;
