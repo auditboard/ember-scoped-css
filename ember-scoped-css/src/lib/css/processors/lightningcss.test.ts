@@ -164,3 +164,38 @@ describe('lightningcss rewrite — @property', () => {
     `);
   });
 });
+
+describe('lightningcss rewrite — at-rule pass-through', () => {
+  it('scopes selectors inside @container/@media but not conditions', () => {
+    const css = `
+      @container (width > 400px) { h2 { font-size: 1.5em; } }
+      @media (min-width: 500px) { .box { color: red; } }
+    `;
+
+    expect(rewrite(css, 'postfix')).toMatchInlineSnapshot(`
+      "@container (width > 400px) {
+        h2.postfix {
+          font-size: 1.5em;
+        }
+      }
+
+      @media (width >= 500px) {
+        .box_postfix {
+          color: red;
+        }
+      }"
+    `);
+  });
+
+  it('leaves @supports feature checks untouched', () => {
+    const css = `@supports (transform-origin: 5% 5%) { .a { color: red } }`;
+
+    expect(rewrite(css, 'postfix')).toMatchInlineSnapshot(`
+      "@supports (transform-origin: 5% 5%) {
+        .a_postfix {
+          color: red;
+        }
+      }"
+    `);
+  });
+});
