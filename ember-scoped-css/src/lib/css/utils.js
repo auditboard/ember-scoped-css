@@ -22,15 +22,16 @@ export function isInsideGlobal(node, func) {
 
 /**
  * @param {string} cssPath path to a CSS file
+ * @param {object} [options] processor options
  */
-export function getCSSInfo(cssPath) {
+export function getCSSInfo(cssPath, options = {}) {
   if (!existsSync(cssPath)) {
     return null;
   }
 
   let css = readFileSync(cssPath, 'utf8');
 
-  return getCSSContentInfo(css);
+  return getCSSContentInfo(css, undefined, options);
 }
 
 /**

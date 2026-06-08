@@ -218,3 +218,14 @@ describe('lightningcss rewrite — at-rule pass-through', () => {
     `);
   });
 });
+
+describe('lightningcss rewrite — options passthrough', () => {
+  it('applies user lightningcss options (e.g. minify) to output', () => {
+    const css = '.foo {\n  color: red;\n}';
+    const def = rewrite(css, 'postfix');
+    const min = rewrite(css, 'postfix', { lightningcss: { minify: true } });
+
+    expect(min.length).toBeLessThan(def.length);
+    expect(min).toContain('.foo_postfix');
+  });
+});

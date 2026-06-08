@@ -68,10 +68,13 @@ function scopeSelector(selector, postfix) {
 /**
  * @param {string} css plain CSS
  * @param {string} postfix
+ * @param {{ lightningcss?: object }} [options]
  * @returns {string} scoped CSS body
  */
-export function rewrite(css, postfix) {
+export function rewrite(css, postfix, options = {}) {
   const code = ENCODER.encode(css);
+
+  const userLightningcss = options.lightningcss ?? {};
 
   const defs = {
     keyframes: new Set(),
@@ -122,9 +125,12 @@ export function rewrite(css, postfix) {
 
   // Pass 2: apply scoping + reference rewrites.
   const result = transform({
+    minify: false,
+    ...userLightningcss,
+    // The following keys are required for our scoping to work and must not be
+    // overridable by user-supplied lightningcss options.
     filename: 'styles.css',
     code,
-    minify: false,
     visitor: {
       Selector(selector) {
         return scopeSelector(selector, postfix);

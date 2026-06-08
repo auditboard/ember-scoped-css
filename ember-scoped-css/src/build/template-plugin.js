@@ -77,7 +77,7 @@ export function createPlugin(config) {
     }
 
     let cssPath = cssPathFor(absolutePath);
-    let info = getCSSInfo(cssPath);
+    let info = getCSSInfo(cssPath, config);
     let localCssPath = forcePosix(cssPath.replace(cwd + path.sep, ''));
 
     /**
@@ -123,7 +123,7 @@ export function createPlugin(config) {
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
             let lang = getLangAttribute(styleTag);
-            let info = getCSSContentInfo(css, lang);
+            let info = getCSSContentInfo(css, lang, config);
 
             addInfo(info);
 
@@ -176,6 +176,7 @@ export function createPlugin(config) {
                 postfix,
                 localCssPath,
                 config.layerName,
+                config,
               );
 
               /**
