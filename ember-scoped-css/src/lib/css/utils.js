@@ -1,9 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
-import postcss from 'postcss';
-import scssSyntax from 'postcss-scss';
-import parser from 'postcss-selector-parser';
 
 import { md5 } from '../path/md5.js';
+import { resolveProcessor } from './processors/index.js';
 
 /**
  * @param {string} css
@@ -41,74 +39,13 @@ export function getCSSInfo(cssPath) {
  *
  * @param {string} css the CSS's contents
  * @param {string} [lang] optional language hint (e.g. 'scss', 'sass', 'less')
+ * @param {object} [options] processor options
  * @return {{ classes: Set<string>, tags: Set<string>, css: string, id: string }}
  */
-export function getCSSContentInfo(css, lang) {
-  const classes = new Set();
-  const tags = new Set();
+export function getCSSContentInfo(css, lang, options = {}) {
+  const processor = resolveProcessor(lang, options);
 
-  const parseOptions =
-    lang === 'scss' || lang === 'sass' ? { syntax: scssSyntax } : {};
-
-  const ast = postcss.parse(css, parseOptions);
-
-  const isScss = lang === 'scss' || lang === 'sass';
-
-  ast.walk((node) => {
-    if (node.type === 'rule') {
-      const selector = isScss ? resolveNestedSassSelector(node) : node.selector;
-
-      getClassesAndTags(selector, classes, tags);
-    }
-  });
-
-  let id = hash(css);
-
-  return { classes, tags, css, id };
-}
-
-/**
- * Resolves a nested SCSS selector by substituting `&` with the fully-resolved
- * parent selector, recursively. This converts e.g. `&--modifier` (child of
- * `.block`) into `.block--modifier`, and handles arbitrary nesting depth so
- * that `&--modifier` inside `&--modifier` inside `.block` yields
- * `.block--modifier--modifier`.
- *
- * @param {import('postcss').Rule} node
- * @return {string}
- */
-function resolveNestedSassSelector(node) {
-  const { selector } = node;
-
-  if (!selector.includes('&')) {
-    return selector;
-  }
-
-  const parent = node.parent;
-
-  if (!parent || parent.type !== 'rule') {
-    // No parent rule — `&` has nothing to substitute, return as-is
-    return selector;
-  }
-
-  // Recursively resolve the parent first, then substitute into this selector
-  const resolvedParent = resolveNestedSassSelector(parent);
-
-  return selector.replace(/&/g, resolvedParent);
-}
-
-function getClassesAndTags(sel, classes, tags) {
-  const transform = (sls) => {
-    sls.walk((selector) => {
-      if (selector.type === 'class' && !isInsideGlobal(selector)) {
-        classes.add(selector.value);
-      } else if (selector.type === 'tag' && !isInsideGlobal(selector)) {
-        tags.add(selector.value);
-      }
-    });
-  };
-
-  parser(transform).processSync(sel);
+  return processor.getContentInfo(css, { lang });
 }
 
 if (import.meta.vitest) {
