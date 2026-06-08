@@ -15,7 +15,7 @@ describe('lightningcss getContentInfo', () => {
 describe('lightningcss rewrite — selectors', () => {
   it('postfixes classes', () => {
     expect(rewrite('.foo { color: red; }', 'postfix')).toMatchInlineSnapshot(`
-      ".foo__postfix {
+      ".foo_postfix {
         color: red;
       }"
     `);
@@ -41,9 +41,9 @@ describe('lightningcss rewrite — selectors', () => {
   it('unwraps :global and leaves its contents unscoped', () => {
     expect(rewrite('.baz :global(.foo) p { color: red; }', 'postfix'))
       .toMatchInlineSnapshot(`
-      ".baz__postfix .foo p.postfix {
-        color: red;
-      }"
-    `);
+        ".baz_postfix .foo p.postfix {
+          color: red;
+        }"
+      `);
   });
 });

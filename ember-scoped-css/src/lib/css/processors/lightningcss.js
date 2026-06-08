@@ -4,10 +4,10 @@ import { hash } from '../utils.js';
 
 const ENCODER = new TextEncoder();
 
-const SEP = '__';
+const _SEP = '__';
 
-function rename(name, postfix) {
-  return name + SEP + postfix;
+function _rename(name, postfix) {
+  return name + _SEP + postfix;
 }
 
 /**
@@ -47,7 +47,7 @@ function scopeSelector(selector, postfix) {
 
   for (const component of selector) {
     if (component.type === 'class') {
-      out.push({ type: 'class', name: rename(component.name, postfix) });
+      out.push({ type: 'class', name: `${component.name}_${postfix}` });
     } else if (component.type === 'type') {
       out.push(component);
       out.push({ type: 'class', name: postfix });
