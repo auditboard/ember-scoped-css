@@ -1,10 +1,18 @@
+import * as lightningcssProcessor from './lightningcss.js';
 import * as postcssProcessor from './postcss.js';
 
 const processors = {
   postcss: postcssProcessor,
+  lightningcss: lightningcssProcessor,
 };
 
 /**
+ * Pick a CSS processor.
+ * - Explicit `options.type` always wins.
+ * - Any non-plain-css language (scss/sass/less/...) routes to postcss, since
+ *   lightningcss cannot parse raw preprocessor dialects.
+ * - Default is lightningcss.
+ *
  * @param {string|undefined} lang
  * @param {{ type?: 'postcss' | 'lightningcss' }} [options]
  */
@@ -22,7 +30,9 @@ export function resolveProcessor(lang, options = {}) {
     return processor;
   }
 
-  // `lang`-based routing (e.g. scss -> postcss) is added in a later task.
-  // For now everything resolves to postcss.
-  return processors.postcss;
+  if (lang && lang !== 'css') {
+    return processors.postcss;
+  }
+
+  return processors.lightningcss;
 }
