@@ -102,6 +102,20 @@ export function rewrite(css, postfix) {
 
           return undefined;
         },
+        unknown(rule) {
+          // `@position-try` is not a typed rule in lightningcss; it surfaces as
+          // an `unknown` at-rule whose prelude holds the dashed-ident name.
+          // The keyed handler receives the unwrapped value (rule.name/prelude).
+          if (rule.name === 'position-try') {
+            for (const tok of rule.prelude) {
+              if (tok.type === 'dashed-ident') {
+                defs.positionTry.add(tok.value);
+              }
+            }
+          }
+
+          return undefined;
+        },
       },
     },
   });
@@ -134,7 +148,13 @@ export function rewrite(css, postfix) {
         return scopeDeclaration(decl, defs, postfix);
       },
       DashedIdent(ident) {
-        return defs.property.has(ident) ? rename(ident, postfix) : undefined;
+        // Covers both the `@position-try` definition name (in the unknown
+        // at-rule prelude) and `position-try-fallbacks` references.
+        if (defs.property.has(ident) || defs.positionTry.has(ident)) {
+          return rename(ident, postfix);
+        }
+
+        return undefined;
       },
     },
   });

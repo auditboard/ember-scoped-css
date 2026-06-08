@@ -118,6 +118,25 @@ describe('lightningcss rewrite — @keyframes', () => {
   });
 });
 
+describe('lightningcss rewrite — @position-try', () => {
+  it('renames @position-try and position-try-fallbacks references', () => {
+    const css = `
+      @position-try --custom-left { position-area: left; width: 100px; }
+      .infobox { position-try-fallbacks: --custom-left; }
+    `;
+
+    expect(rewrite(css, 'postfix')).toMatchInlineSnapshot(`
+      "@position-try --custom-left__postfix {
+        position-area: left; width: 100px;
+      }
+
+      .infobox_postfix {
+        position-try-fallbacks: --custom-left__postfix;
+      }"
+    `);
+  });
+});
+
 describe('lightningcss rewrite — @property', () => {
   it('renames @property and var() references but leaves plain custom props', () => {
     const css = `
