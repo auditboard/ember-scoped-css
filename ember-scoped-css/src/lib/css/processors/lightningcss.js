@@ -97,6 +97,11 @@ export function rewrite(css, postfix) {
 
           return undefined;
         },
+        property(rule) {
+          defs.property.add(rule.value.name);
+
+          return undefined;
+        },
       },
     },
   });
@@ -127,6 +132,9 @@ export function rewrite(css, postfix) {
       },
       Declaration(decl) {
         return scopeDeclaration(decl, defs, postfix);
+      },
+      DashedIdent(ident) {
+        return defs.property.has(ident) ? rename(ident, postfix) : undefined;
       },
     },
   });

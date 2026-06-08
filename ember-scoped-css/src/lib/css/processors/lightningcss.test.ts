@@ -117,3 +117,31 @@ describe('lightningcss rewrite — @keyframes', () => {
     `);
   });
 });
+
+describe('lightningcss rewrite — @property', () => {
+  it('renames @property and var() references but leaves plain custom props', () => {
+    const css = `
+      @property --item-size { syntax: "<percentage>"; inherits: true; initial-value: 40%; }
+      .container { --item-size: 20%; --item-color: orange; }
+      .item { width: var(--item-size); background-color: var(--item-color); }
+    `;
+
+    expect(rewrite(css, 'postfix')).toMatchInlineSnapshot(`
+      "@property --item-size__postfix {
+        syntax: "<percentage>";
+        inherits: true;
+        initial-value: 40%;
+      }
+
+      .container_postfix {
+        --item-size__postfix: 20%;
+        --item-color: orange;
+      }
+
+      .item_postfix {
+        width: var(--item-size__postfix);
+        background-color: var(--item-color);
+      }"
+    `);
+  });
+});
