@@ -67,6 +67,25 @@ describe('lightningcss rewrite — @counter-style', () => {
       }"
     `);
   });
+
+  it('renames counter-style referenced via list-style-type longhand', () => {
+    const css = `
+      @counter-style thumbs { system: cyclic; symbols: "A"; suffix: " "; }
+      .items { list-style-type: thumbs; }
+    `;
+
+    expect(rewrite(css, 'postfix')).toMatchInlineSnapshot(`
+      "@counter-style thumbs__postfix {
+        system: cyclic;
+        symbols: "A";
+        suffix: " ";
+      }
+
+      .items_postfix {
+        list-style-type: thumbs__postfix;
+      }"
+    `);
+  });
 });
 
 describe('lightningcss rewrite — @keyframes', () => {

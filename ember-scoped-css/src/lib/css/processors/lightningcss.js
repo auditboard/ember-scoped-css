@@ -210,6 +210,22 @@ function scopeDeclaration(decl, defs, postfix) {
     return undefined;
   }
 
+  if (decl.property === 'list-style-type') {
+    const lst = decl.value;
+
+    if (
+      lst?.type === 'counter-style' &&
+      lst.value?.type === 'name' &&
+      defs.counterStyle.has(lst.value.value)
+    ) {
+      lst.value.value = rename(lst.value.value, postfix);
+
+      return decl;
+    }
+
+    return undefined;
+  }
+
   return undefined;
 }
 
