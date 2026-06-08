@@ -4,10 +4,10 @@ import { hash } from '../utils.js';
 
 const ENCODER = new TextEncoder();
 
-const _SEP = '__';
+const SEP = '__';
 
-function _rename(name, postfix) {
-  return name + _SEP + postfix;
+function rename(name, postfix) {
+  return name + SEP + postfix;
 }
 
 /**
@@ -71,18 +71,92 @@ function scopeSelector(selector, postfix) {
  * @returns {string} scoped CSS body
  */
 export function rewrite(css, postfix) {
+  const code = ENCODER.encode(css);
+
+  const defs = {
+    keyframes: new Set(),
+    counterStyle: new Set(),
+    property: new Set(),
+    positionTry: new Set(),
+  };
+
+  // Pass 1: collect referenceable definition names.
+  transform({
+    filename: 'styles.css',
+    code,
+    minify: false,
+    visitor: {
+      Rule: {
+        keyframes(rule) {
+          defs.keyframes.add(rule.value.name.value);
+
+          return undefined;
+        },
+      },
+    },
+  });
+
+  // Pass 2: apply scoping + reference rewrites.
   const result = transform({
     filename: 'styles.css',
-    code: ENCODER.encode(css),
+    code,
     minify: false,
     visitor: {
       Selector(selector) {
         return scopeSelector(selector, postfix);
       },
+      Rule: {
+        keyframes(rule) {
+          rule.value.name = {
+            type: 'ident',
+            value: rename(rule.value.name.value, postfix),
+          };
+
+          return rule;
+        },
+      },
+      Declaration(decl) {
+        return scopeDeclaration(decl, defs, postfix);
+      },
     },
   });
 
   return result.code.toString().trimEnd();
+}
+
+function scopeDeclaration(decl, defs, postfix) {
+  // animation shorthand: value is an array of animation entries.
+  if (decl.property === 'animation' && Array.isArray(decl.value)) {
+    let changed = false;
+
+    for (const anim of decl.value) {
+      if (anim.name?.type === 'ident' && defs.keyframes.has(anim.name.value)) {
+        anim.name = { type: 'ident', value: rename(anim.name.value, postfix) };
+        changed = true;
+      }
+    }
+
+    return changed ? decl : undefined;
+  }
+
+  // animation-name: value is an array of name entries (idents or `none`).
+  if (decl.property === 'animation-name' && Array.isArray(decl.value)) {
+    let changed = false;
+
+    decl.value = decl.value.map((name) => {
+      if (name?.type === 'ident' && defs.keyframes.has(name.value)) {
+        changed = true;
+
+        return { type: 'ident', value: rename(name.value, postfix) };
+      }
+
+      return name;
+    });
+
+    return changed ? decl : undefined;
+  }
+
+  return undefined;
 }
 
 /**

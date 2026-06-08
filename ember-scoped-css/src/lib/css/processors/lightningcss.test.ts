@@ -47,3 +47,52 @@ describe('lightningcss rewrite — selectors', () => {
       `);
   });
 });
+
+describe('lightningcss rewrite — @keyframes', () => {
+  it('renames keyframes and animation-name references', () => {
+    const css = `
+      p { animation-duration: 3s; animation-name: slide-in; }
+      @keyframes slide-in { from { opacity: 0 } to { opacity: 1 } }
+    `;
+
+    expect(rewrite(css, 'postfix')).toMatchInlineSnapshot(`
+      "p.postfix {
+        animation-name: slide-in__postfix;
+        animation-duration: 3s;
+      }
+
+      @keyframes slide-in__postfix {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }"
+    `);
+  });
+
+  it('renames keyframes referenced in the animation shorthand', () => {
+    const css = `
+      div { animation: mymove 5s infinite; }
+      @keyframes mymove { from { top: 0 } to { top: 200px } }
+    `;
+
+    expect(rewrite(css, 'postfix')).toMatchInlineSnapshot(`
+      "div.postfix {
+        animation: 5s infinite mymove__postfix;
+      }
+
+      @keyframes mymove__postfix {
+        from {
+          top: 0;
+        }
+
+        to {
+          top: 200px;
+        }
+      }"
+    `);
+  });
+});
