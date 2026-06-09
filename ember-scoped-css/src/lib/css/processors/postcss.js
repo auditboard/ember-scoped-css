@@ -92,10 +92,24 @@ function isInsideKeyframes(node) {
  *
  * @param {string} css plain CSS
  * @param {string} postfix
+ * @param {{ postcss?: { plugins?: import('postcss').AcceptedPlugin[] } }} [options]
  * @return {string}
  */
-export function rewrite(css, postfix) {
-  const ast = postcss.parse(css);
+export function rewrite(css, postfix, options = {}) {
+  const userPlugins = options.postcss?.plugins ?? [];
+
+  let ast;
+
+  if (userPlugins.length) {
+    const result = postcss(userPlugins).process(css, { from: undefined });
+
+    // Force synchronous evaluation; throws if a plugin is async-only.
+    result.sync();
+    ast = result.root;
+  } else {
+    ast = postcss.parse(css);
+  }
+
   /**
    * kind => originalName => postfixedName
    * @type {{ [kind: string]: { [originalName: string]: string }}}
