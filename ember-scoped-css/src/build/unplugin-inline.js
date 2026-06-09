@@ -84,6 +84,7 @@ export function inline(options = {}) {
           meta.postfix,
           `<inline>/${meta.fileName}`,
           options.layerName,
+          options,
         );
 
         return css;

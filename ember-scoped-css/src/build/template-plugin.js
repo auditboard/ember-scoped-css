@@ -123,7 +123,7 @@ export function createPlugin(config) {
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
             let lang = getLangAttribute(styleTag);
-            let info = getCSSContentInfo(css, lang);
+            let info = getCSSContentInfo(css, lang, absolutePath);
 
             addInfo(info);
 
@@ -176,6 +176,7 @@ export function createPlugin(config) {
                 postfix,
                 localCssPath,
                 config.layerName,
+                config,
               );
 
               /**
