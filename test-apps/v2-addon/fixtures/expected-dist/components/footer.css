@@ -1,10 +1,12 @@
 /* src/components/footer.css */
 .alert_e9a64d6f1 {
-  border: 1px solid black;
+  border: 1px solid #000;
 }
+
 div.e9a64d6f1 {
   color: green;
 }
+
 p.e9a64d6f1 {
   font-style: italic;
   text-decoration: underline;
