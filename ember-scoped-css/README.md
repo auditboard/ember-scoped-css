@@ -131,6 +131,11 @@ export default defineConfig({
 ##### Configuration Options
 
 - `layerName: string` - Wrap your CSS in a `@layer` with this given name
+- `type: 'lightningcss' | 'postcss'` - Force a single CSS processor for all files. By default, plain `.css` is scoped with [lightningcss][lightningcss] and preprocessor files (`.scss`, `.sass`, `.less`) are routed to postcss (lightningcss cannot parse raw preprocessor syntax).
+- `lightningcss: object` - Options passed through to lightningcss's `transform` (e.g. `targets`, `drafts`). Note: by default lightningcss normalizes/modernizes CSS syntax (for example, `@media (min-width: 500px)` becomes `@media (width >= 500px)`). Pass `targets` to control how conservative the emitted CSS is.
+- `postcss: { plugins: [] }` - User postcss plugins to run before scoping (postcss path only).
+
+[lightningcss]: https://lightningcss.dev/
 
 #### Rollup
 
@@ -148,6 +153,9 @@ plugins: [
 ##### Configuration Options
 
 - `layerName: string` - Wrap your CSS in a `@layer` with this given name
+- `type: 'lightningcss' | 'postcss'` - Force a single CSS processor for all files (default: lightningcss for plain CSS, postcss for `.scss`/`.sass`/`.less`).
+- `lightningcss: object` - Options passed through to lightningcss's `transform` (e.g. `targets`, `drafts`).
+- `postcss: { plugins: [] }` - User postcss plugins to run before scoping (postcss path only).
 
 #### Babel
 

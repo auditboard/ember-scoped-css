@@ -22,6 +22,8 @@ describe('resolveProcessor', () => {
   });
 
   it('throws on an unknown type', () => {
-    expect(() => resolveProcessor(undefined, { type: 'nope' })).toThrow(/Unknown CSS processor/);
+    expect(() => resolveProcessor(undefined, { type: 'nope' })).toThrow(
+      /Unknown CSS processor/,
+    );
   });
 });
