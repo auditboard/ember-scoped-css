@@ -83,45 +83,59 @@ export function rewrite(css, postfix, options = {}) {
     positionTry: new Set(),
   };
 
+  // Referenceable at-rules are the only reason we need two passes (a reference
+  // can appear before its definition in document order). When none are present
+  // — the common case for component CSS — skip the collection pass entirely and
+  // scope selectors in a single transform. This is a cheap substring check: a
+  // false positive (e.g. the text in a comment) only costs an unnecessary pass,
+  // never correctness.
+  const hasReferenceables =
+    css.includes('@keyframes') ||
+    css.includes('@counter-style') ||
+    css.includes('@property') ||
+    css.includes('@position-try');
+
   // Pass 1: collect referenceable definition names.
-  transform({
-    filename: 'styles.css',
-    code,
-    minify: false,
-    visitor: {
-      Rule: {
-        keyframes(rule) {
-          defs.keyframes.add(rule.value.name.value);
+  if (hasReferenceables) {
+    transform({
+      filename: 'styles.css',
+      code,
+      minify: false,
+      visitor: {
+        Rule: {
+          keyframes(rule) {
+            defs.keyframes.add(rule.value.name.value);
 
-          return undefined;
-        },
-        'counter-style'(rule) {
-          defs.counterStyle.add(rule.value.name);
+            return undefined;
+          },
+          'counter-style'(rule) {
+            defs.counterStyle.add(rule.value.name);
 
-          return undefined;
-        },
-        property(rule) {
-          defs.property.add(rule.value.name);
+            return undefined;
+          },
+          property(rule) {
+            defs.property.add(rule.value.name);
 
-          return undefined;
-        },
-        unknown(rule) {
-          // `@position-try` is not a typed rule in lightningcss; it surfaces as
-          // an `unknown` at-rule whose prelude holds the dashed-ident name.
-          // The keyed handler receives the unwrapped value (rule.name/prelude).
-          if (rule.name === 'position-try') {
-            for (const tok of rule.prelude) {
-              if (tok.type === 'dashed-ident') {
-                defs.positionTry.add(tok.value);
+            return undefined;
+          },
+          unknown(rule) {
+            // `@position-try` is not a typed rule in lightningcss; it surfaces as
+            // an `unknown` at-rule whose prelude holds the dashed-ident name.
+            // The keyed handler receives the unwrapped value (rule.name/prelude).
+            if (rule.name === 'position-try') {
+              for (const tok of rule.prelude) {
+                if (tok.type === 'dashed-ident') {
+                  defs.positionTry.add(tok.value);
+                }
               }
             }
-          }
 
-          return undefined;
+            return undefined;
+          },
         },
       },
-    },
-  });
+    });
+  }
 
   // Pass 2: apply scoping + reference rewrites.
   const result = transform({
