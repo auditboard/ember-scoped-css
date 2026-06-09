@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
-import { rewriteCss } from './rewrite.js';
+import { rewriteCss as _rewriteCss } from './rewrite.js';
+
+/**
+ * These snapshots assert the postcss processor's exact output, so pin every
+ * call to `type: 'postcss'`. The lightningcss path (the default) has its own
+ * snapshots in `processors/lightningcss.test.ts`.
+ */
+const rewriteCss = (
+  css: string,
+  postfix: string,
+  fileName: string,
+  layerName?: string,
+) => _rewriteCss(css, postfix, fileName, layerName, { type: 'postcss' });
 
 it('should rewrite css', function () {
   const css = '.foo { color: red; }';

@@ -179,12 +179,11 @@ it('scoped with @scope transforms correctly', async () => {
                     <h1>Hello, World!</h1>
                 </div>
                 <style scoped inline>/* src/components/example-component.css */
-
-                    @scope {
-                      .foo_e65d154a1 {
-                          color: red;
-                      }
-                    }
+    @scope {
+      .foo_e65d154a1 {
+        color: red;
+      }
+    }
     </style>",
     ]
   `);
@@ -210,10 +209,9 @@ it('scoped inline transforms correctly', async () => {
                     <h1>Hello, World!</h1>
                 </div>
                 <style scoped inline>/* src/components/example-component.css */
-
-                    .foo_e65d154a1 {
-                        color: red;
-                    }
+    .foo_e65d154a1 {
+      color: red;
+    }
     </style>",
     ]
   `);
