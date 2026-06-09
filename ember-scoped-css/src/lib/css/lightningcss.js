@@ -146,6 +146,46 @@ export function rewrite(css, postfix, options = {}) {
   }
 
   // Pass 2: apply scoping + reference rewrites.
+  const visitor = {
+    Selector(selector) {
+      return scopeSelector(selector, postfix);
+    },
+  };
+
+  // Every registered visitor costs a JS callback (with Rust<->JS
+  // serialization) per matching node. Declaration fires for every
+  // declaration in the file, so only register the referenceable-handling
+  // visitors when pass 1 had anything to collect.
+  if (hasReferenceables) {
+    visitor.Rule = {
+      keyframes(rule) {
+        rule.value.name = {
+          type: 'ident',
+          value: rename(rule.value.name.value, postfix),
+        };
+
+        return rule;
+      },
+      'counter-style'(rule) {
+        rule.value.name = rename(rule.value.name, postfix);
+
+        return rule;
+      },
+    };
+
+    visitor.Declaration = (decl) => scopeDeclaration(decl, defs, postfix);
+
+    visitor.DashedIdent = (ident) => {
+      // Covers both the `@position-try` definition name (in the unknown
+      // at-rule prelude) and `position-try-fallbacks` references.
+      if (defs.property.has(ident) || defs.positionTry.has(ident)) {
+        return rename(ident, postfix);
+      }
+
+      return undefined;
+    };
+  }
+
   const result = transform({
     minify: false,
     ...userLightningcss,
@@ -153,38 +193,7 @@ export function rewrite(css, postfix, options = {}) {
     // overridable by user-supplied lightningcss options.
     filename: 'styles.css',
     code,
-    visitor: {
-      Selector(selector) {
-        return scopeSelector(selector, postfix);
-      },
-      Rule: {
-        keyframes(rule) {
-          rule.value.name = {
-            type: 'ident',
-            value: rename(rule.value.name.value, postfix),
-          };
-
-          return rule;
-        },
-        'counter-style'(rule) {
-          rule.value.name = rename(rule.value.name, postfix);
-
-          return rule;
-        },
-      },
-      Declaration(decl) {
-        return scopeDeclaration(decl, defs, postfix);
-      },
-      DashedIdent(ident) {
-        // Covers both the `@position-try` definition name (in the unknown
-        // at-rule prelude) and `position-try-fallbacks` references.
-        if (defs.property.has(ident) || defs.positionTry.has(ident)) {
-          return rename(ident, postfix);
-        }
-
-        return undefined;
-      },
-    },
+    visitor,
   });
 
   return result.code.toString().trimEnd();
