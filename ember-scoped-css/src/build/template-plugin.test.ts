@@ -179,12 +179,11 @@ it('scoped with @scope transforms correctly', async () => {
                     <h1>Hello, World!</h1>
                 </div>
                 <style scoped inline>/* src/components/example-component.css */
-
-                    @scope {
-                      .foo_e65d154a1 {
-                          color: red;
-                      }
-                    }
+    @scope {
+      .foo_e65d154a1 {
+        color: red;
+      }
+    }
     </style>",
     ]
   `);
@@ -210,10 +209,9 @@ it('scoped inline transforms correctly', async () => {
                     <h1>Hello, World!</h1>
                 </div>
                 <style scoped inline>/* src/components/example-component.css */
-
-                    .foo_e65d154a1 {
-                        color: red;
-                    }
+    .foo_e65d154a1 {
+      color: red;
+    }
     </style>",
     ]
   `);
@@ -243,7 +241,7 @@ describe('lang attribute (SCSS preprocessor)', () => {
     // The virtual module import should include &lang=scss
     expect(virtualImportUrlsOf(output)).toMatchInlineSnapshot(`
       [
-        "./e65d154a1___css-3fbbf8c13a5ef6f5c5395268df4e8f37.ember-scoped.css?css=%0A%20%20%20%20%20%20%20%20%20%20.foo%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%26%3Ahover%20%7B%20color%3A%20blue%3B%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3A%20red%3B%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20&lang=scss",
+        "./e65d154a1___css-61f691d4478dd05c150712283725b012.ember-scoped.css?css=%0A%20%20%20%20%20%20%20%20%20%20.foo%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%26%3Ahover%20%7B%20color%3A%20blue%3B%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3A%20red%3B%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20&lang=scss",
       ]
     `);
   });
@@ -273,7 +271,7 @@ describe('lang attribute (SCSS preprocessor)', () => {
     // A virtual module import should have been emitted with lang=scss
     expect(virtualImportUrlsOf(output)).toMatchInlineSnapshot(`
       [
-        "./e65d154a1___css-3fbbf8c13a5ef6f5c5395268df4e8f37.ember-scoped.css?css=%0A%20%20%20%20%20%20%20%20%20%20.foo%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%26%3Ahover%20%7B%20color%3A%20blue%3B%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3A%20red%3B%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20&lang=scss",
+        "./e65d154a1___css-61f691d4478dd05c150712283725b012.ember-scoped.css?css=%0A%20%20%20%20%20%20%20%20%20%20.foo%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%26%3Ahover%20%7B%20color%3A%20blue%3B%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3A%20red%3B%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20&lang=scss",
       ]
     `);
 
@@ -288,6 +286,10 @@ describe('lang attribute (SCSS preprocessor)', () => {
   });
 
   it('handles scoped lang="scss" BEM constructs', async () => {
+    // `.block` has no declarations of its own, so the compiled stylesheet
+    // contains no `.block` rule - extraction runs on compiled CSS, so the
+    // template's `block` class is left unscoped (consistent with the emitted
+    // CSS, which never had a rule for it).
     let output = await transform(`
     export const Foo = <template>
       <div class="block block--modifier">hi</div>
@@ -301,12 +303,14 @@ describe('lang attribute (SCSS preprocessor)', () => {
 
     expect(templateContentsOf(output)).toMatchInlineSnapshot(`
     [
-      "<div class="block_e65d154a1 block--modifier_e65d154a1">hi</div>",
+      "<div class="block block--modifier_e65d154a1">hi</div>",
     ]
   `);
   });
 
   it('handles deeply nested BEM constructs', async () => {
+    // Declaration-less `.block` produces no compiled rule, so only the
+    // levels that emit CSS get scoped in the template.
     let output = await transform(`
     export const Foo = <template>
       <div class="block block--modifier block--modifier--modifier block--modifier--modifier--modifier">hi</div>
@@ -328,7 +332,7 @@ describe('lang attribute (SCSS preprocessor)', () => {
 
     expect(templateContentsOf(output)).toMatchInlineSnapshot(`
       [
-        "<div class="block_e65d154a1 block--modifier_e65d154a1 block--modifier--modifier_e65d154a1 block--modifier--modifier--modifier_e65d154a1">hi</div>",
+        "<div class="block block--modifier_e65d154a1 block--modifier--modifier_e65d154a1 block--modifier--modifier--modifier_e65d154a1">hi</div>",
       ]
     `);
   });

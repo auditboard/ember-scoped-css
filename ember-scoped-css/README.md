@@ -131,6 +131,9 @@ export default defineConfig({
 ##### Configuration Options
 
 - `layerName: string` - Wrap your CSS in a `@layer` with this given name
+- `lightningcss: object` - Options passed through to [lightningcss][lightningcss]'s `transform` (e.g. `targets`, `drafts`). Note: by default lightningcss normalizes/modernizes CSS syntax (for example, `@media (min-width: 500px)` becomes `@media (width >= 500px)`). Pass `targets` to control how conservative the emitted CSS is.
+
+[lightningcss]: https://lightningcss.dev/
 
 #### Rollup
 
@@ -148,6 +151,7 @@ plugins: [
 ##### Configuration Options
 
 - `layerName: string` - Wrap your CSS in a `@layer` with this given name
+- `lightningcss: object` - Options passed through to lightningcss's `transform` (e.g. `targets`, `drafts`).
 
 #### Babel
 
@@ -261,7 +265,7 @@ Note that `<style>` (without `scoped`) will continue to work as it does today an
 
 ### Using CSS preprocessors (eg. SCSS) with Vite
 
-When using Vite, you can write preprocessor languages inside inline `<style>` blocks by using the `lang` attribute. The plugin uses Vite's `preprocessCSS` API to compile your preprocessor code to plain CSS during the build, then extracts and scopes classes from the compiled CSS.
+When using Vite, you can write scss or sass inside inline `<style>` blocks by using the `lang` attribute. Class extraction compiles your code to plain CSS with the [sass](https://www.npmjs.com/package/sass) package (which must be installed in your app), and the final stylesheet is compiled via Vite's `preprocessCSS` API. Only `lang="scss"` and `lang="sass"` are supported; for other languages, precompile to CSS.
 
 Examples:
 
@@ -285,8 +289,10 @@ Examples:
 
 Notes:
 
-- `lang` preprocessing is only supported when building with Vite. The plugin relies on Vite's `preprocessCSS` function. If you attempt to use `lang` without Vite, the build will throw a clear error.
-- Inline styles with `lang` (for example `<style scoped inline lang="scss">`) are downgraded to a non-inline virtual module because preprocessing is asynchronous and cannot run at synchronous Babel-time; you will see a console warning informing you that the style was converted to a virtual CSS import.
+- Only `lang="scss"` and `lang="sass"` are supported, and the `sass` package must be installed in your app (it already is if Vite compiles your scss). Other languages throw a build error - precompile to CSS instead.
+- A class that produces no rule in the compiled CSS (for example a BEM parent like `.block` that only contains nested `&--modifier` rules and no declarations of its own) is not scoped in the template, because extraction runs on the compiled output.
+- `lang` styles require building with Vite. The plugin relies on Vite's `preprocessCSS` function for the emitted stylesheet. If you attempt to use `lang` without Vite, the build will throw a clear error.
+- Inline styles with `lang` (for example `<style scoped inline lang="scss">`) are downgraded to a non-inline virtual module because Vite preprocessing is asynchronous and cannot run at synchronous Babel-time; you will see a console warning informing you that the style was converted to a virtual CSS import.
 
 <details><summary>inline / conditional CSS</summary>
 

@@ -1,26 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
-import postcss from 'postcss';
-import scssSyntax from 'postcss-scss';
-import parser from 'postcss-selector-parser';
 
-import { md5 } from '../path/md5.js';
-
-/**
- * @param {string} css
- * @return {string} hashed down version of the CSS for disambiguating
- */
-export function hash(css) {
-  return `css-${md5(css)}`;
-}
-
-export function isInsideGlobal(node, func) {
-  const parent = node.parent;
-
-  if (!parent) return false;
-  if (parent.type === 'pseudo' && parent.value === ':global') return true;
-
-  return isInsideGlobal(parent, func);
-}
+import { getContentInfo } from './lightningcss.js';
+import { compileToCss } from './preprocess.js';
 
 /**
  * @param {string} cssPath path to a CSS file
@@ -40,75 +21,17 @@ export function getCSSInfo(cssPath) {
  * to see if we need to leave it alone or transform it
  *
  * @param {string} css the CSS's contents
- * @param {string} [lang] optional language hint (e.g. 'scss', 'sass', 'less')
+ * @param {string} [lang] optional language hint (e.g. 'scss', 'sass')
+ * @param {string} [fromFile] absolute path of the file containing the CSS,
+ *   used to resolve relative `@use`/`@import` during compilation
  * @return {{ classes: Set<string>, tags: Set<string>, css: string, id: string }}
  */
-export function getCSSContentInfo(css, lang) {
-  const classes = new Set();
-  const tags = new Set();
-
-  const parseOptions =
-    lang === 'scss' || lang === 'sass' ? { syntax: scssSyntax } : {};
-
-  const ast = postcss.parse(css, parseOptions);
-
-  const isScss = lang === 'scss' || lang === 'sass';
-
-  ast.walk((node) => {
-    if (node.type === 'rule') {
-      const selector = isScss ? resolveNestedSassSelector(node) : node.selector;
-
-      getClassesAndTags(selector, classes, tags);
-    }
-  });
-
-  let id = hash(css);
-
-  return { classes, tags, css, id };
-}
-
-/**
- * Resolves a nested SCSS selector by substituting `&` with the fully-resolved
- * parent selector, recursively. This converts e.g. `&--modifier` (child of
- * `.block`) into `.block--modifier`, and handles arbitrary nesting depth so
- * that `&--modifier` inside `&--modifier` inside `.block` yields
- * `.block--modifier--modifier`.
- *
- * @param {import('postcss').Rule} node
- * @return {string}
- */
-function resolveNestedSassSelector(node) {
-  const { selector } = node;
-
-  if (!selector.includes('&')) {
-    return selector;
+export function getCSSContentInfo(css, lang, fromFile) {
+  if (lang && lang !== 'css') {
+    css = compileToCss(css, lang, fromFile);
   }
 
-  const parent = node.parent;
-
-  if (!parent || parent.type !== 'rule') {
-    // No parent rule — `&` has nothing to substitute, return as-is
-    return selector;
-  }
-
-  // Recursively resolve the parent first, then substitute into this selector
-  const resolvedParent = resolveNestedSassSelector(parent);
-
-  return selector.replace(/&/g, resolvedParent);
-}
-
-function getClassesAndTags(sel, classes, tags) {
-  const transform = (sls) => {
-    sls.walk((selector) => {
-      if (selector.type === 'class' && !isInsideGlobal(selector)) {
-        classes.add(selector.value);
-      } else if (selector.type === 'tag' && !isInsideGlobal(selector)) {
-        tags.add(selector.value);
-      }
-    });
-  };
-
-  parser(transform).processSync(sel);
+  return getContentInfo(css);
 }
 
 if (import.meta.vitest) {
@@ -146,14 +69,15 @@ if (import.meta.vitest) {
     `);
   });
 
-  it('should parse SCSS nesting syntax without crashing when lang=sass', function () {
-    const scss = `
-      $base-color: green;
-      .block {
-        &--modifier { color: $base-color; }
-      }
-    `;
-    const { classes } = getCSSContentInfo(scss, 'sass');
+  it('should parse indented syntax when lang=sass', function () {
+    const sassSource = [
+      '$base-color: green',
+      '.block',
+      '  color: $base-color',
+      '  &--modifier',
+      '    color: red',
+    ].join('\n');
+    const { classes } = getCSSContentInfo(sassSource, 'sass');
 
     expect([...classes]).toMatchInlineSnapshot(`
       [
@@ -163,22 +87,19 @@ if (import.meta.vitest) {
     `);
   });
 
-  it('should parse SCSS deeply nested BEM when lang=sass', function () {
-    const scss = `
-      $base-color: green;
-      .block {
-        &--modifier {
-          color: $base-color;
-          &--modifier {
-            color: $base-color;
-            &--modifier {
-              color: $base-color;
-            }
-          }
-        }
-      }
-    `;
-    const { classes } = getCSSContentInfo(scss, 'sass');
+  it('should parse deeply nested BEM when lang=sass', function () {
+    const sassSource = [
+      '$base-color: green',
+      '.block',
+      '  color: $base-color',
+      '  &--modifier',
+      '    color: $base-color',
+      '    &--modifier',
+      '      color: $base-color',
+      '      &--modifier',
+      '        color: $base-color',
+    ].join('\n');
+    const { classes } = getCSSContentInfo(sassSource, 'sass');
 
     expect([...classes]).toMatchInlineSnapshot(`
       [

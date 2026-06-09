@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { rewriteCss } from './rewrite.js';
+import { rewriteCss as _rewriteCss } from './rewrite.js';
+
+const rewriteCss = (
+  css: string,
+  postfix: string,
+  fileName: string,
+  layerName?: string,
+) => _rewriteCss(css, postfix, fileName, layerName);
 
 it('should rewrite css', function () {
   const css = '.foo { color: red; }';
@@ -8,7 +15,9 @@ it('should rewrite css', function () {
   const fileName = 'foo.css';
   const rewritten = rewriteCss(css, postfix, fileName);
 
-  expect(rewritten).to.equal(`/* foo.css */\n.foo_postfix { color: red; }\n`);
+  expect(rewritten).to.equal(
+    `/* foo.css */\n.foo_postfix {\n  color: red;\n}\n`,
+  );
 });
 
 it('should use a custom layer', function () {
@@ -20,7 +29,9 @@ it('should use a custom layer', function () {
   expect(rewritten).toMatchInlineSnapshot(`
     "/* foo.css */
     @layer utils {
-    .foo_postfix { color: red; }
+    .foo_postfix {
+      color: red;
+    }
     }
     "
   `);
@@ -28,8 +39,8 @@ it('should use a custom layer', function () {
 
 it(`understands nth-of-type syntax`, function () {
   const css = `
-    li:nth-of-type(odd) {}
-    li:nth-of-type(even) {}
+    li:nth-of-type(odd) { color: red; }
+    li:nth-of-type(even) { color: blue; }
   `;
 
   const postfix = 'postfix';
@@ -38,9 +49,13 @@ it(`understands nth-of-type syntax`, function () {
 
   expect(rewritten).toMatchInlineSnapshot(`
     "/* foo.css */
+    li.postfix:nth-of-type(odd) {
+      color: red;
+    }
 
-        li.postfix:nth-of-type(odd) {}
-        li.postfix:nth-of-type(even) {}
+    li.postfix:nth-of-type(2n) {
+      color: #00f;
+    }
     "
   `);
 });
@@ -60,7 +75,6 @@ describe('@container', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-
       @container (width > 400px) {
         h2.postfix {
           font-size: 1.5em;
@@ -101,26 +115,22 @@ describe('@container', () => {
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
-
-      /* With an optional <container-name> */
       @container tall (height > 30rem) {
         p.postfix {
           line-height: 1.6;
         }
       }
 
-      /* With a <scroll-state> */
       @container scroll-state(scrollable: top) {
         .back-to-top-link_postfix {
           visibility: visible;
         }
       }
 
-      /* With a <container-name> and a <scroll-state> */
       @container sticky-heading scroll-state(stuck: top) {
         h2.postfix {
+          color: #fff;
           background: purple;
-          color: white;
         }
       }
       "
@@ -142,9 +152,10 @@ describe('@media', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer utils {
-
       @media (height >= 680px), screen and (orientation: portrait) {
-        .foo_postfix { color: red; }
+        .foo_postfix {
+          color: red;
+        }
       }
       }
       "
@@ -169,12 +180,11 @@ describe('@keyframe', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
-
-            @keyframes luna-view-navigation__postfix {
-              100% {
-                padding-top: 1rem;
-              }
-            }
+      @keyframes luna-view-navigation__postfix {
+        100% {
+          padding-top: 1rem;
+        }
+      }
       }
       "
     `);
@@ -207,23 +217,22 @@ describe('@keyframe', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
+      p.postfix {
+        animation-name: slide-in__postfix;
+        animation-duration: 3s;
+      }
 
-            p.postfix {
-              animation-duration: 3s;
-              animation-name: slide-in__postfix;
-            }
+      @keyframes slide-in__postfix {
+        from {
+          translate: 150vw;
+          scale: 2 1;
+        }
 
-            @keyframes slide-in__postfix {
-              from {
-                translate: 150vw 0;
-                scale: 200% 1;
-              }
-
-              to {
-                translate: 0 0;
-                scale: 100% 1;
-              }
-            }
+        to {
+          translate: 0;
+          scale: 1;
+        }
+      }
       }
       "
     `);
@@ -276,44 +285,44 @@ describe('@keyframe', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
+      p.postfix {
+        animation-name: slide-in__postfix;
+        animation-duration: 3s;
+      }
 
-            p.postfix {
-              animation-duration: 3s;
-              animation-name: slide-in__postfix;
-            }
-            p.postfix.hello_postfix {
-              animation-duration: 5s;
-              animation-name: slide-in__postfix;
-            }
-            p.postfix span.postfix {
-              display: inline-block;
-              animation-duration: 3s;
-              animation-name: grow-shrink__postfix;
-            }
+      p.postfix.hello_postfix {
+        animation-name: slide-in__postfix;
+        animation-duration: 5s;
+      }
 
-            @keyframes slide-in__postfix {
-              from {
-                translate: 150vw 0;
-                scale: 200% 1;
-              }
+      p.postfix span.postfix {
+        animation-name: grow-shrink__postfix;
+        animation-duration: 3s;
+        display: inline-block;
+      }
 
-              to {
-                translate: 0 0;
-                scale: 100% 1;
-              }
-            }
+      @keyframes slide-in__postfix {
+        from {
+          translate: 150vw;
+          scale: 2 1;
+        }
 
-            @keyframes grow-shrink__postfix {
-              25%,
-              75% {
-                scale: 100%;
-              }
+        to {
+          translate: 0;
+          scale: 1;
+        }
+      }
 
-              50% {
-                scale: 200%;
-                color: magenta;
-              }
-            }
+      @keyframes grow-shrink__postfix {
+        25%, 75% {
+          scale: 1;
+        }
+
+        50% {
+          color: #f0f;
+          scale: 2;
+        }
+      }
       }
       "
     `);
@@ -342,19 +351,23 @@ describe('@keyframe', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
+      div.postfix {
+        background: red;
+        width: 100px;
+        height: 100px;
+        animation: 5s infinite mymove__postfix;
+        position: relative;
+      }
 
-            div.postfix {
-              width: 100px;
-              height: 100px;
-              background: red;
-              position: relative;
-              animation: mymove__postfix 5s infinite;
-            }
+      @keyframes mymove__postfix {
+        from {
+          top: 0;
+        }
 
-            @keyframes mymove__postfix {
-              from {top: 0px;}
-              to {top: 200px;}
-            }
+        to {
+          top: 200px;
+        }
+      }
       }
       "
     `);
@@ -378,12 +391,11 @@ describe('@counter-style', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
-
-            @counter-style circled-alpha__postfix {
-              system: fixed;
-              symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
-              suffix: " ";
-            }
+      @counter-style circled-alpha__postfix {
+        system: fixed;
+        symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
+        suffix: " ";
+      }
       }
       "
     `);
@@ -409,16 +421,15 @@ describe('@counter-style', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
+      @counter-style circled-alpha__postfix {
+        system: fixed;
+        symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
+        suffix: " ";
+      }
 
-            @counter-style circled-alpha__postfix {
-              system: fixed;
-              symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ;
-              suffix: " ";
-            }
-
-            .items_postfix {
-              list-style: circled-alpha__postfix;
-            }
+      .items_postfix {
+        list-style: circled-alpha__postfix;
+      }
       }
       "
     `);
@@ -442,12 +453,11 @@ describe('@position-try', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
-
-            @position-try --custom-left__postfix {
-              position-area: left;
+      @position-try --custom-left__postfix {
+        position-area: left;
               width: 100px;
               margin-right: 10px;
-            }
+      }
       }
       "
     `);
@@ -474,17 +484,15 @@ describe('@position-try', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
-
-            @position-try --custom-left__postfix {
-              position-area: left;
+      @position-try --custom-left__postfix {
+        position-area: left;
               width: 100px;
               margin-right: 10px;
-            }
+      }
 
-            .infobox_postfix {
-              position-try-fallbacks:
-                --custom-left__postfix;
-            }
+      .infobox_postfix {
+        position-try-fallbacks: --custom-left__postfix;
+      }
       }
       "
     `);
@@ -508,12 +516,11 @@ describe('@property', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
-
-            @property --item-size__postfix {
-              syntax: "<percentage>";
-              inherits: true;
-              initial-value: 40%;
-            }
+      @property --item-size__postfix {
+        syntax: "<percentage>";
+        inherits: true;
+        initial-value: 40%;
+      }
       }
       "
     `);
@@ -552,29 +559,25 @@ describe('@property', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
+      @property --item-size__postfix {
+        syntax: "<percentage>";
+        inherits: true;
+        initial-value: 40%;
+      }
 
-            @property --item-size__postfix {
-              syntax: "<percentage>";
-              inherits: true;
-              initial-value: 40%;
-            }
+      .container_postfix {
+        --item-size__postfix: 20%;
+        --item-color: orange;
+        border: 1px dashed #000;
+        height: 200px;
+        display: flex;
+      }
 
-            .container_postfix {
-              display: flex;
-              height: 200px;
-              border: 1px dashed black;
-
-              /* set custom property values on parent */
-              --item-size: 20%;
-              --item-color: orange;
-            }
-
-            /* use custom properties to set item size and background color */
-            .item_postfix {
-              width: var(--item-size__postfix);
-              height: var(--item-size__postfix);
-              background-color: var(--item-color);
-            }
+      .item_postfix {
+        width: var(--item-size__postfix);
+        height: var(--item-size__postfix);
+        background-color: var(--item-color);
+      }
       }
       "
     `);
@@ -595,9 +598,6 @@ describe('@supports', () => {
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
       @layer components {
-
-          @supports (transform-origin: 5% 5%) {}
-          @supports selector(h2 > p) {}
       }
       "
     `);

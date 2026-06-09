@@ -14,7 +14,7 @@ var inline = setComponentTemplate(precompileTemplate("\n  <h1 class=\"e1fcda1af\
 const SecondScoped = setComponentTemplate(precompileTemplate("\n  <h6 class=\"e1fcda1af\">Second Scoped</h6>\n\n  \n", {
   strictMode: true
 }), templateOnly());
-const ActuallyInline = setComponentTemplate(precompileTemplate("\n  <h6 class=\"e1fcda1af\">Actually Inline</h6>\n\n  <style scoped inline>/* src/components/inline.css */\n\n    h6.e1fcda1af { color: rgb(200, 0, 0); }\n</style>\n", {
+const ActuallyInline = setComponentTemplate(precompileTemplate("\n  <h6 class=\"e1fcda1af\">Actually Inline</h6>\n\n  <style scoped inline>/* src/components/inline.css */\nh6.e1fcda1af {\n  color: #c80000;\n}\n</style>\n", {
   strictMode: true
 }), templateOnly());
 

@@ -83,6 +83,7 @@ export function colocated(options = {}) {
           meta.postfix,
           meta.fileName,
           options.layerName,
+          options,
         );
 
         return css;
@@ -143,6 +144,7 @@ export function colocated(options = {}) {
             parsed.postfix,
             relativeFilePath,
             options.layerName,
+            options,
           );
 
           return css;

@@ -1,5 +1,6 @@
 /* <inline>/src/components/inline-css-a429dce1a164746b7f8ad15dc067290e.css */
 @layer design-system {
-
-    h6.eeb9f1fae { color: rgb(200, 0, 200); }
+h6.eeb9f1fae {
+  color: #c800c8;
+}
 }
