@@ -82,6 +82,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@babel/eslint-parser": "^7.26.8",
+    "@jridgewell/trace-mapping": "^0.3.25",
     "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "@tsconfig/ember": "^3.0.9",
     "@tsconfig/strictest": "^2.0.5",

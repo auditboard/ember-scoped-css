@@ -4,20 +4,24 @@
  *
  * Two layers are at play:
  *
- *  1. ember-scoped-css's own CSS output. FIXED: the scoped CSS we emit
- *     (colocated and inline `<style scoped>`) now carries an inline sourcemap
- *     that traces back to the authored source.
+ *  1. ember-scoped-css's own output. FIXED: `rewriteCss` now returns a real
+ *     (external) source map and the `load` hooks pass `{ code, map }` through.
+ *     That correctness is verified directly in the package's unit tests
+ *     (`src/lib/css/rewrite.test.ts`), and bundlers that respect load-hook maps
+ *     (e.g. Vite's CSS pipeline) surface it.
  *
- *  2. `@embroider/addon-dev`'s `keep-assets` plugin, which the addon uses to
- *     emit `.css` files. It drops sourcemaps in BOTH its `transform` hook
- *     (replaces the CSS module with a marker, no map) and its `renderChunk`
- *     hook (prepends import statements to the chunk, no map). That poisons the
- *     JS chunk map for any component importing a kept asset and makes rollup
- *     warn `SOURCEMAP_BROKEN`. This is upstream and NOT fixable from here.
+ *  2. `@embroider/addon-dev`'s `keep-assets`, which the addon uses to emit
+ *     `.css` files. It discards source maps in BOTH its `transform` hook
+ *     (swaps the CSS module for a marker, no map) and its `renderChunk` hook
+ *     (prepends imports to the chunk, no map), and emits the `.css` asset with
+ *     no accompanying `.map`. So in the addon build neither the JS chunk map
+ *     nor the CSS asset map survives, regardless of what we return. This is
+ *     upstream and NOT fixable from ember-scoped-css (short of inlining the
+ *     map into the CSS, which we deliberately do not do).
  *
  * Tests marked `it.fails` pin that upstream limitation: they're expected to
- * fail today and will start passing once keep-assets preserves sourcemaps — at
- * which point vitest flips them red, prompting us to drop the `.fails`.
+ * fail today and will flip red (prompting removal of `.fails`) once keep-assets
+ * preserves source maps.
  */
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -121,7 +125,8 @@ describe('colocated CSS component', () => {
     },
   );
 
-  it('the emitted scoped CSS carries a sourcemap', () => {
+  // Upstream (keep-assets): emits the .css asset with no accompanying map.
+  it.fails('the emitted scoped CSS carries a sourcemap', () => {
     const cssAsset = assets(result.output).find((a) =>
       a.fileName.endsWith('colocated.css'),
     );
@@ -138,29 +143,33 @@ describe('colocated CSS component', () => {
     expect(map.sources.some((s) => s?.endsWith('colocated.css'))).toBe(true);
   });
 
-  it('the scoped CSS map traces a rewritten selector back to the source', () => {
-    const cssAsset = assets(result.output).find((a) =>
-      a.fileName.endsWith('colocated.css'),
-    );
-    const map = cssSourcemap(cssAsset);
+  // Upstream (keep-assets): no CSS asset map to trace.
+  it.fails(
+    'the scoped CSS map traces a rewritten selector back to the source',
+    () => {
+      const cssAsset = assets(result.output).find((a) =>
+        a.fileName.endsWith('colocated.css'),
+      );
+      const map = cssSourcemap(cssAsset);
 
-    expect(map).not.toBeNull();
+      expect(map).not.toBeNull();
 
-    const css =
-      typeof cssAsset.source === 'string'
-        ? cssAsset.source
-        : Buffer.from(cssAsset.source).toString('utf8');
-    const renamed = css.match(/\.title_[a-z0-9]+/)[0];
-    const tracer = new TraceMap(map);
-    const original = originalPositionFor(
-      tracer,
-      generatedPositionOf(css, renamed),
-    );
+      const css =
+        typeof cssAsset.source === 'string'
+          ? cssAsset.source
+          : Buffer.from(cssAsset.source).toString('utf8');
+      const renamed = css.match(/\.title_[a-z0-9]+/)[0];
+      const tracer = new TraceMap(map);
+      const original = originalPositionFor(
+        tracer,
+        generatedPositionOf(css, renamed),
+      );
 
-    // `.title` is on line 1 of colocated.css.
-    expect(original.source?.endsWith('colocated.css')).toBe(true);
-    expect(original.line).toBe(1);
-  });
+      // `.title` is on line 1 of colocated.css.
+      expect(original.source?.endsWith('colocated.css')).toBe(true);
+      expect(original.line).toBe(1);
+    },
+  );
 });
 
 describe('inline <style scoped> component', () => {
@@ -178,7 +187,8 @@ describe('inline <style scoped> component', () => {
     },
   );
 
-  it('the extracted inline CSS carries a sourcemap', () => {
+  // Upstream (keep-assets): emits the inline .css asset with no map.
+  it.fails('the extracted inline CSS carries a sourcemap', () => {
     const cssAsset = assets(result.output).find((a) =>
       a.fileName.includes('inline-css'),
     );

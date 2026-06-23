@@ -171,7 +171,7 @@ export function createPlugin(config) {
 
             if (hasInlineAttributeWithoutLang(node)) {
               let text = textContent(node);
-              let scopedText = rewriteCss(
+              let { code: scopedText } = rewriteCss(
                 text,
                 postfix,
                 localCssPath,
