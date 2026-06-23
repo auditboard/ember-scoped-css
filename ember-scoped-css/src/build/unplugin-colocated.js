@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
-import { rewriteCss } from '../lib/css/rewrite.js';
+import { rewriteCssWithMap, withInlineSourceMap } from '../lib/css/rewrite.js';
 import { request } from '../lib/request.js';
 
 const META = 'scoped-css:colocated';
@@ -78,14 +78,20 @@ export function colocated(options = {}) {
 
         let code = readFileSync(meta.fullPath, 'utf-8');
 
-        let css = rewriteCss(
+        let { css, map } = rewriteCssWithMap(
           code,
           meta.postfix,
           meta.fileName,
           options.layerName,
         );
 
-        return css;
+        /**
+         * The CSS is emitted as a standalone asset (e.g. via keep-assets),
+         * which doesn't propagate rollup's sourcemap chain, so the map has to
+         * be inlined into the CSS itself. We still return `map` for bundlers
+         * that can chain it.
+         */
+        return { code: withInlineSourceMap(css, map), map };
       }
     },
     vite: {
@@ -138,14 +144,15 @@ export function colocated(options = {}) {
             code = result.code;
           }
 
-          let css = rewriteCss(
+          let { css, map } = rewriteCssWithMap(
             code,
             parsed.postfix,
             relativeFilePath,
             options.layerName,
           );
 
-          return css;
+          // Vite chains the map through its own CSS pipeline.
+          return { code: css, map };
         }
       },
     },

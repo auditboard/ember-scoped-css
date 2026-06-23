@@ -84,8 +84,15 @@ function isInsideKeyframes(node) {
   return isInsideKeyframes(parent);
 }
 
-export function rewriteCss(css, postfix, fileName, layerName) {
-  const ast = postcss.parse(css);
+/**
+ * Parse `css` and apply the scoping transforms (postfixing selectors,
+ * referenceables, etc) in place. Returns the mutated PostCSS AST.
+ *
+ * `fileName` is passed as PostCSS's `from` so generated sourcemaps point at the
+ * original file.
+ */
+function parseAndScope(css, postfix, fileName) {
+  const ast = postcss.parse(css, { from: fileName });
   /**
    * kind => originalName => postfixedName
    * @type {{ [kind: string]: { [originalName: string]: string }}}
@@ -184,16 +191,78 @@ export function rewriteCss(css, postfix, fileName, layerName) {
     }
   });
 
-  const rewrittenCss = ast.toString();
+  return ast;
+}
+
+/**
+ * Wrap the rewritten CSS with the leading filename comment and optional
+ * `@layer`. Returns the final CSS plus the number of lines prepended before the
+ * rewritten content (so a sourcemap can be shifted to match).
+ */
+function assemble(rewrittenCss, fileName, layerName) {
+  const prefix = [
+    `/* ${fileName} */`,
+    layerName ? `@layer ${layerName} {` : '',
+  ].filter(Boolean);
+
+  const css =
+    [...prefix, rewrittenCss.trimEnd(), layerName ? `}` : '']
+      .filter(Boolean)
+      .join('\n') + '\n';
+
+  return { css, prefixLines: prefix.length };
+}
+
+export function rewriteCss(css, postfix, fileName, layerName) {
+  const ast = parseAndScope(css, postfix, fileName);
+
+  return assemble(ast.toString(), fileName, layerName).css;
+}
+
+/**
+ * Like {@link rewriteCss}, but also returns a source map (v3 JSON) that maps the
+ * rewritten CSS back to the original `fileName`.
+ *
+ * @returns {{ css: string, map: import('postcss').default.SourceMapOptions extends never ? object : object }}
+ */
+export function rewriteCssWithMap(css, postfix, fileName, layerName) {
+  const ast = parseAndScope(css, postfix, fileName);
+
+  const result = ast.toResult({
+    from: fileName,
+    map: { inline: false, annotation: false, sourcesContent: true },
+  });
+
+  const { css: finalCss, prefixLines } = assemble(
+    result.css,
+    fileName,
+    layerName,
+  );
+  const map = result.map.toJSON();
+
+  /**
+   * `assemble` prepends `prefixLines` generated lines (the filename comment and
+   * optional `@layer {`). A sourcemap `mappings` string is `;`-delimited per
+   * generated line, so prepending that many `;` shifts every mapping down to
+   * line up with the assembled output.
+   */
+  map.mappings = ';'.repeat(prefixLines) + map.mappings;
+
+  return { css: finalCss, map };
+}
+
+/**
+ * Append an inline `sourceMappingURL` comment (base64 data URI) to `css`.
+ *
+ * Needed for bundler paths that emit the CSS as a standalone asset without
+ * propagating sourcemaps themselves (e.g. `@embroider/addon-dev`'s
+ * `keep-assets`): the map has to ride along inside the CSS itself.
+ */
+export function withInlineSourceMap(css, map) {
+  const base64 = Buffer.from(JSON.stringify(map), 'utf8').toString('base64');
 
   return (
-    [
-      `/* ${fileName} */`,
-      layerName ? `@layer ${layerName} {` : '',
-      rewrittenCss.trimEnd(),
-      layerName ? `}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n') + '\n'
+    `${css.trimEnd()}\n` +
+    `/*# sourceMappingURL=data:application/json;charset=utf-8;base64,${base64} */\n`
   );
 }

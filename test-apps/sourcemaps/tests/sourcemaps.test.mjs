@@ -2,19 +2,22 @@
  * End-to-end sourcemap correctness for ember-scoped-css, run against the *real*
  * v2-addon rollup pipeline (see `./build.mjs`).
  *
- * What this project established:
+ * Two layers are at play:
  *
- *  - Components WITHOUT a colocated `.css` (plain `.gjs` / `.gts`) already get
- *    correct sourcemaps. Those tests pass and act as regression guards.
+ *  1. ember-scoped-css's own CSS output. FIXED: the scoped CSS we emit
+ *     (colocated and inline `<style scoped>`) now carries an inline sourcemap
+ *     that traces back to the authored source.
  *
- *  - The moment a component imports a colocated `.css`, `@embroider/addon-dev`'s
- *    `keep-assets` plugin transforms the asset without emitting a sourcemap.
- *    Rollup warns (`SOURCEMAP_BROKEN`) and the breakage poisons BOTH:
- *      * the component's JS chunk map (collapses to empty), and
- *      * the emitted `.css` (no usable map at all).
+ *  2. `@embroider/addon-dev`'s `keep-assets` plugin, which the addon uses to
+ *     emit `.css` files. It drops sourcemaps in BOTH its `transform` hook
+ *     (replaces the CSS module with a marker, no map) and its `renderChunk`
+ *     hook (prepends import statements to the chunk, no map). That poisons the
+ *     JS chunk map for any component importing a kept asset and makes rollup
+ *     warn `SOURCEMAP_BROKEN`. This is upstream and NOT fixable from here.
  *
- * The failing tests below pin that bug. They should go green once the CSS that
- * `ember-scoped-css` produces carries a sourcemap through the bundler.
+ * Tests marked `it.fails` pin that upstream limitation: they're expected to
+ * fail today and will start passing once keep-assets preserves sourcemaps — at
+ * which point vitest flips them red, prompting us to drop the `.fails`.
  */
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -66,7 +69,8 @@ function cssSourcemap(cssAsset) {
 }
 
 describe('the build itself', () => {
-  it('produces no "broken sourcemap" warnings', () => {
+  // Upstream: keep-assets' transform + renderChunk hooks don't emit maps.
+  it.fails('produces no "broken sourcemap" warnings', () => {
     const broken = result.warnings.filter((w) => w.code === 'SOURCEMAP_BROKEN');
 
     expect(
@@ -102,17 +106,20 @@ describe('plain .gjs / .gts (no colocated CSS) — regression guards', () => {
   });
 });
 
-describe('colocated CSS component — the bug', () => {
-  it('the JS chunk keeps a non-empty map referencing the original .gjs', () => {
-    const chunk = chunkNamed('colocated');
+describe('colocated CSS component', () => {
+  // Upstream (keep-assets): importing the kept .css asset poisons the chunk map.
+  it.fails(
+    'the JS chunk keeps a non-empty map referencing the original .gjs',
+    () => {
+      const chunk = chunkNamed('colocated');
 
-    expect(chunk?.map).toBeTruthy();
-    // Currently empty: importing the colocated .css poisons the chunk map.
-    expect(chunk.map.mappings.length).toBeGreaterThan(0);
-    expect(chunk.map.sources.some((s) => s?.endsWith('colocated.gjs'))).toBe(
-      true,
-    );
-  });
+      expect(chunk?.map).toBeTruthy();
+      expect(chunk.map.mappings.length).toBeGreaterThan(0);
+      expect(chunk.map.sources.some((s) => s?.endsWith('colocated.gjs'))).toBe(
+        true,
+      );
+    },
+  );
 
   it('the emitted scoped CSS carries a sourcemap', () => {
     const cssAsset = assets(result.output).find((a) =>
@@ -156,15 +163,20 @@ describe('colocated CSS component — the bug', () => {
   });
 });
 
-describe('inline <style scoped> component — the bug', () => {
-  it('the JS chunk keeps a non-empty map referencing the original .gjs', () => {
-    const chunk = chunkNamed('inline');
+describe('inline <style scoped> component', () => {
+  // Upstream (keep-assets): same failure mode as colocated.
+  it.fails(
+    'the JS chunk keeps a non-empty map referencing the original .gjs',
+    () => {
+      const chunk = chunkNamed('inline');
 
-    expect(chunk?.map).toBeTruthy();
-    // Same failure mode as colocated: the virtual inline CSS import poisons it.
-    expect(chunk.map.mappings.length).toBeGreaterThan(0);
-    expect(chunk.map.sources.some((s) => s?.endsWith('inline.gjs'))).toBe(true);
-  });
+      expect(chunk?.map).toBeTruthy();
+      expect(chunk.map.mappings.length).toBeGreaterThan(0);
+      expect(chunk.map.sources.some((s) => s?.endsWith('inline.gjs'))).toBe(
+        true,
+      );
+    },
+  );
 
   it('the extracted inline CSS carries a sourcemap', () => {
     const cssAsset = assets(result.output).find((a) =>

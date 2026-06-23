@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
-import { rewriteCss } from '../lib/css/rewrite.js';
+import { rewriteCssWithMap, withInlineSourceMap } from '../lib/css/rewrite.js';
 import { request } from '../lib/request.js';
 
 const META = 'scoped-css:inline';
@@ -79,14 +79,16 @@ export function inline(options = {}) {
           rawCss = result.code;
         }
 
-        const css = rewriteCss(
+        const { css, map } = rewriteCssWithMap(
           rawCss,
           meta.postfix,
           `<inline>/${meta.fileName}`,
           options.layerName,
         );
 
-        return css;
+        // Emitted as a standalone asset (keep-assets), so inline the map; still
+        // return `map` for bundlers that chain it.
+        return { code: withInlineSourceMap(css, map), map };
       }
     },
     vite: {
