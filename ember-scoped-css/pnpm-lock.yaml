@@ -61,9 +61,6 @@ importers:
       '@babel/eslint-parser':
         specifier: ^7.26.8
         version: 7.26.8(219373b2619d1477d28a72ebfd2073a2)
-      '@jridgewell/trace-mapping':
-        specifier: ^0.3.25
-        version: 0.3.31
       '@nullvoxpopuli/eslint-configs':
         specifier: ^5.3.4
         version: 5.3.4(7dca65407b77bac3e2cab29204b2bff7)
@@ -84,7 +81,7 @@ importers:
         version: 17.3.0
       '@vitest/coverage-v8':
         specifier: ^4.1.0
-        version: 4.1.0(d3db9b32699581fe6ce8d9cc09f8bed1)
+        version: 4.1.0(990d3e62cd8a70570bf234afba640ddf)
       babel-plugin-ember-template-compilation:
         specifier: ^3.0.1
         version: 3.0.1
@@ -115,12 +112,9 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.8.2
-      vite:
-        specifier: ^6.2.5
-        version: 6.4.3(e073f8de3e182d5321a4d12661c21c0c)
       vitest:
         specifier: ^4.1.0
-        version: 4.1.0(774c3e09f7907864bebf1daf6b1df9a0)
+        version: 4.1.0(e073f8de3e182d5321a4d12661c21c0c)
       webpack:
         specifier: ^5.98.0
         version: 5.98.0
@@ -3623,7 +3617,6 @@ packages:
       '@vitest/ui': 4.1.0
       happy-dom: '*'
       jsdom: '*'
-      vite: ^6.0.0 || ^7.0.0 || ^8.0.0-0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
@@ -4752,7 +4745,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
-  '@vitest/coverage-v8@4.1.0(d3db9b32699581fe6ce8d9cc09f8bed1)':
+  '@vitest/coverage-v8@4.1.0(990d3e62cd8a70570bf234afba640ddf)':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
       '@vitest/utils': 4.1.0
@@ -4764,7 +4757,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.0(774c3e09f7907864bebf1daf6b1df9a0)
+      vitest: 4.1.0(e073f8de3e182d5321a4d12661c21c0c)
 
   '@vitest/expect@4.1.0':
     dependencies:
@@ -7720,7 +7713,7 @@ snapshots:
       jiti: 2.6.1
       terser: 5.39.0
 
-  vitest@4.1.0(774c3e09f7907864bebf1daf6b1df9a0):
+  vitest@4.1.0(e073f8de3e182d5321a4d12661c21c0c):
     dependencies:
       '@vitest/expect': 4.1.0
       '@vitest/mocker': 4.1.0(af366c2b5aca6d0247f76715b98a4ae1)
@@ -7745,7 +7738,17 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.13.9
     transitivePeerDependencies:
+      - jiti
+      - less
+      - lightningcss
       - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - terser
+      - tsx
+      - yaml
 
   vscode-json-languageservice@4.2.1:
     dependencies:

@@ -82,7 +82,6 @@
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@babel/eslint-parser": "^7.26.8",
-    "@jridgewell/trace-mapping": "^0.3.25",
     "@nullvoxpopuli/eslint-configs": "^5.3.4",
     "@tsconfig/ember": "^3.0.9",
     "@tsconfig/strictest": "^2.0.5",
@@ -100,7 +99,6 @@
     "prettier": "^3.6.2",
     "tsdown": "^0.15.12",
     "typescript": "^5.2.2",
-    "vite": "^6.2.5",
     "vitest": "^4.1.0",
     "webpack": "^5.98.0"
   },

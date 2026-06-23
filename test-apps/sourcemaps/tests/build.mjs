@@ -45,6 +45,7 @@ export async function buildAddon() {
       'components/colocated': src('components/colocated.gjs'),
       'components/typed': src('components/typed.gts'),
       'components/scoped': src('components/scoped.gjs'),
+      'components/inline': src('components/inline.gjs'),
     },
     external: isExternal,
     onwarn(warning) {
