@@ -116,10 +116,13 @@ describe('colocated CSS component — the bug', () => {
 
   it('the emitted scoped CSS carries a sourcemap', () => {
     const cssAsset = assets(result.output).find((a) =>
-      a.fileName.endsWith('.css'),
+      a.fileName.endsWith('colocated.css'),
     );
 
-    expect(cssAsset, 'expected a .css asset to be emitted').toBeTruthy();
+    expect(
+      cssAsset,
+      'expected a colocated .css asset to be emitted',
+    ).toBeTruthy();
 
     const map = cssSourcemap(cssAsset);
 
@@ -130,7 +133,7 @@ describe('colocated CSS component — the bug', () => {
 
   it('the scoped CSS map traces a rewritten selector back to the source', () => {
     const cssAsset = assets(result.output).find((a) =>
-      a.fileName.endsWith('.css'),
+      a.fileName.endsWith('colocated.css'),
     );
     const map = cssSourcemap(cssAsset);
 
@@ -150,5 +153,29 @@ describe('colocated CSS component — the bug', () => {
     // `.title` is on line 1 of colocated.css.
     expect(original.source?.endsWith('colocated.css')).toBe(true);
     expect(original.line).toBe(1);
+  });
+});
+
+describe('inline <style scoped> component — the bug', () => {
+  it('the JS chunk keeps a non-empty map referencing the original .gjs', () => {
+    const chunk = chunkNamed('inline');
+
+    expect(chunk?.map).toBeTruthy();
+    // Same failure mode as colocated: the virtual inline CSS import poisons it.
+    expect(chunk.map.mappings.length).toBeGreaterThan(0);
+    expect(chunk.map.sources.some((s) => s?.endsWith('inline.gjs'))).toBe(true);
+  });
+
+  it('the extracted inline CSS carries a sourcemap', () => {
+    const cssAsset = assets(result.output).find((a) =>
+      a.fileName.includes('inline-css'),
+    );
+
+    expect(cssAsset, 'expected an inline CSS asset to be emitted').toBeTruthy();
+
+    const map = cssSourcemap(cssAsset);
+
+    expect(map, 'the inline scoped CSS has no usable sourcemap').not.toBeNull();
+    expect(map.mappings.length).toBeGreaterThan(0);
   });
 });
