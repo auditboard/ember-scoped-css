@@ -29,7 +29,7 @@ beforeAll(async () => {
 });
 
 const chunkNamed = (name) =>
-  chunks(result.output).find((c) => c.fileName === `components/${name}`);
+  chunks(result.output).find((c) => c.fileName === `components/${name}.js`);
 
 /** Find the sourcemap belonging to a CSS asset (inline comment or sibling). */
 function cssSourcemap(cssAsset) {
