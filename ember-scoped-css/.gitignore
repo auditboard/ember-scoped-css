@@ -1,2 +1,5 @@
 dist/
 declarations/
+
+# Scratch fixtures written by the e2e sourcemap tests
+.tmp-sourcemaps-*/
