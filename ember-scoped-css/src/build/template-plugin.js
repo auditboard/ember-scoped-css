@@ -64,7 +64,15 @@ export function createPlugin(config) {
     let scopedClasses = new Set();
 
     /**
-     * @param {{ tags: Set<string>; classes: Set<string> }} info
+     * The attribute names found in attribute selectors in the CSS, used to
+     * mark matching elements with the scope class.
+     *
+     * @type {Set<string>}
+     */
+    let scopedAttributes = new Set();
+
+    /**
+     * @param {{ tags: Set<string>; classes: Set<string>; attributes: Set<string> }} info
      */
     function addInfo(info) {
       for (let item of info.tags) {
@@ -73,6 +81,10 @@ export function createPlugin(config) {
 
       for (let item of info.classes) {
         scopedClasses.add(item);
+      }
+
+      for (let item of info.attributes) {
+        scopedAttributes.add(item);
       }
     }
 
@@ -98,6 +110,7 @@ export function createPlugin(config) {
     let visitors = templatePlugin({
       classes: scopedClasses,
       tags: scopedTags,
+      attributes: scopedAttributes,
       postfix,
     });
 

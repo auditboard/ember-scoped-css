@@ -5,6 +5,7 @@
 import postcss from 'postcss';
 import parser from 'postcss-selector-parser';
 
+import { renameClass } from '../renameClass.js';
 import { isInsideGlobal } from './utils.js';
 
 const SEP = '__';
@@ -33,8 +34,61 @@ function rewriteReferenceable(node, postfix) {
   };
 }
 
+/**
+ * Class-targeting attribute selectors whose value is a real class name
+ * (`[class="foo"]`, `[class~="foo"]`) are scoped by renaming the value the same
+ * way `.foo` is renamed to `.foo_postfix`. The renamed token is unique, so no
+ * marker class is needed (mirrors the class-renaming strategy).
+ *
+ * Every other attribute selector keeps its discriminator and is scoped with a
+ * marker class (mirrors the tag strategy: `div` -> `div.postfix`).
+ */
+function isRenamedClassAttribute(node) {
+  return (
+    node.attribute === 'class' &&
+    (node.operator === '=' || node.operator === '~=') &&
+    Boolean(node.value)
+  );
+}
+
+/**
+ * Walk left and right from `node` within its compound selector (bounded by
+ * combinators) to see if the marker class has already been added. Used to add
+ * the marker at most once per compound, e.g. `input[type="text"]` becomes
+ * `input.postfix[type="text"]`, not `input.postfix[type="text"].postfix`.
+ */
+function compoundHasMarker(node, postfix) {
+  const siblings = node.parent.nodes;
+  const index = siblings.indexOf(node);
+
+  for (let i = index; i >= 0; i--) {
+    if (siblings[i].type === 'combinator') break;
+    if (siblings[i].type === 'class' && siblings[i].value === postfix)
+      return true;
+  }
+
+  for (let i = index + 1; i < siblings.length; i++) {
+    if (siblings[i].type === 'combinator') break;
+    if (siblings[i].type === 'class' && siblings[i].value === postfix)
+      return true;
+  }
+
+  return false;
+}
+
+function addMarker(node, postfix) {
+  if (compoundHasMarker(node, postfix)) return;
+
+  node.parent.insertAfter(node, parser.className({ value: postfix }));
+}
+
 function rewriteSelector(sel, postfix) {
   const transform = (selectors) => {
+    // Nodes we need to mark with the scope class. We collect them during the
+    // walk and insert markers afterwards so the freshly-inserted marker classes
+    // are never themselves re-visited by the walk.
+    const toMark = [];
+
     selectors.walk((selector) => {
       if (isInsideGlobal(selector)) return;
 
@@ -50,12 +104,33 @@ function rewriteSelector(sel, postfix) {
       if (selector.type === 'class') {
         selector.value += '_' + postfix;
       } else if (selector.type === 'tag') {
-        selector.replaceWith(
-          parser.tag({ value: selector.value }),
-          parser.className({ value: postfix }),
-        );
+        toMark.push(selector);
+      } else if (selector.type === 'attribute') {
+        if (isRenamedClassAttribute(selector)) {
+          // Bucket A: rewrite the value to track the renamed class. No marker —
+          // the renamed token (e.g. `foo_postfix`) is already unique per file.
+          selector.value = renameClass(selector.value, postfix);
+          if (!selector.quoteMark) selector.quoteMark = '"';
+        } else {
+          // Bucket B: keep the discriminator, scope with a marker class.
+          // `[class|="foo"]` cannot be fully scoped via renaming, so we warn
+          // and fall back to the marker (matches by the preserved value only).
+          if (selector.attribute === 'class' && selector.operator === '|=') {
+            console.warn(
+              `[ember-scoped-css] \`${selector.toString()}\` cannot be fully scoped; ` +
+                `class-targeting \`|=\` attribute selectors are matched via the scope ` +
+                `marker only and may not behave as written.`,
+            );
+          }
+
+          toMark.push(selector);
+        }
       }
     });
+
+    for (const node of toMark) {
+      addMarker(node, postfix);
+    }
 
     // remove :global
     selectors.walk((selector) => {

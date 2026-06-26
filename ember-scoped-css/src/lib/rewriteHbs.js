@@ -2,7 +2,35 @@ import * as recast from 'ember-template-recast';
 
 import { renameClass } from './renameClass.js';
 
-export function templatePlugin({ classes, tags, postfix }) {
+/**
+ * Native HTML elements are lowercase; component invocations are capitalized
+ * (`<Foo>`) or use a path (`<foo.bar>`, `<this.x>`). We only mark native
+ * elements via attribute selectors so the scope class is never forwarded into
+ * another component's scope. Tag selectors are already implicitly native-only
+ * because CSS tag names are lowercase.
+ */
+function isNativeElement(tag) {
+  return /^[a-z]/.test(tag) && !tag.includes('.') && !tag.includes(':');
+}
+
+/**
+ * Whether an element carries a statically-named attribute that appears in a
+ * scoped attribute selector. Splattributes (`...attributes`) are dynamic and
+ * `@args` are component arguments, so neither counts.
+ */
+function elementHasScopedAttribute(node, attributes) {
+  if (attributes.size === 0) return false;
+
+  return node.attributes.some((attr) => {
+    let name = attr.name;
+
+    if (name === '...attributes' || name.startsWith('@')) return false;
+
+    return attributes.has(name);
+  });
+}
+
+export function templatePlugin({ classes, tags, attributes, postfix }) {
   let stack = [];
   // scoped-class is a global we allow in hbs
   // scopedClass is importable, and we'll error if someone tries to rename it
@@ -46,18 +74,26 @@ export function templatePlugin({ classes, tags, postfix }) {
     },
 
     ElementNode(node) {
-      if (tags.has(node.tag)) {
-        // check if class attribute already exists
-        const classAttr = node.attributes.find((attr) => attr.name === 'class');
+      // A native element is in scope if its tag matches a tag selector, or if
+      // it carries an attribute named in a scoped attribute selector. We add
+      // the marker class at most once regardless of how many things matched.
+      const shouldScope =
+        tags.has(node.tag) ||
+        (isNativeElement(node.tag) &&
+          elementHasScopedAttribute(node, attributes));
 
-        if (classAttr) {
-          classAttr.value.chars += ' ' + postfix;
-        } else {
-          // push class attribute
-          node.attributes.push(
-            recast.builders.attr('class', recast.builders.text(postfix)),
-          );
-        }
+      if (!shouldScope) return;
+
+      // check if class attribute already exists
+      const classAttr = node.attributes.find((attr) => attr.name === 'class');
+
+      if (classAttr) {
+        classAttr.value.chars += ' ' + postfix;
+      } else {
+        // push class attribute
+        node.attributes.push(
+          recast.builders.attr('class', recast.builders.text(postfix)),
+        );
       }
     },
 
@@ -133,10 +169,16 @@ function getValue(path) {
   return path.original;
 }
 
-export default function rewriteHbs(hbs, classes, tags, postfix) {
+export default function rewriteHbs(
+  hbs,
+  classes,
+  tags,
+  postfix,
+  attributes = new Set(),
+) {
   let ast = recast.parse(hbs);
 
-  recast.traverse(ast, templatePlugin({ classes, tags, postfix }));
+  recast.traverse(ast, templatePlugin({ classes, tags, attributes, postfix }));
 
   let result = recast.print(ast);
 

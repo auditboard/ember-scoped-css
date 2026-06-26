@@ -235,3 +235,84 @@ will become
   ...;
 }
 ```
+
+## Attribute selectors
+
+Attribute selectors (`[disabled]`, `[type="text"]`, `[data-state="open"]`, …) are
+scoped the same way bare element selectors are: the original selector is kept as
+the discriminator and a marker class is added, while every matching native
+element in the template gets that same marker class.
+
+```css
+[type='text'] {
+  ...;
+}
+```
+
+becomes
+
+```css
+[type='text'].generated {
+  ...;
+}
+```
+
+and `<input type="text">` becomes `<input type="text" class="generated">`.
+
+When an attribute selector targets `class` and the value is a real class name
+(`[class="foo"]` or `[class~="foo"]`), the value is renamed to match the scoped
+class instead of adding a marker, because `.foo` is itself renamed to
+`.foo_generated`:
+
+```css
+[class~='foo'] {
+  ...;
+} /* -> [class~="foo_generated"] */
+```
+
+Only **native** elements are marked. Component invocations (`<Foo>`,
+`<foo.bar>`) are skipped so the scope marker is never forwarded into another
+component's scope. Named arguments (`@type`) and `...attributes` are not treated
+as attributes.
+
+## Known limitations
+
+These limitations stem from the marker-class model and apply to bare element
+selectors as well as attribute selectors.
+
+### Standalone negation leaks
+
+The marker class is a _positive_ signal ("this element belongs to my
+component"). A negation (`:not(...)`) inverts its contents, so when the marker
+is added inside the `:not()` it no longer acts as a scope anchor. A selector
+that is _only_ a negation has nothing left to anchor the scope, so it matches
+the whole document:
+
+```css
+:not([disabled]) {
+} /* -> :not([disabled].generated) — leaks globally */
+:not(div) {
+} /* -> :not(div.generated)        — same leak, pre-existing for tags */
+```
+
+As long as the negation has a positive anchor in the same compound, scoping is
+correct:
+
+```css
+button:not([disabled]) {
+} /* -> button.generated:not([disabled].generated) — scoped */
+```
+
+The `ember-scoped-css/no-unscoped-selectors` stylelint rule flags standalone
+negations, which surfaces this case before it ships.
+
+### Class-targeting attribute operators
+
+`[class$="foo"]` matches by string-suffix. If the matched class is also renamed
+through its own `.foo` selector, its suffix becomes `_generated` and the
+selector no longer matches. This cannot be detected statically, so it is left
+as a documented edge case.
+
+`[class|="foo"]` cannot be expressed precisely after class renaming. It emits a
+build-time warning and is scoped with a marker class only (matching on the
+preserved value), which may not behave exactly as written.

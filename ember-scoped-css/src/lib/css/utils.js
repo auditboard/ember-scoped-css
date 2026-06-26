@@ -41,11 +41,12 @@ export function getCSSInfo(cssPath) {
  *
  * @param {string} css the CSS's contents
  * @param {string} [lang] optional language hint (e.g. 'scss', 'sass', 'less')
- * @return {{ classes: Set<string>, tags: Set<string>, css: string, id: string }}
+ * @return {{ classes: Set<string>, tags: Set<string>, attributes: Set<string>, css: string, id: string }}
  */
 export function getCSSContentInfo(css, lang) {
   const classes = new Set();
   const tags = new Set();
+  const attributes = new Set();
 
   const parseOptions =
     lang === 'scss' || lang === 'sass' ? { syntax: scssSyntax } : {};
@@ -58,13 +59,13 @@ export function getCSSContentInfo(css, lang) {
     if (node.type === 'rule') {
       const selector = isScss ? resolveNestedSassSelector(node) : node.selector;
 
-      getClassesAndTags(selector, classes, tags);
+      getClassesAndTags(selector, classes, tags, attributes);
     }
   });
 
   let id = hash(css);
 
-  return { classes, tags, css, id };
+  return { classes, tags, attributes, css, id };
 }
 
 /**
@@ -97,13 +98,31 @@ function resolveNestedSassSelector(node) {
   return selector.replace(/&/g, resolvedParent);
 }
 
-function getClassesAndTags(sel, classes, tags) {
+function getClassesAndTags(sel, classes, tags, attributes) {
   const transform = (sls) => {
     sls.walk((selector) => {
-      if (selector.type === 'class' && !isInsideGlobal(selector)) {
+      if (isInsideGlobal(selector)) return;
+
+      if (selector.type === 'class') {
         classes.add(selector.value);
-      } else if (selector.type === 'tag' && !isInsideGlobal(selector)) {
+      } else if (selector.type === 'tag') {
         tags.add(selector.value);
+      } else if (selector.type === 'attribute') {
+        if (
+          selector.attribute === 'class' &&
+          (selector.operator === '=' || selector.operator === '~=') &&
+          selector.value
+        ) {
+          // Bucket A: the value names real class(es), which get renamed in the
+          // template. Register them as classes so the renaming happens.
+          for (let token of selector.value.split(/\s+/).filter(Boolean)) {
+            classes.add(token);
+          }
+        } else {
+          // Bucket B: mark elements that carry this attribute. For class-target
+          // operators (^=, *=, $=, |=) and presence, the name is `class`.
+          attributes.add(selector.attribute);
+        }
       }
     });
   };
@@ -123,6 +142,36 @@ if (import.meta.vitest) {
     expect([...classes]).to.have.members(['baz', 'bar']);
     expect(tags.size).to.equal(1);
     expect([...tags]).to.have.members(['div']);
+  });
+
+  it('collects attribute names for marker-based scoping', function () {
+    const css = '[disabled] [data-x="y"] { color: red; }';
+    const { attributes } = getCSSContentInfo(css);
+
+    expect([...attributes]).to.have.members(['disabled', 'data-x']);
+  });
+
+  it('treats =/~= class attribute values as renamed classes', function () {
+    const css = '[class="foo bar"] [class~="baz"] { color: red; }';
+    const { classes, attributes } = getCSSContentInfo(css);
+
+    expect([...classes]).to.have.members(['foo', 'bar', 'baz']);
+    expect(attributes.size).to.equal(0);
+  });
+
+  it('treats other class attribute operators as marker attributes', function () {
+    const css = '[class^="foo"] [class*="bar"] { color: red; }';
+    const { classes, attributes } = getCSSContentInfo(css);
+
+    expect(classes.size).to.equal(0);
+    expect([...attributes]).to.have.members(['class']);
+  });
+
+  it('ignores attribute selectors inside :global', function () {
+    const css = ':global([data-x]) [data-y] { color: red; }';
+    const { attributes } = getCSSContentInfo(css);
+
+    expect([...attributes]).to.have.members(['data-y']);
   });
 
   it('should parse SCSS nesting syntax without crashing when lang=scss', function () {
