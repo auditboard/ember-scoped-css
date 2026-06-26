@@ -1,3 +1,7 @@
 .green {
   color: rgba(0, 244, 0);
 }
+
+[type="submit"] {
+  color: rgb(10, 20, 30);
+}
