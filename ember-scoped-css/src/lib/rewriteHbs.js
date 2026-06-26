@@ -3,20 +3,13 @@ import * as recast from 'ember-template-recast';
 import { renameClass } from './renameClass.js';
 
 /**
- * Native HTML elements are lowercase; component invocations are capitalized
- * (`<Foo>`) or use a path (`<foo.bar>`, `<this.x>`). We only mark native
- * elements via attribute selectors so the scope class is never forwarded into
- * another component's scope. Tag selectors are already implicitly native-only
- * because CSS tag names are lowercase.
- */
-function isNativeElement(tag) {
-  return /^[a-z]/.test(tag) && !tag.includes('.') && !tag.includes(':');
-}
-
-/**
  * Whether an element carries a statically-named attribute that appears in a
- * scoped attribute selector. Splattributes (`...attributes`) are dynamic and
- * `@args` are component arguments, so neither counts.
+ * scoped attribute selector. This includes component invocations: a component
+ * receives the marker class through its `...attributes` the same way it
+ * receives the matched attribute, so `[type="text"]` scopes `<Foo type="text">`
+ * just as it scopes `<input type="text">`. Splattributes (`...attributes`)
+ * carry an unknown set of attributes and `@args` are component arguments, so
+ * neither counts as a matchable attribute.
  */
 function elementHasScopedAttribute(node, attributes) {
   if (attributes.size === 0) return false;
@@ -74,13 +67,11 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     },
 
     ElementNode(node) {
-      // A native element is in scope if its tag matches a tag selector, or if
-      // it carries an attribute named in a scoped attribute selector. We add
-      // the marker class at most once regardless of how many things matched.
+      // An element is in scope if its tag matches a tag selector, or if it
+      // carries an attribute named in a scoped attribute selector. We add the
+      // marker class at most once regardless of how many things matched.
       const shouldScope =
-        tags.has(node.tag) ||
-        (isNativeElement(node.tag) &&
-          elementHasScopedAttribute(node, attributes));
+        tags.has(node.tag) || elementHasScopedAttribute(node, attributes);
 
       if (!shouldScope) return;
 

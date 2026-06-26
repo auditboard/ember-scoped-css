@@ -46,16 +46,18 @@ describe('attribute marking', () => {
     expect(out).to.equal('<input type="text" class="pfx">');
   });
 
-  describe('component invocations are never marked', () => {
-    it('skips capitalized components', () => {
+  describe('component invocations are marked too', () => {
+    // The marker class reaches the component's root element through
+    // `...attributes`, the same way the matched attribute does.
+    it('marks capitalized components', () => {
       expect(mark('<Foo type="text" />', ['type'])).to.equal(
-        '<Foo type="text" />',
+        '<Foo type="text" class="pfx" />',
       );
     });
 
-    it('skips path-based components', () => {
+    it('marks path-based components', () => {
       expect(mark('<foo.bar type="text" />', ['type'])).to.equal(
-        '<foo.bar type="text" />',
+        '<foo.bar type="text" class="pfx" />',
       );
     });
   });
