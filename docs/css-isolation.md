@@ -238,13 +238,41 @@ will become
 
 ## Attribute selectors
 
-Attribute selectors (`[disabled]`, `[type="text"]`, `[data-state="open"]`, …) are
-scoped the same way bare element selectors are: the original selector is kept as
-the discriminator and a marker class is added, while every matching native
-element in the template gets that same marker class.
+Attribute selectors like `[disabled]`, `[type="text"]`, and `[data-state="open"]` are scoped the same way bare tag selectors are. The original selector is kept and a generated marker class is added, and every matching native element in the template gets that same class.
+
+Input:
+
+```html
+<!-- components/first.hbs -->
+<input type="text" />
+```
 
 ```css
+/* components/first.css */
 [type='text'] {
+  ...;
+}
+```
+
+Output:
+
+```html
+<!-- components/first.hbs -->
+<input type="text" class="generated-first" />
+```
+
+```css
+/* components/first.css */
+[type='text'].generated-first {
+  ...;
+}
+```
+
+When an attribute selector targets the `class` attribute and the value is a real class name (`[class="foo"]` or `[class~="foo"]`) the value is renamed instead of adding a marker class, because `.foo` is itself renamed to `.foo_generated-first`.
+
+```css
+/* components/first.css */
+[class~='foo'] {
   ...;
 }
 ```
@@ -252,67 +280,48 @@ element in the template gets that same marker class.
 becomes
 
 ```css
-[type='text'].generated {
+/* components/first.css */
+[class~='foo_generated-first'] {
   ...;
 }
 ```
 
-and `<input type="text">` becomes `<input type="text" class="generated">`.
-
-When an attribute selector targets `class` and the value is a real class name
-(`[class="foo"]` or `[class~="foo"]`), the value is renamed to match the scoped
-class instead of adding a marker, because `.foo` is itself renamed to
-`.foo_generated`:
-
-```css
-[class~='foo'] {
-  ...;
-} /* -> [class~="foo_generated"] */
-```
-
-Only **native** elements are marked. Component invocations (`<Foo>`,
-`<foo.bar>`) are skipped so the scope marker is never forwarded into another
-component's scope. Named arguments (`@type`) and `...attributes` are not treated
-as attributes.
+Component invocations are marked too. A component receives the marker class through its `...attributes` the same way it receives the matched attribute, so `[type='text']` scopes `<Foo type="text" />` just as it scopes `<input type="text" />`. Named arguments such as `@type` are not HTML attributes, and `...attributes` carries an unknown set of attributes, so neither is matched.
 
 ## Known limitations
 
-These limitations stem from the marker-class model and apply to bare element
-selectors as well as attribute selectors.
+These limitations come from the marker class approach and apply to bare tag selectors as well as attribute selectors.
 
 ### Standalone negation leaks
 
-The marker class is a _positive_ signal ("this element belongs to my
-component"). A negation (`:not(...)`) inverts its contents, so when the marker
-is added inside the `:not()` it no longer acts as a scope anchor. A selector
-that is _only_ a negation has nothing left to anchor the scope, so it matches
-the whole document:
+The marker class is a positive signal that an element belongs to a component. A negation like `:not(...)` inverts its contents, so when the marker class is added inside the `:not()` it no longer anchors the scope. A selector that is only a negation has nothing left to anchor it and ends up matching the whole document.
 
 ```css
+/* components/first.css */
 :not([disabled]) {
-} /* -> :not([disabled].generated) — leaks globally */
+  ...;
+}
 :not(div) {
-} /* -> :not(div.generated)        — same leak, pre-existing for tags */
+  ...;
+}
 ```
 
-As long as the negation has a positive anchor in the same compound, scoping is
-correct:
+becomes
 
 ```css
-button:not([disabled]) {
-} /* -> button.generated:not([disabled].generated) — scoped */
+/* components/first.css */
+:not([disabled].generated-first) {
+  ...;
+}
+:not(div.generated-first) {
+  ...;
+}
 ```
 
-The `ember-scoped-css/no-unscoped-selectors` stylelint rule flags standalone
-negations, which surfaces this case before it ships.
+Both rules now match every element that isn't a disabled (or `div`) element in the current component, including elements in other components and the rest of the page. As long as the negation has a positive anchor in the same compound the scope is preserved, so `button:not([disabled])` becomes `button.generated-first:not([disabled].generated-first)` and stays scoped. The `ember-scoped-css/no-unscoped-selectors` stylelint rule flags standalone negations so this is caught before it ships.
 
-### Class-targeting attribute operators
+### Class attribute operators
 
-`[class$="foo"]` matches by string-suffix. If the matched class is also renamed
-through its own `.foo` selector, its suffix becomes `_generated` and the
-selector no longer matches. This cannot be detected statically, so it is left
-as a documented edge case.
+`[class$="foo"]` matches the end of the class string. If the matched class is also renamed through its own `.foo` selector its suffix becomes `_generated-first` and the selector no longer matches. This can't be detected at build time, so it is left as a known edge case.
 
-`[class|="foo"]` cannot be expressed precisely after class renaming. It emits a
-build-time warning and is scoped with a marker class only (matching on the
-preserved value), which may not behave exactly as written.
+`[class|="foo"]` can't be expressed precisely once classes are renamed, so it is scoped with a marker class only and may not behave exactly as written. The `ember-scoped-css/no-unscopable-class-attribute-selector` stylelint rule flags it so it is caught before it ships.
