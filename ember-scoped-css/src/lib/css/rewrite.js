@@ -113,16 +113,12 @@ function rewriteSelector(sel, postfix) {
           if (!selector.quoteMark) selector.quoteMark = '"';
         } else {
           // Bucket B: keep the discriminator, scope with a marker class.
-          // `[class|="foo"]` cannot be fully scoped via renaming, so we warn
-          // and fall back to the marker (matches by the preserved value only).
-          if (selector.attribute === 'class' && selector.operator === '|=') {
-            console.warn(
-              `[ember-scoped-css] \`${selector.toString()}\` cannot be fully scoped; ` +
-                `class-targeting \`|=\` attribute selectors are matched via the scope ` +
-                `marker only and may not behave as written.`,
-            );
-          }
-
+          //
+          // `[class|="foo"]` cannot be fully scoped via renaming and only
+          // matches by the preserved value, so it falls back to a marker like
+          // any other Bucket B selector. That imprecision is surfaced to
+          // authors by the `ember-scoped-css/no-unscopable-class-attribute-selector`
+          // stylelint rule rather than a runtime warning.
           toMark.push(selector);
         }
       }

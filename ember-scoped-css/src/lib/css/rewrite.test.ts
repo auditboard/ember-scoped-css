@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { rewriteCss } from './rewrite.js';
 
@@ -686,16 +686,10 @@ describe('attribute selectors', () => {
       );
     });
 
-    it('warns and falls back to a marker for |=', () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
+    it('falls back to a marker for |= (no runtime warning)', () => {
       expect(scopeSelector('[class|="foo"] { color: red; }')).to.equal(
         '[class|="foo"].postfix',
       );
-      expect(warn).toHaveBeenCalledOnce();
-      expect(warn.mock.calls[0][0]).toContain('[class|="foo"]');
-
-      warn.mockRestore();
     });
   });
 
