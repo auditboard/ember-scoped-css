@@ -19,7 +19,6 @@ module('example', function (hooks) {
         scopedClass('green', 'v2-addon-bundled/components/from-direct/example'),
       );
 
-    // attribute selector: the button is marked via the scope class
     assert.dom('button').hasStyle({ color: 'rgb(10, 20, 30)' });
     assert
       .dom('button')
