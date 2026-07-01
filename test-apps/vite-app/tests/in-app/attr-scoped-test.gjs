@@ -20,7 +20,7 @@ module('[In App] attr-scoped', function (hooks) {
   });
 
   test('scopes a component invocation matched by an attribute selector', async function (assert) {
-    // The marker class reaches the child's root element through `...attributes`
+    // The generated scoping class reaches the child's root element through `...attributes`
     // the same way the `data-variant` attribute does, so the parent's
     // `[data-variant="primary"]` rule applies to it.
     await render(CallsChild);

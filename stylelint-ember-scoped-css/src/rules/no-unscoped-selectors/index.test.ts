@@ -24,7 +24,7 @@ testRule({
     { code: ':where(.class, tag) {}' },
     { code: ':where(tag) {}' },
 
-    // Attribute selectors are scoped (marker class, or renamed value for class)
+    // Attribute selectors are scoped (generated class, or renamed value for class)
     { code: '[attr] {}' },
     { code: '[attr] [attr2] {}' },
     { code: 'tag[attr] {}' },

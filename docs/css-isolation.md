@@ -238,7 +238,7 @@ will become
 
 ## Attribute selectors
 
-Attribute selectors like `[disabled]`, `[type="text"]`, and `[data-state="open"]` are scoped the same way bare tag selectors are. The original selector is kept and a generated marker class is added, and every matching native element in the template gets that same class.
+Attribute selectors like `[disabled]`, `[type="text"]`, and `[data-state="open"]` are scoped the same way bare tag selectors are. The original selector is kept and the generated class is added to it, and every matching element in the template gets that same class.
 
 Input:
 
@@ -268,7 +268,7 @@ Output:
 }
 ```
 
-When an attribute selector targets the `class` attribute and the value is a real class name (`[class="foo"]` or `[class~="foo"]`) the value is renamed instead of adding a marker class, because `.foo` is itself renamed to `.foo_generated-first`.
+When an attribute selector targets the `class` attribute and the value is a real class name (`[class="foo"]` or `[class~="foo"]`) the value is renamed instead of adding the generated class, because `.foo` is itself renamed to `.foo_generated-first`.
 
 ```css
 /* components/first.css */
@@ -286,15 +286,15 @@ becomes
 }
 ```
 
-Component invocations are marked too. A component receives the marker class through its `...attributes` the same way it receives the matched attribute, so `[type='text']` scopes `<Foo type="text" />` just as it scopes `<input type="text" />`. Named arguments such as `@type` are not HTML attributes, and `...attributes` carries an unknown set of attributes, so neither is matched.
+Component invocations are scoped too. A component receives the generated class through its `...attributes` the same way it receives the matched attribute, so `[type='text']` scopes `<Foo type="text" />` just as it scopes `<input type="text" />`. Named arguments such as `@type` are not HTML attributes, and `...attributes` carries an unknown set of attributes, so neither is matched.
 
 ## Known limitations
 
-These limitations come from the marker class approach and apply to bare tag selectors as well as attribute selectors.
+These limitations come from the generated-class approach and apply to bare tag selectors as well as attribute selectors.
 
 ### Standalone negation leaks
 
-The marker class is a positive signal that an element belongs to a component. A negation like `:not(...)` inverts its contents, so when the marker class is added inside the `:not()` it no longer anchors the scope. A selector that is only a negation has nothing left to anchor it and ends up matching the whole document.
+The generated class is a positive signal that an element belongs to a component. A negation like `:not(...)` inverts its contents, so when the generated class is added inside the `:not()` it no longer anchors the scope. A selector that is only a negation has nothing left to anchor it and ends up matching the whole document.
 
 ```css
 /* components/first.css */
@@ -324,4 +324,4 @@ Both rules now match every element that isn't a disabled (or `div`) element in t
 
 `[class$="foo"]` matches the end of the class string. If the matched class is also renamed through its own `.foo` selector its suffix becomes `_generated-first` and the selector no longer matches. This can't be detected at build time, so it is left as a known edge case.
 
-`[class|="foo"]` can't be expressed precisely once classes are renamed, so it is scoped with a marker class only and may not behave exactly as written. The `ember-scoped-css/no-unscopable-class-attribute-selector` stylelint rule flags it so it is caught before it ships.
+`[class|="foo"]` can't be expressed precisely once classes are renamed, so it is scoped with the generated class only and may not behave exactly as written. The `ember-scoped-css/no-unscopable-class-attribute-selector` stylelint rule flags it so it is caught before it ships.

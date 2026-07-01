@@ -23,7 +23,7 @@ div {
 ```
 
 ```css
-/* Attribute selectors are scoped (marker class, or renamed value for class) */
+/* Attribute selectors are scoped (generated class, or renamed value for class) */
 [data-test] {
 }
 .btn [data-test] {

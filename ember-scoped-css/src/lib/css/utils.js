@@ -115,12 +115,18 @@ function getClassesAndTags(sel, classes, tags, attributes) {
         ) {
           // Bucket A: the value names real class(es), which get renamed in the
           // template. Register them as classes so the renaming happens.
+          //
+          // postcss-selector-parser exposes the attribute value only as an
+          // opaque string, so splitting `[class="foo bar"]` into its
+          // space-separated class names is on us (same tokenization as
+          // `renameClass`).
           for (let token of selector.value.split(/\s+/).filter(Boolean)) {
             classes.add(token);
           }
         } else {
-          // Bucket B: mark elements that carry this attribute. For class-target
-          // operators (^=, *=, $=, |=) and presence, the name is `class`.
+          // Bucket B: elements carrying this attribute get the postfix class.
+          // For class-target operators (^=, *=, $=, |=) and presence, the
+          // name is `class`.
           attributes.add(selector.attribute);
         }
       }
@@ -144,34 +150,34 @@ if (import.meta.vitest) {
     expect([...tags]).to.have.members(['div']);
   });
 
-  it('collects attribute names for marker-based scoping', function () {
+  it('collects attribute names for postfix-class scoping', function () {
     const css = '[disabled] [data-x="y"] { color: red; }';
     const { attributes } = getCSSContentInfo(css);
 
-    expect([...attributes]).to.have.members(['disabled', 'data-x']);
+    expect(attributes).to.deep.equal(new Set(['disabled', 'data-x']));
   });
 
   it('treats =/~= class attribute values as renamed classes', function () {
     const css = '[class="foo bar"] [class~="baz"] { color: red; }';
     const { classes, attributes } = getCSSContentInfo(css);
 
-    expect([...classes]).to.have.members(['foo', 'bar', 'baz']);
-    expect(attributes.size).to.equal(0);
+    expect(classes).to.deep.equal(new Set(['foo', 'bar', 'baz']));
+    expect(attributes).to.deep.equal(new Set());
   });
 
-  it('treats other class attribute operators as marker attributes', function () {
+  it('treats other class attribute operators as postfix-class attributes', function () {
     const css = '[class^="foo"] [class*="bar"] { color: red; }';
     const { classes, attributes } = getCSSContentInfo(css);
 
-    expect(classes.size).to.equal(0);
-    expect([...attributes]).to.have.members(['class']);
+    expect(classes).to.deep.equal(new Set());
+    expect(attributes).to.deep.equal(new Set(['class']));
   });
 
   it('ignores attribute selectors inside :global', function () {
     const css = ':global([data-x]) [data-y] { color: red; }';
     const { attributes } = getCSSContentInfo(css);
 
-    expect([...attributes]).to.have.members(['data-y']);
+    expect(attributes).to.deep.equal(new Set(['data-y']));
   });
 
   it('should parse SCSS nesting syntax without crashing when lang=scss', function () {

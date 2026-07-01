@@ -2,7 +2,7 @@
 
 Disallows `[class|="..."]` attribute selectors, which cannot be reliably scoped by ember-scoped-css.
 
-ember-scoped-css renames classes by appending a per-file suffix (`.foo` becomes `.foo_generated`). The `|=` operator matches a value that is either exactly equal to the given string or begins with it followed by a hyphen, which no longer holds once the class has been renamed. Unlike `=` and `~=` (whose values are rewritten to the renamed class), a `|=` value cannot be rewritten precisely, so the selector is scoped with a marker class only and may not match as written.
+ember-scoped-css renames classes by appending a per-file suffix (`.foo` becomes `.foo_generated`). The `|=` operator matches a value that is either exactly equal to the given string or begins with it followed by a hyphen, which no longer holds once the class has been renamed. Unlike `=` and `~=` (whose values are rewritten to the renamed class), a `|=` value cannot be rewritten precisely, so the selector is scoped with the generated class only and may not match as written.
 
 ## Options
 

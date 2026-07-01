@@ -3,24 +3,18 @@ import * as recast from 'ember-template-recast';
 import { renameClass } from './renameClass.js';
 
 /**
- * Whether an element carries a statically-named attribute that appears in a
- * scoped attribute selector. This includes component invocations: a component
- * receives the marker class through its `...attributes` the same way it
- * receives the matched attribute, so `[type="text"]` scopes `<Foo type="text">`
- * just as it scopes `<input type="text">`. Splattributes (`...attributes`)
- * carry an unknown set of attributes and `@args` are component arguments, so
- * neither counts as a matchable attribute.
+ * Whether an element carries an attribute that appears in a scoped attribute
+ * selector. This includes component invocations: a component receives the
+ * postfix class through its `...attributes` the same way it receives the
+ * matched attribute, so `[type="text"]` scopes `<Foo type="text">` just as it
+ * scopes `<input type="text">`.
+ *
+ * `attributes` comes from parsing the CSS, so it can only contain valid
+ * attribute-selector names — `@args` and `...attributes` can never be in it
+ * and need no special handling.
  */
 function elementHasScopedAttribute(node, attributes) {
-  if (attributes.size === 0) return false;
-
-  return node.attributes.some((attr) => {
-    let name = attr.name;
-
-    if (name === '...attributes' || name.startsWith('@')) return false;
-
-    return attributes.has(name);
-  });
+  return node.attributes.some((attr) => attributes.has(attr.name));
 }
 
 export function templatePlugin({ classes, tags, attributes, postfix }) {
@@ -69,7 +63,7 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     ElementNode(node) {
       // An element is in scope if its tag matches a tag selector, or if it
       // carries an attribute named in a scoped attribute selector. We add the
-      // marker class at most once regardless of how many things matched.
+      // postfix class at most once regardless of how many things matched.
       const shouldScope =
         tags.has(node.tag) || elementHasScopedAttribute(node, attributes);
 

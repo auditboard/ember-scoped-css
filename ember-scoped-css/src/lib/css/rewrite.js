@@ -37,11 +37,11 @@ function rewriteReferenceable(node, postfix) {
 /**
  * Class-targeting attribute selectors whose value is a real class name
  * (`[class="foo"]`, `[class~="foo"]`) are scoped by renaming the value the same
- * way `.foo` is renamed to `.foo_postfix`. The renamed token is unique, so no
- * marker class is needed (mirrors the class-renaming strategy).
+ * way `.foo` is renamed to `.foo_postfix`. The renamed token is unique, so the
+ * postfix class is not needed (mirrors the class-renaming strategy).
  *
- * Every other attribute selector keeps its discriminator and is scoped with a
- * marker class (mirrors the tag strategy: `div` -> `div.postfix`).
+ * Every other attribute selector keeps its discriminator and is scoped by
+ * adding the postfix class (mirrors the tag strategy: `div` -> `div.postfix`).
  */
 function isRenamedClassAttribute(node) {
   return (
@@ -53,11 +53,11 @@ function isRenamedClassAttribute(node) {
 
 /**
  * Walk left and right from `node` within its compound selector (bounded by
- * combinators) to see if the marker class has already been added. Used to add
- * the marker at most once per compound, e.g. `input[type="text"]` becomes
- * `input.postfix[type="text"]`, not `input.postfix[type="text"].postfix`.
+ * combinators) to see if the postfix class has already been added. Used to add
+ * the postfix class at most once per compound, e.g. `input[type="text"]`
+ * becomes `input.postfix[type="text"]`, not `input.postfix[type="text"].postfix`.
  */
-function compoundHasMarker(node, postfix) {
+function compoundHasPostfixClass(node, postfix) {
   const siblings = node.parent.nodes;
   const index = siblings.indexOf(node);
 
@@ -76,18 +76,18 @@ function compoundHasMarker(node, postfix) {
   return false;
 }
 
-function addMarker(node, postfix) {
-  if (compoundHasMarker(node, postfix)) return;
+function addPostfixClass(node, postfix) {
+  if (compoundHasPostfixClass(node, postfix)) return;
 
   node.parent.insertAfter(node, parser.className({ value: postfix }));
 }
 
 function rewriteSelector(sel, postfix) {
   const transform = (selectors) => {
-    // Nodes we need to mark with the scope class. We collect them during the
-    // walk and insert markers afterwards so the freshly-inserted marker classes
-    // are never themselves re-visited by the walk.
-    const toMark = [];
+    // Nodes that need the postfix class added next to them. We collect them
+    // during the walk and insert the classes afterwards so the freshly-inserted
+    // classes are never themselves re-visited by the walk.
+    const needsPostfixClass = [];
 
     selectors.walk((selector) => {
       if (isInsideGlobal(selector)) return;
@@ -104,28 +104,30 @@ function rewriteSelector(sel, postfix) {
       if (selector.type === 'class') {
         selector.value += '_' + postfix;
       } else if (selector.type === 'tag') {
-        toMark.push(selector);
+        needsPostfixClass.push(selector);
       } else if (selector.type === 'attribute') {
         if (isRenamedClassAttribute(selector)) {
-          // Bucket A: rewrite the value to track the renamed class. No marker —
-          // the renamed token (e.g. `foo_postfix`) is already unique per file.
+          // Bucket A: rewrite the value to track the renamed class. The
+          // renamed token (e.g. `foo_postfix`) is already unique per file, so
+          // no postfix class is needed.
           selector.value = renameClass(selector.value, postfix);
           if (!selector.quoteMark) selector.quoteMark = '"';
         } else {
-          // Bucket B: keep the discriminator, scope with a marker class.
+          // Bucket B: keep the discriminator, scope with the postfix class.
           //
           // `[class|="foo"]` cannot be fully scoped via renaming and only
-          // matches by the preserved value, so it falls back to a marker like
-          // any other Bucket B selector. That imprecision is surfaced to
-          // authors by the `ember-scoped-css/no-unscopable-class-attribute-selector`
+          // matches by the preserved value, so it falls back to the postfix
+          // class like any other Bucket B selector. That imprecision is
+          // surfaced to authors by the
+          // `ember-scoped-css/no-unscopable-class-attribute-selector`
           // stylelint rule rather than a runtime warning.
-          toMark.push(selector);
+          needsPostfixClass.push(selector);
         }
       }
     });
 
-    for (const node of toMark) {
-      addMarker(node, postfix);
+    for (const node of needsPostfixClass) {
+      addPostfixClass(node, postfix);
     }
 
     // remove :global

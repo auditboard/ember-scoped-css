@@ -10,7 +10,7 @@ const messages = stylelint.utils.ruleMessages(ruleName, {
   rejected: (selector) =>
     `Class attribute selector "${selector}" cannot be reliably scoped. ` +
     `The \`|=\` operator does not survive class renaming, so the rule is ` +
-    `scoped by a marker class only and may not match as written. Use a class ` +
+    `scoped by the generated class only and may not match as written. Use a class ` +
     `selector (e.g. \`.foo\`) instead.`,
 });
 
