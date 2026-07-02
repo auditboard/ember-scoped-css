@@ -288,10 +288,62 @@ becomes
 
 Component invocations are scoped too. A component receives the generated class through its `...attributes` the same way it receives the matched attribute, so `[type='text']` scopes `<Foo type="text" />` just as it scopes `<input type="text" />`. Named arguments such as `@type` are not HTML attributes, and `...attributes` carries an unknown set of attributes, so neither is matched.
 
-Two things to be aware of with this forwarding:
+Two things to be aware of with this forwarding.
 
-- Elements are matched by attribute **name**, not value: `<Foo data-variant="secondary" />` receives the generated class even if the CSS only has `[data-variant="primary"]` (the preserved attribute selector still decides which rule actually applies).
-- The generated class is shared by every selector in the file that is scoped with it. Once it reaches the child's root element through `...attributes`, that element matches **all** of the file's generated-class rules — including bare tag rules like `button { }` — not just the attribute rule that caused it to be forwarded.
+First, elements are matched by attribute **name**, not value. Given this CSS:
+
+```css
+/* components/first.css */
+[data-variant='primary'] {
+  ...;
+}
+```
+
+both of these invocations receive the generated class:
+
+```html
+<!-- components/first.hbs -->
+<Foo data-variant="primary" />
+<Foo data-variant="secondary" />
+```
+
+```html
+<!-- output -->
+<Foo data-variant="primary" class="generated-first" />
+<Foo data-variant="secondary" class="generated-first" />
+```
+
+This is harmless for the rule itself — the preserved `[data-variant='primary']` still decides which elements are styled — but it feeds into the second point.
+
+Second, the generated class is shared by every selector in the file that is scoped with it. Once it reaches the child's root element through `...attributes`, that element matches **all** of the file's generated-class rules — including bare tag rules — not just the attribute rule that caused it to be forwarded:
+
+```css
+/* components/first.css */
+[data-variant='primary'] {
+  color: blue;
+}
+button {
+  color: red;
+}
+```
+
+```html
+<!-- components/first.hbs -->
+<Child data-variant="primary" />
+```
+
+```html
+<!-- components/child.hbs -->
+<button ...attributes>...</button>
+```
+
+renders as
+
+```html
+<button data-variant="primary" class="generated-first">...</button>
+```
+
+which matches both `[data-variant='primary'].generated-first` **and** `button.generated-first` — the parent's plain `button` rule now styles the child's root element, which a plain `<button>` inside the child never would be.
 
 ## Known limitations
 

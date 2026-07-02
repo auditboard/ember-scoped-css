@@ -138,8 +138,7 @@ function collectSelectorInfo(sel, classes, tags, attributes) {
         tags.add(selector.value);
       } else if (selector.type === 'attribute') {
         if (isRenamedClassAttribute(selector)) {
-          // Renamed-value strategy: register the value's class names so the
-          // template renames them.
+          // Register the value's class names so the template renames them.
           //
           // postcss-selector-parser exposes the attribute value only as an
           // opaque string, so splitting `[class="foo bar"]` into its
@@ -149,9 +148,9 @@ function collectSelectorInfo(sel, classes, tags, attributes) {
             classes.add(token);
           }
         } else {
-          // Postfix-class strategy: elements carrying this attribute get the
-          // postfix class. For class-target operators (^=, *=, $=, |=) and
-          // presence, the name is `class`.
+          // Elements carrying this attribute get the postfix class. For
+          // class-target operators (^=, *=, $=, |=) and presence, the name
+          // is `class`.
           //
           // CSS matches HTML attribute names case-insensitively, so store the
           // name lowercased and compare against lowercased template attribute

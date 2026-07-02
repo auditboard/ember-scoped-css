@@ -89,19 +89,15 @@ function rewriteSelector(sel, postfix) {
       } else if (selector.type === 'tag') {
         needsPostfixClass.push(selector);
       } else if (selector.type === 'attribute') {
-        // See `isRenamedClassAttribute` for the two scoping strategies.
         if (isRenamedClassAttribute(selector)) {
-          // Renamed-value strategy: the renamed token (e.g. `foo_postfix`) is
-          // already unique per file, so no postfix class is needed.
+          // The renamed token (e.g. `foo_postfix`) is already unique per
+          // file, so no postfix class is needed.
           selector.value = renameClass(selector.value, postfix);
           if (!selector.quoteMark) selector.quoteMark = '"';
         } else {
-          // Postfix-class strategy: keep the discriminator, scope with the
-          // postfix class.
-          //
           // `[class|="foo"]` and `[class$="foo"]` cannot be reliably scoped
-          // this way (the postfix class defeats them). That is surfaced to
-          // authors by the
+          // with the postfix class (the postfix class defeats them). That is
+          // surfaced to authors by the
           // `ember-scoped-css/no-unscopable-class-attribute-selectors`
           // stylelint rule rather than a runtime warning.
           needsPostfixClass.push(selector);
