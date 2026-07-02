@@ -238,7 +238,7 @@ will become
 
 ## Attribute selectors
 
-Attribute selectors like `[disabled]`, `[type="text"]`, and `[data-state="open"]` are scoped the same way bare tag selectors are. The original selector is kept and the generated class is added to it, and every matching element in the template gets that same class.
+Attribute selectors like `[disabled]`, `[type="text"]`, and `[data-state="open"]` are scoped the same way bare tag selectors are. The original selector is kept and the generated class — a per-file hash, `e55555f9d` for `components/first` throughout these examples — is added to it, and every matching element in the template gets that same class.
 
 Input:
 
@@ -258,17 +258,17 @@ Output:
 
 ```html
 <!-- components/first.hbs -->
-<input type="text" class="generated-first" />
+<input type="text" class="e55555f9d" />
 ```
 
 ```css
 /* components/first.css */
-[type='text'].generated-first {
+[type='text'].e55555f9d {
   ...;
 }
 ```
 
-When an attribute selector targets the `class` attribute and the value is a real class name (`[class="foo"]` or `[class~="foo"]`) the value is renamed instead of adding the generated class, because `.foo` is itself renamed to `.foo_generated-first`.
+When an attribute selector targets the `class` attribute and the value is a real class name (`[class="foo"]` or `[class~="foo"]`) the value is renamed instead of adding the generated class, because `.foo` is itself renamed to `.foo_e55555f9d`.
 
 ```css
 /* components/first.css */
@@ -281,7 +281,7 @@ becomes
 
 ```css
 /* components/first.css */
-[class~='foo_generated-first'] {
+[class~='foo_e55555f9d'] {
   ...;
 }
 ```
@@ -311,15 +311,15 @@ Output — both invocations receive the generated class:
 
 ```css
 /* components/first.css */
-[data-variant='primary'].generated-first {
+[data-variant='primary'].e55555f9d {
   ...;
 }
 ```
 
 ```html
 <!-- components/first.hbs -->
-<Foo data-variant="primary" class="generated-first" />
-<Foo data-variant="secondary" class="generated-first" />
+<Foo data-variant="primary" class="e55555f9d" />
+<Foo data-variant="secondary" class="e55555f9d" />
 ```
 
 This is harmless for the rule itself — the preserved `[data-variant='primary']` still decides which elements are styled — but it feeds into the second point.
@@ -352,20 +352,20 @@ Output:
 
 ```css
 /* components/first.css */
-[data-variant='primary'].generated-first {
+[data-variant='primary'].e55555f9d {
   color: blue;
 }
-button.generated-first {
+button.e55555f9d {
   color: red;
 }
 ```
 
 ```html
 <!-- rendered -->
-<button data-variant="primary" class="generated-first">...</button>
+<button data-variant="primary" class="e55555f9d">...</button>
 ```
 
-The rendered button matches both `[data-variant='primary'].generated-first` **and** `button.generated-first` — the parent's plain `button` rule now styles the child's root element, which a plain `<button>` inside the child never would be.
+The rendered button matches both `[data-variant='primary'].e55555f9d` **and** `button.e55555f9d` — the parent's plain `button` rule now styles the child's root element, which a plain `<button>` inside the child never would be.
 
 ## Known limitations
 
@@ -389,15 +389,15 @@ becomes
 
 ```css
 /* components/first.css */
-:not([disabled].generated-first) {
+:not([disabled].e55555f9d) {
   ...;
 }
-:not(div.generated-first) {
+:not(div.e55555f9d) {
   ...;
 }
 ```
 
-Both rules now match every element that isn't a disabled (or `div`) element in the current component, including elements in other components and the rest of the page. As long as the negation has a positive anchor in the same compound the scope is preserved, so `button:not([disabled])` becomes `button.generated-first:not([disabled].generated-first)` and stays scoped. The `ember-scoped-css/no-unscoped-selectors` stylelint rule flags standalone negations so this is caught before it ships.
+Both rules now match every element that isn't a disabled (or `div`) element in the current component, including elements in other components and the rest of the page. As long as the negation has a positive anchor in the same compound the scope is preserved, so `button:not([disabled])` becomes `button.e55555f9d:not([disabled].e55555f9d)` and stays scoped. The `ember-scoped-css/no-unscoped-selectors` stylelint rule flags standalone negations so this is caught before it ships.
 
 ### Attributes that only appear at runtime
 
@@ -422,4 +422,4 @@ If you are upgrading: attribute selectors used to be left untouched, so a rule l
 
 `[class$="foo"]` matches the end of the class string, but the generated class is appended to the end of the class attribute of every element the file scopes, so the selector can never match once it is scoped. `[class|="foo"]` can't be expressed precisely once classes are renamed, so it is scoped with the generated class only and may not behave exactly as written. The `ember-scoped-css/no-unscopable-class-attribute-selectors` stylelint rule flags both so they are caught before they ship.
 
-`[class="foo"]` is renamed to `[class="foo_generated-first"]`, which is an *exact* match of the whole attribute value. If the same element is also scoped by a tag or attribute selector in the file it additionally receives the generated class, the value becomes `"foo_generated-first generated-first"`, and the exact match no longer holds. Prefer `[class~="foo"]` (token match), which is unaffected.
+`[class="foo"]` is renamed to `[class="foo_e55555f9d"]`, which is an *exact* match of the whole attribute value. If the same element is also scoped by a tag or attribute selector in the file it additionally receives the generated class, the value becomes `"foo_e55555f9d e55555f9d"`, and the exact match no longer holds. Prefer `[class~="foo"]` (token match), which is unaffected.
