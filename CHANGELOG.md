@@ -1,5 +1,17 @@
 # Changelog
 
+## Release (2026-07-02)
+
+* ember-scoped-css 3.0.0 (major)
+* stylelint-ember-scoped-css 2.0.0 (major)
+
+#### :boom: Breaking Change
+* `ember-scoped-css`, `stylelint-ember-scoped-css`
+  * [#393](https://github.com/auditboard/ember-scoped-css/pull/393) feat: scope attribute selectors ([@adrianbw](https://github.com/adrianbw))
+
+#### Committers: 1
+- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))
+
 ## Release (2026-03-23)
 
 * ember-scoped-css 2.2.2 (patch)

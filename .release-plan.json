@@ -1,21 +1,31 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "patch",
-      "oldVersion": "2.2.1",
-      "newVersion": "2.2.2",
+      "impact": "major",
+      "oldVersion": "2.2.2",
+      "newVersion": "3.0.0",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "oldVersion": "1.0.2"
+      "impact": "major",
+      "oldVersion": "1.0.2",
+      "newVersion": "2.0.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
+        }
+      ],
+      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
     }
   },
-  "description": "## Release (2026-03-23)\n\n* ember-scoped-css 2.2.2 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#388](https://github.com/auditboard/ember-scoped-css/pull/388) Fix createRequire for colocated plugin ([@evoactivity](https://github.com/evoactivity))\n\n#### Committers: 1\n- Liam ([@evoactivity](https://github.com/evoactivity))\n"
+  "description": "## Release (2026-07-02)\n\n* ember-scoped-css 3.0.0 (major)\n* stylelint-ember-scoped-css 2.0.0 (major)\n\n#### :boom: Breaking Change\n* `ember-scoped-css`, `stylelint-ember-scoped-css`\n  * [#393](https://github.com/auditboard/ember-scoped-css/pull/393) feat: scope attribute selectors ([@adrianbw](https://github.com/adrianbw))\n\n#### Committers: 1\n- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))\n"
 }
