@@ -60,31 +60,31 @@ describe('attribute selectors', () => {
   });
 
   describe('class-targeting operators', () => {
-    it('rewrites the value for ~= (Bucket A, no postfix class)', () => {
+    it('rewrites the value for ~= (renamed value, no postfix class)', () => {
       expect(scopeSelector('[class~="foo"] { color: red; }')).to.equal(
         '[class~="foo_postfix"]',
       );
     });
 
-    it('rewrites every token for = (Bucket A, no postfix class)', () => {
+    it('rewrites every token for = (renamed value, no postfix class)', () => {
       expect(scopeSelector('[class="foo bar"] { color: red; }')).to.equal(
         '[class="foo_postfix bar_postfix"]',
       );
     });
 
-    it('keeps the value and adds the postfix class for ^= (Bucket B)', () => {
+    it('keeps the value and adds the postfix class for ^=', () => {
       expect(scopeSelector('[class^="foo"] { color: red; }')).to.equal(
         '[class^="foo"].postfix',
       );
     });
 
-    it('keeps the value and adds the postfix class for *= (Bucket B)', () => {
+    it('keeps the value and adds the postfix class for *=', () => {
       expect(scopeSelector('[class*="foo"] { color: red; }')).to.equal(
         '[class*="foo"].postfix',
       );
     });
 
-    it('keeps the value and adds the postfix class for $= (Bucket B)', () => {
+    it('keeps the value and adds the postfix class for $=', () => {
       expect(scopeSelector('[class$="foo"] { color: red; }')).to.equal(
         '[class$="foo"].postfix',
       );

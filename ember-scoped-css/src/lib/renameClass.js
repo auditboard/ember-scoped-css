@@ -1,4 +1,15 @@
 /**
+ * Splits a space-separated class list (the value of a `class` attribute or of
+ * a `[class="..."]` selector) into its individual class names.
+ *
+ * @param {string} classList
+ * @returns {string[]}
+ */
+export function splitClassList(classList) {
+  return classList.split(/\s+/).filter(Boolean);
+}
+
+/**
  *
  * @param {string} className
  * @param {string} postfix
@@ -6,10 +17,7 @@
  * @returns
  */
 export function renameClass(className, postfix, classesInCss) {
-  const classes = className.split(/\s+/);
-  const renamedClasses = classes
-    .filter((c) => c)
-    .map((c) => c.trim())
+  const renamedClasses = splitClassList(className)
     .map((c) => {
       if (!classesInCss || classesInCss.has(c)) {
         if (c.endsWith(postfix)) return c;

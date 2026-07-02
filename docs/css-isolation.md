@@ -288,6 +288,11 @@ becomes
 
 Component invocations are scoped too. A component receives the generated class through its `...attributes` the same way it receives the matched attribute, so `[type='text']` scopes `<Foo type="text" />` just as it scopes `<input type="text" />`. Named arguments such as `@type` are not HTML attributes, and `...attributes` carries an unknown set of attributes, so neither is matched.
 
+Two things to be aware of with this forwarding:
+
+- Elements are matched by attribute **name**, not value: `<Foo data-variant="secondary" />` receives the generated class even if the CSS only has `[data-variant="primary"]` (the preserved attribute selector still decides which rule actually applies).
+- The generated class is shared by every selector in the file that is scoped with it. Once it reaches the child's root element through `...attributes`, that element matches **all** of the file's generated-class rules — including bare tag rules like `button { }` — not just the attribute rule that caused it to be forwarded.
+
 ## Known limitations
 
 These limitations come from the generated-class approach and apply to bare tag selectors as well as attribute selectors.
@@ -320,8 +325,27 @@ becomes
 
 Both rules now match every element that isn't a disabled (or `div`) element in the current component, including elements in other components and the rest of the page. As long as the negation has a positive anchor in the same compound the scope is preserved, so `button:not([disabled])` becomes `button.generated-first:not([disabled].generated-first)` and stays scoped. The `ember-scoped-css/no-unscoped-selectors` stylelint rule flags standalone negations so this is caught before it ships.
 
+### Attributes that only appear at runtime
+
+Scoping looks at the attributes written literally in the template. An attribute that arrives some other way — through `...attributes` from a caller, or set by a modifier — is not visible at build time, so the element does not receive the generated class and the rule matches nothing:
+
+```css
+/* components/first.css */
+[disabled] {
+  ...;
+}
+```
+
+```html
+<!-- components/first.hbs -->
+<button ...attributes>...</button>
+<!-- `disabled` arrives from the caller; the button is never scoped -->
+```
+
+If you are upgrading: attribute selectors used to be left untouched, so a rule like this leaked into other components but *appeared* to work on elements like the one above. Now that attribute selectors are scoped, the same rule applies to nothing. Add the attribute (or a class) to the element in the component's own template, or use `:global(...)` if the rule is intentionally global.
+
 ### Class attribute operators
 
-`[class$="foo"]` matches the end of the class string. If the matched class is also renamed through its own `.foo` selector its suffix becomes `_generated-first` and the selector no longer matches. This can't be detected at build time, so it is left as a known edge case.
+`[class$="foo"]` matches the end of the class string, but the generated class is appended to the end of the class attribute of every element the file scopes, so the selector can never match once it is scoped. `[class|="foo"]` can't be expressed precisely once classes are renamed, so it is scoped with the generated class only and may not behave exactly as written. The `ember-scoped-css/no-unscopable-class-attribute-selectors` stylelint rule flags both so they are caught before they ship.
 
-`[class|="foo"]` can't be expressed precisely once classes are renamed, so it is scoped with the generated class only and may not behave exactly as written. The `ember-scoped-css/no-unscopable-class-attribute-selector` stylelint rule flags it so it is caught before it ships.
+`[class="foo"]` is renamed to `[class="foo_generated-first"]`, which is an *exact* match of the whole attribute value. If the same element is also scoped by a tag or attribute selector in the file it additionally receives the generated class, the value becomes `"foo_generated-first generated-first"`, and the exact match no longer holds. Prefer `[class~="foo"]` (token match), which is unaffected.

@@ -6,7 +6,7 @@ import postcss from 'postcss';
 import parser from 'postcss-selector-parser';
 
 import { renameClass } from '../renameClass.js';
-import { isInsideGlobal } from './utils.js';
+import { isInsideGlobal, isRenamedClassAttribute } from './utils.js';
 
 const SEP = '__';
 
@@ -32,23 +32,6 @@ function rewriteReferenceable(node, postfix) {
     originalName,
     postfixedName,
   };
-}
-
-/**
- * Class-targeting attribute selectors whose value is a real class name
- * (`[class="foo"]`, `[class~="foo"]`) are scoped by renaming the value the same
- * way `.foo` is renamed to `.foo_postfix`. The renamed token is unique, so the
- * postfix class is not needed (mirrors the class-renaming strategy).
- *
- * Every other attribute selector keeps its discriminator and is scoped by
- * adding the postfix class (mirrors the tag strategy: `div` -> `div.postfix`).
- */
-function isRenamedClassAttribute(node) {
-  return (
-    node.attribute === 'class' &&
-    (node.operator === '=' || node.operator === '~=') &&
-    Boolean(node.value)
-  );
 }
 
 /**
@@ -106,20 +89,20 @@ function rewriteSelector(sel, postfix) {
       } else if (selector.type === 'tag') {
         needsPostfixClass.push(selector);
       } else if (selector.type === 'attribute') {
+        // See `isRenamedClassAttribute` for the two scoping strategies.
         if (isRenamedClassAttribute(selector)) {
-          // Bucket A: rewrite the value to track the renamed class. The
-          // renamed token (e.g. `foo_postfix`) is already unique per file, so
-          // no postfix class is needed.
+          // Renamed-value strategy: the renamed token (e.g. `foo_postfix`) is
+          // already unique per file, so no postfix class is needed.
           selector.value = renameClass(selector.value, postfix);
           if (!selector.quoteMark) selector.quoteMark = '"';
         } else {
-          // Bucket B: keep the discriminator, scope with the postfix class.
+          // Postfix-class strategy: keep the discriminator, scope with the
+          // postfix class.
           //
-          // `[class|="foo"]` cannot be fully scoped via renaming and only
-          // matches by the preserved value, so it falls back to the postfix
-          // class like any other Bucket B selector. That imprecision is
-          // surfaced to authors by the
-          // `ember-scoped-css/no-unscopable-class-attribute-selector`
+          // `[class|="foo"]` and `[class$="foo"]` cannot be reliably scoped
+          // this way (the postfix class defeats them). That is surfaced to
+          // authors by the
+          // `ember-scoped-css/no-unscopable-class-attribute-selectors`
           // stylelint rule rather than a runtime warning.
           needsPostfixClass.push(selector);
         }

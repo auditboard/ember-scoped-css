@@ -28,6 +28,12 @@ describe('attribute scoping', () => {
     ).to.equal('<input type="text" class="foo pfx">');
   });
 
+  it('matches attribute names case-insensitively, like CSS does', () => {
+    expect(scopeByAttribute('<input TYPE="text">', ['type'])).to.equal(
+      '<input TYPE="text" class="pfx">',
+    );
+  });
+
   it('does not scope elements without the scoped attribute', () => {
     expect(scopeByAttribute('<a href="/x">link</a>', ['type'])).to.equal(
       '<a href="/x">link</a>',
@@ -59,6 +65,32 @@ describe('attribute scoping', () => {
       expect(scopeByAttribute('<foo.bar type="text" />', ['type'])).to.equal(
         '<foo.bar type="text" class="pfx" />',
       );
+    });
+  });
+
+  describe('dynamic class values still receive the postfix class', () => {
+    it('appends to a mustache class by wrapping it in a concat', () => {
+      expect(
+        scopeByAttribute('<input type="text" class={{this.cls}}>', ['type']),
+      ).to.equal('<input type="text" class="{{this.cls}} pfx">');
+    });
+
+    it('appends to a concat class', () => {
+      expect(
+        scopeByAttribute('<input type="text" class="foo {{bar}}">', ['type']),
+      ).to.equal('<input type="text" class="foo {{bar}} pfx">');
+    });
+
+    it('appends to a mustache class for tag-scoped elements', () => {
+      const out = rewriteHbs(
+        '<div class={{this.cls}}></div>',
+        new Set(),
+        new Set(['div']),
+        postfix,
+        new Set(),
+      );
+
+      expect(out).to.equal('<div class="{{this.cls}} pfx"></div>');
     });
   });
 

@@ -12,9 +12,14 @@ import { renameClass } from './renameClass.js';
  * `attributes` comes from parsing the CSS, so it can only contain valid
  * attribute-selector names — `@args` and `...attributes` can never be in it
  * and need no special handling.
+ *
+ * Names in `attributes` are lowercased at discovery (CSS matches HTML
+ * attribute names case-insensitively), so compare lowercased.
  */
 function elementHasScopedAttribute(node, attributes) {
-  return node.attributes.some((attr) => attributes.has(attr.name));
+  return node.attributes.some((attr) =>
+    attributes.has(attr.name.toLowerCase()),
+  );
 }
 
 export function templatePlugin({ classes, tags, attributes, postfix }) {
@@ -72,13 +77,23 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
       // check if class attribute already exists
       const classAttr = node.attributes.find((attr) => attr.name === 'class');
 
-      if (classAttr) {
-        classAttr.value.chars += ' ' + postfix;
-      } else {
+      if (!classAttr) {
         // push class attribute
         node.attributes.push(
           recast.builders.attr('class', recast.builders.text(postfix)),
         );
+      } else if (classAttr.value.type === 'TextNode') {
+        classAttr.value.chars += ' ' + postfix;
+      } else if (classAttr.value.type === 'ConcatStatement') {
+        // class="foo {{bar}}"
+        classAttr.value.parts.push(recast.builders.text(' ' + postfix));
+      } else {
+        // class={{this.foo}} — wrap in a concat so we can append the text part
+        classAttr.value = recast.builders.concat([
+          classAttr.value,
+          recast.builders.text(' ' + postfix),
+        ]);
+        classAttr.quoteType = '"';
       }
     },
 

@@ -4,6 +4,7 @@ import scssSyntax from 'postcss-scss';
 import parser from 'postcss-selector-parser';
 
 import { md5 } from '../path/md5.js';
+import { splitClassList } from '../renameClass.js';
 
 /**
  * @param {string} css
@@ -11,6 +12,34 @@ import { md5 } from '../path/md5.js';
  */
 export function hash(css) {
   return `css-${md5(css)}`;
+}
+
+/**
+ * Attribute selectors are scoped with one of two strategies:
+ *
+ * - **renamed value**: class-targeting selectors whose value names real
+ *   class(es) (`[class="foo"]`, `[class~="foo"]`) are scoped by renaming the
+ *   value the same way `.foo` is renamed to `.foo_postfix`. The renamed token
+ *   is unique per file, so nothing else is needed.
+ * - **postfix class**: every other attribute selector keeps its discriminator
+ *   and is scoped by the generated postfix class — appended to the selector
+ *   in the CSS and added to matching elements in the template (the same
+ *   strategy bare tag selectors use: `div` becomes `div.postfix`).
+ *
+ * This predicate decides between the two. It is shared by the CSS rewrite
+ * (which renames the selector value) and by discovery in this file (which
+ * registers the value's class names for template renaming) so both sides
+ * always classify a selector the same way.
+ *
+ * @param {import('postcss-selector-parser').Attribute} node
+ * @returns {boolean}
+ */
+export function isRenamedClassAttribute(node) {
+  return (
+    node.attribute === 'class' &&
+    (node.operator === '=' || node.operator === '~=') &&
+    Boolean(node.value)
+  );
 }
 
 export function isInsideGlobal(node, func) {
@@ -59,7 +88,7 @@ export function getCSSContentInfo(css, lang) {
     if (node.type === 'rule') {
       const selector = isScss ? resolveNestedSassSelector(node) : node.selector;
 
-      getClassesAndTags(selector, classes, tags, attributes);
+      collectSelectorInfo(selector, classes, tags, attributes);
     }
   });
 
@@ -98,7 +127,7 @@ function resolveNestedSassSelector(node) {
   return selector.replace(/&/g, resolvedParent);
 }
 
-function getClassesAndTags(sel, classes, tags, attributes) {
+function collectSelectorInfo(sel, classes, tags, attributes) {
   const transform = (sls) => {
     sls.walk((selector) => {
       if (isInsideGlobal(selector)) return;
@@ -108,26 +137,28 @@ function getClassesAndTags(sel, classes, tags, attributes) {
       } else if (selector.type === 'tag') {
         tags.add(selector.value);
       } else if (selector.type === 'attribute') {
-        if (
-          selector.attribute === 'class' &&
-          (selector.operator === '=' || selector.operator === '~=') &&
-          selector.value
-        ) {
-          // Bucket A: the value names real class(es), which get renamed in the
-          // template. Register them as classes so the renaming happens.
+        if (isRenamedClassAttribute(selector)) {
+          // Renamed-value strategy: register the value's class names so the
+          // template renames them.
           //
           // postcss-selector-parser exposes the attribute value only as an
           // opaque string, so splitting `[class="foo bar"]` into its
-          // space-separated class names is on us (same tokenization as
-          // `renameClass`).
-          for (let token of selector.value.split(/\s+/).filter(Boolean)) {
+          // space-separated class names is on us — `splitClassList` is the
+          // same tokenization `renameClass` applies.
+          for (let token of splitClassList(selector.value)) {
             classes.add(token);
           }
         } else {
-          // Bucket B: elements carrying this attribute get the postfix class.
-          // For class-target operators (^=, *=, $=, |=) and presence, the
-          // name is `class`.
-          attributes.add(selector.attribute);
+          // Postfix-class strategy: elements carrying this attribute get the
+          // postfix class. For class-target operators (^=, *=, $=, |=) and
+          // presence, the name is `class`.
+          //
+          // CSS matches HTML attribute names case-insensitively, so store the
+          // name lowercased and compare against lowercased template attribute
+          // names. (Coarser than SVG's case-sensitive matching, but the two
+          // sides always agree; worst case an element gets the postfix class
+          // it didn't strictly need.)
+          attributes.add(selector.attribute.toLowerCase());
         }
       }
     });
@@ -171,6 +202,13 @@ if (import.meta.vitest) {
 
     expect(classes).to.deep.equal(new Set());
     expect(attributes).to.deep.equal(new Set(['class']));
+  });
+
+  it('lowercases attribute names (CSS matches them case-insensitively)', function () {
+    const css = '[TYPE="submit"] { color: red; }';
+    const { attributes } = getCSSContentInfo(css);
+
+    expect(attributes).to.deep.equal(new Set(['type']));
   });
 
   it('ignores attribute selectors inside :global', function () {
