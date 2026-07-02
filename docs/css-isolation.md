@@ -401,7 +401,9 @@ Both rules now match every element that isn't a disabled (or `div`) element in t
 
 ### Attributes that only appear at runtime
 
-Scoping looks at the attributes written literally in the template. An attribute that arrives some other way — through `...attributes` from a caller, or set by a modifier — is not visible at build time, so the element does not receive the generated class and the rule matches nothing:
+Scoping looks at the attributes written literally in the template. An attribute that arrives some other way — through `...attributes` from a caller, or set by a modifier — is not visible at build time, so the element does not receive the generated class and the rule matches nothing.
+
+Input:
 
 ```css
 /* components/first.css */
@@ -413,8 +415,23 @@ Scoping looks at the attributes written literally in the template. An attribute 
 ```html
 <!-- components/first.hbs -->
 <button ...attributes>...</button>
-<!-- `disabled` arrives from the caller; the button is never scoped -->
 ```
+
+Output:
+
+```css
+/* components/first.css */
+[disabled].e55555f9d {
+  ...;
+}
+```
+
+```html
+<!-- components/first.hbs -->
+<button ...attributes>...</button>
+```
+
+The CSS is rewritten, but the template is unchanged — no attribute named `disabled` appears on the button, so it never receives `e55555f9d`. Even when a caller passes `disabled` through `...attributes` at runtime, the rendered button is `<button disabled>` without the generated class, and `[disabled].e55555f9d` matches nothing.
 
 If you are upgrading: attribute selectors used to be left untouched, so a rule like this leaked into other components but *appeared* to work on elements like the one above. Now that attribute selectors are scoped, the same rule applies to nothing. Add the attribute (or a class) to the element in the component's own template, or use `:global(...)` if the rule is intentionally global.
 
