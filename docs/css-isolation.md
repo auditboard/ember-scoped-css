@@ -290,7 +290,9 @@ Component invocations are scoped too. A component receives the generated class t
 
 Two things to be aware of with this forwarding.
 
-First, elements are matched by attribute **name**, not value. Given this CSS:
+First, elements are matched by attribute **name**, not value.
+
+Input:
 
 ```css
 /* components/first.css */
@@ -299,23 +301,32 @@ First, elements are matched by attribute **name**, not value. Given this CSS:
 }
 ```
 
-both of these invocations receive the generated class:
-
 ```html
 <!-- components/first.hbs -->
 <Foo data-variant="primary" />
 <Foo data-variant="secondary" />
 ```
 
+Output — both invocations receive the generated class:
+
+```css
+/* components/first.css */
+[data-variant='primary'].generated-first {
+  ...;
+}
+```
+
 ```html
-<!-- output -->
+<!-- components/first.hbs -->
 <Foo data-variant="primary" class="generated-first" />
 <Foo data-variant="secondary" class="generated-first" />
 ```
 
 This is harmless for the rule itself — the preserved `[data-variant='primary']` still decides which elements are styled — but it feeds into the second point.
 
-Second, the generated class is shared by every selector in the file that is scoped with it. Once it reaches the child's root element through `...attributes`, that element matches **all** of the file's generated-class rules — including bare tag rules — not just the attribute rule that caused it to be forwarded:
+Second, the generated class is shared by every selector in the file that is scoped with it. Once it reaches the child's root element through `...attributes`, that element matches **all** of the file's generated-class rules — including bare tag rules — not just the attribute rule that caused it to be forwarded.
+
+Input:
 
 ```css
 /* components/first.css */
@@ -337,13 +348,24 @@ button {
 <button ...attributes>...</button>
 ```
 
-renders as
+Output:
+
+```css
+/* components/first.css */
+[data-variant='primary'].generated-first {
+  color: blue;
+}
+button.generated-first {
+  color: red;
+}
+```
 
 ```html
+<!-- rendered -->
 <button data-variant="primary" class="generated-first">...</button>
 ```
 
-which matches both `[data-variant='primary'].generated-first` **and** `button.generated-first` — the parent's plain `button` rule now styles the child's root element, which a plain `<button>` inside the child never would be.
+The rendered button matches both `[data-variant='primary'].generated-first` **and** `button.generated-first` — the parent's plain `button` rule now styles the child's root element, which a plain `<button>` inside the child never would be.
 
 ## Known limitations
 
