@@ -23,7 +23,9 @@ div {
 ```
 
 ```css
-/* Combinations of scoped and unscoped selectors */
+/* Attribute selectors are scoped (generated class, or renamed value for class) */
+[data-test] {
+}
 .btn [data-test] {
 }
 .btn:hover {
@@ -47,13 +49,7 @@ div[data-test] {
 The following are examples of patterns that are considered problems:
 
 ```css
-/* Attribute selectors cannot be scoped */
-[data-test] {
-}
-```
-
-```css
-/* Element selectors cannot be scoped */
+/* ID selectors cannot be scoped */
 #container {
 }
 ```
@@ -72,11 +68,11 @@ When this rule reports an error, you have several options:
 
 ```css
 /* ❌ Error */
-[data-test] {
+#container {
 }
 
 /* ✅ Fixed */
-.my-component [data-test] {
+.my-component {
 }
 ```
 
@@ -84,11 +80,11 @@ When this rule reports an error, you have several options:
 
 ```css
 /* ❌ Error */
-[data-test] {
+* {
 }
 
 /* ✅ Fixed */
-div[data-test] {
+div {
 }
 ```
 
@@ -96,11 +92,11 @@ div[data-test] {
 
 ```css
 /* ❌ Error */
-[data-test] {
+#container {
 }
 
 /* ✅ Fixed - applies globally */
-:global([data-test]) {
+:global(#container) {
 }
 ```
 

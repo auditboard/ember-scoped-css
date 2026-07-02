@@ -5,7 +5,8 @@
 import postcss from 'postcss';
 import parser from 'postcss-selector-parser';
 
-import { isInsideGlobal } from './utils.js';
+import { renameClass } from '../renameClass.js';
+import { isInsideGlobal, isRenamedClassAttribute } from './utils.js';
 
 const SEP = '__';
 
@@ -33,8 +34,44 @@ function rewriteReferenceable(node, postfix) {
   };
 }
 
+/**
+ * Walk left and right from `node` within its compound selector (bounded by
+ * combinators) to see if the postfix class has already been added. Used to add
+ * the postfix class at most once per compound, e.g. `input[type="text"]`
+ * becomes `input.postfix[type="text"]`, not `input.postfix[type="text"].postfix`.
+ */
+function compoundHasPostfixClass(node, postfix) {
+  const siblings = node.parent.nodes;
+  const index = siblings.indexOf(node);
+
+  for (let i = index; i >= 0; i--) {
+    if (siblings[i].type === 'combinator') break;
+    if (siblings[i].type === 'class' && siblings[i].value === postfix)
+      return true;
+  }
+
+  for (let i = index + 1; i < siblings.length; i++) {
+    if (siblings[i].type === 'combinator') break;
+    if (siblings[i].type === 'class' && siblings[i].value === postfix)
+      return true;
+  }
+
+  return false;
+}
+
+function addPostfixClass(node, postfix) {
+  if (compoundHasPostfixClass(node, postfix)) return;
+
+  node.parent.insertAfter(node, parser.className({ value: postfix }));
+}
+
 function rewriteSelector(sel, postfix) {
   const transform = (selectors) => {
+    // Nodes that need the postfix class added next to them. We collect them
+    // during the walk and insert the classes afterwards so the freshly-inserted
+    // classes are never themselves re-visited by the walk.
+    const needsPostfixClass = [];
+
     selectors.walk((selector) => {
       if (isInsideGlobal(selector)) return;
 
@@ -50,12 +87,27 @@ function rewriteSelector(sel, postfix) {
       if (selector.type === 'class') {
         selector.value += '_' + postfix;
       } else if (selector.type === 'tag') {
-        selector.replaceWith(
-          parser.tag({ value: selector.value }),
-          parser.className({ value: postfix }),
-        );
+        needsPostfixClass.push(selector);
+      } else if (selector.type === 'attribute') {
+        if (isRenamedClassAttribute(selector)) {
+          // The renamed token (e.g. `foo_postfix`) is already unique per
+          // file, so no postfix class is needed.
+          selector.value = renameClass(selector.value, postfix);
+          if (!selector.quoteMark) selector.quoteMark = '"';
+        } else {
+          // `[class|="foo"]` and `[class$="foo"]` cannot be reliably scoped
+          // with the postfix class (the postfix class defeats them). That is
+          // surfaced to authors by the
+          // `ember-scoped-css/no-unscopable-class-attribute-selectors`
+          // stylelint rule rather than a runtime warning.
+          needsPostfixClass.push(selector);
+        }
       }
     });
+
+    for (const node of needsPostfixClass) {
+      addPostfixClass(node, postfix);
+    }
 
     // remove :global
     selectors.walk((selector) => {

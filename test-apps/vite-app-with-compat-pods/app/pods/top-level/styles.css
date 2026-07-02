@@ -5,3 +5,7 @@
 span {
   font-style: italic;
 }
+
+[type='submit'] {
+  color: rgb(10 20 30);
+}

@@ -235,3 +235,210 @@ will become
   ...;
 }
 ```
+
+## Attribute selectors
+
+Attribute selectors like `[disabled]`, `[type="text"]`, and `[data-state="open"]` are scoped the same way bare tag selectors are. The original selector is kept and the generated class — a per-file hash, `e55555f9d` for `components/first` throughout these examples — is added to it, and every matching element in the template gets that same class.
+
+Input:
+
+```html
+<!-- components/first.hbs -->
+<input type="text" />
+```
+
+```css
+/* components/first.css */
+[type='text'] {
+  ...;
+}
+```
+
+Output:
+
+```html
+<!-- components/first.hbs -->
+<input type="text" class="e55555f9d" />
+```
+
+```css
+/* components/first.css */
+[type='text'].e55555f9d {
+  ...;
+}
+```
+
+When an attribute selector targets the `class` attribute and the value is a real class name (`[class="foo"]` or `[class~="foo"]`) the value is renamed instead of adding the generated class, because `.foo` is itself renamed to `.foo_e55555f9d`.
+
+```css
+/* components/first.css */
+[class~='foo'] {
+  ...;
+}
+```
+
+becomes
+
+```css
+/* components/first.css */
+[class~='foo_e55555f9d'] {
+  ...;
+}
+```
+
+Component invocations are scoped too. A component receives the generated class through its `...attributes` the same way it receives the matched attribute, so `[type='text']` scopes `<Foo type="text" />` just as it scopes `<input type="text" />`. Named arguments such as `@type` are not HTML attributes, and `...attributes` carries an unknown set of attributes, so neither is matched.
+
+Two things to be aware of with this forwarding.
+
+First, elements are matched by attribute **name**, not value.
+
+Input:
+
+```css
+/* components/first.css */
+[data-variant='primary'] {
+  ...;
+}
+```
+
+```html
+<!-- components/first.hbs -->
+<Foo data-variant="primary" />
+<Foo data-variant="secondary" />
+```
+
+Output — both invocations receive the generated class:
+
+```css
+/* components/first.css */
+[data-variant='primary'].e55555f9d {
+  ...;
+}
+```
+
+```html
+<!-- components/first.hbs -->
+<Foo data-variant="primary" class="e55555f9d" />
+<Foo data-variant="secondary" class="e55555f9d" />
+```
+
+This is harmless for the rule itself — the preserved `[data-variant='primary']` still decides which elements are styled — but it feeds into the second point.
+
+Second, the generated class is shared by every selector in the file that is scoped with it. Once it reaches the child's root element through `...attributes`, that element matches **all** of the file's generated-class rules — including bare tag rules — not just the attribute rule that caused it to be forwarded.
+
+Input:
+
+```css
+/* components/first.css */
+[data-variant='primary'] {
+  color: blue;
+}
+button {
+  color: red;
+}
+```
+
+```html
+<!-- components/first.hbs -->
+<Child data-variant="primary" />
+```
+
+```html
+<!-- components/child.hbs -->
+<button ...attributes>...</button>
+```
+
+Output:
+
+```css
+/* components/first.css */
+[data-variant='primary'].e55555f9d {
+  color: blue;
+}
+button.e55555f9d {
+  color: red;
+}
+```
+
+```html
+<!-- rendered -->
+<button data-variant="primary" class="e55555f9d">...</button>
+```
+
+The rendered button matches both `[data-variant='primary'].e55555f9d` **and** `button.e55555f9d` — the parent's plain `button` rule now styles the child's root element, which a plain `<button>` inside the child never would be.
+
+## Known limitations
+
+These limitations come from the generated-class approach and apply to bare tag selectors as well as attribute selectors.
+
+### Standalone negation leaks
+
+The generated class is a positive signal that an element belongs to a component. A negation like `:not(...)` inverts its contents, so when the generated class is added inside the `:not()` it no longer anchors the scope. A selector that is only a negation has nothing left to anchor it and ends up matching the whole document.
+
+```css
+/* components/first.css */
+:not([disabled]) {
+  ...;
+}
+:not(div) {
+  ...;
+}
+```
+
+becomes
+
+```css
+/* components/first.css */
+:not([disabled].e55555f9d) {
+  ...;
+}
+:not(div.e55555f9d) {
+  ...;
+}
+```
+
+Both rules now match every element that isn't a disabled (or `div`) element in the current component, including elements in other components and the rest of the page. As long as the negation has a positive anchor in the same compound the scope is preserved, so `button:not([disabled])` becomes `button.e55555f9d:not([disabled].e55555f9d)` and stays scoped. The `ember-scoped-css/no-unscoped-selectors` stylelint rule flags standalone negations so this is caught before it ships.
+
+### Attributes that only appear at runtime
+
+Scoping looks at the attributes written literally in the template, with one exception: an element that spreads `...attributes` can receive any attribute from its caller at runtime, so it receives the generated class whenever the file scopes by attribute at all. The preserved attribute selector still decides which rules actually apply.
+
+Input:
+
+```css
+/* components/first.css */
+[disabled] {
+  ...;
+}
+```
+
+```html
+<!-- components/first.hbs -->
+<button ...attributes>...</button>
+```
+
+Output:
+
+```css
+/* components/first.css */
+[disabled].e55555f9d {
+  ...;
+}
+```
+
+```html
+<!-- components/first.hbs -->
+<button ...attributes class="e55555f9d">...</button>
+```
+
+When a caller passes `disabled`, the rendered button is `<button disabled class="e55555f9d">` and the rule applies; when it doesn't, the extra class matches nothing.
+
+An attribute set any other way — by a modifier, or by touching the DOM directly — is still invisible at build time, so the element does not receive the generated class and the rule matches nothing. Add the attribute (or `...attributes`, or a class) to the element in the component's own template, or use `:global(...)` if the rule is intentionally global.
+
+If you are upgrading: attribute selectors used to be left untouched, so they leaked into other components while *appearing* to work on modifier-set attributes. Now that attribute selectors are scoped, a rule that only ever matched such attributes applies to nothing.
+
+### Class attribute operators
+
+`[class$="foo"]` matches the end of the class string, but the generated class is appended to the end of the class attribute of every element the file scopes, so the selector can never match once it is scoped. `[class|="foo"]` can't be expressed precisely once classes are renamed, so it is scoped with the generated class only and may not behave exactly as written. The `ember-scoped-css/no-unscopable-class-attribute-selectors` stylelint rule flags both so they are caught before they ship.
+
+`[class="foo"]` is renamed to `[class="foo_e55555f9d"]`, which is an *exact* match of the whole attribute value. If the same element is also scoped by a tag or attribute selector in the file it additionally receives the generated class, the value becomes `"foo_e55555f9d e55555f9d"`, and the exact match no longer holds. Prefer `[class~="foo"]` (token match), which is unaffected.

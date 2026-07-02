@@ -24,6 +24,20 @@ testRule({
     { code: ':where(.class, tag) {}' },
     { code: ':where(tag) {}' },
 
+    // Attribute selectors are scoped (generated class, or renamed value for class)
+    { code: '[attr] {}' },
+    { code: '[attr] [attr2] {}' },
+    { code: 'tag[attr] {}' },
+    { code: '[data-state="open"][role="dialog"] {}' },
+    { code: '[class~="foo"] {}' },
+    { code: ':has([attr]) {}' },
+    { code: ':has(.class, [attr]) {}' },
+    { code: ':is([attr]) {}' },
+    { code: ':is(.class, [attr]) {}' },
+    { code: ':is(:global([data-test]), [attr]) {}' },
+    { code: ':where([attr]) {}' },
+    { code: ':where(.class, [attr]) {}' },
+
     // Global
     { code: ':global(.class) {}' },
     { code: ':global(tag) {}' },
@@ -47,81 +61,27 @@ testRule({
     { code: '[attr] { .parent {} }' },
   ],
   reject: [
-    {
-      code: '[attr] {}',
-      message: rule.messages.rejected('[attr]'),
-    },
-    {
-      code: '[attr] [attr2] {}',
-      message: rule.messages.rejected('[attr] [attr2]'),
-    },
-    {
-      code: ':has([attr]) {}',
-      message: rule.messages.rejected(':has([attr])'),
-    },
-    {
-      code: ':has(.class, [attr]) {}',
-      message: rule.messages.rejected(':has(.class, [attr])'),
-    },
-    {
-      code: ':is([attr]) {}',
-      message: rule.messages.rejected(':is([attr])'),
-    },
-    {
-      code: ':is(.class, [attr]) {}',
-      message: rule.messages.rejected(':is(.class, [attr])'),
-    },
-    {
-      code: ':is(:global([data-test]), [attr]) {}',
-      message: rule.messages.rejected(':is(:global([data-test]), [attr])'),
-    },
-
-    {
-      code: ':where([attr]) {}',
-      message: rule.messages.rejected(':where([attr])'),
-    },
-    {
-      code: ':where(.class, [attr]) {}',
-      message: rule.messages.rejected(':where(.class, [attr])'),
-    },
+    // `:not(...)` is not treated as scoped, so a selector consisting only of a
+    // negation is still unscoped. This also surfaces the standalone-negation
+    // limitation to users (see docs/css-isolation.md).
     {
       code: ':not(.class) {}',
       message: rule.messages.rejected(':not(.class)'),
     },
-
-    // At rules
     {
-      code: '@media (min-width: 768px) { [attr] {} }',
-      message: rule.messages.rejected('@media (min-width: 768px) { [attr] }'),
-    },
-    {
-      code: '@container (min-width: 300px) { [attr] {} }',
-      message: rule.messages.rejected(
-        '@container (min-width: 300px) { [attr] }',
-      ),
-    },
-
-    // Nesting
-    {
-      code: '[attr] { [attr2] {} }',
-      warnings: [
-        {
-          message: rule.messages.rejected('[attr] { [attr2] }'),
-        },
-      ],
+      code: ':not([attr]) {}',
+      message: rule.messages.rejected(':not([attr])'),
     },
     {
       code: '.parent { :not(&) {} }',
       message: rule.messages.rejected('.parent { :not(&) }'),
     },
 
-    // Multiple selectors
+    // Multiple selectors: the attribute compound is now scoped, only the
+    // standalone negation remains unscoped.
     {
       code: `.class, [attr], :not(.class) {}`,
       warnings: [
-        {
-          message: rule.messages.rejected('[attr]'),
-        },
         {
           message: rule.messages.rejected(':not(.class)'),
         },

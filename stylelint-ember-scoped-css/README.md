@@ -40,7 +40,8 @@ This adds ember-scoped-css specific rules to your existing stylelint config.
   "files": ["app/components/**/*.css", "app/templates/**/*.css"],
   "plugins": ["stylelint-ember-scoped-css"],
   "rules": {
-    "ember-scoped-css/no-unscoped-selectors": true
+    "ember-scoped-css/no-unscoped-selectors": true,
+    "ember-scoped-css/no-unscopable-class-attribute-selectors": true
   }
 }
 ```
@@ -48,6 +49,7 @@ This adds ember-scoped-css specific rules to your existing stylelint config.
 ## List of rules
 
 - [`no-unscoped-selectors`](./src/rules/no-unscoped-selectors/README.md)
+- [`no-unscopable-class-attribute-selectors`](./src/rules/no-unscopable-class-attribute-selectors/README.md)
 
 ## License
 

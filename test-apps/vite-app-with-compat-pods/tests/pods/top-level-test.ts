@@ -20,4 +20,13 @@ module('[In App] pod:top-level (hbs)', function (hooks) {
       );
     assert.dom('span').hasStyle({ fontWeight: '100', fontStyle: 'italic' });
   });
+
+  test('scopes a native element matched by an attribute selector', async function (assert) {
+    await visit('/top-level');
+
+    assert
+      .dom('button')
+      .hasClass(scopedClass('vite-app-with-compat-pods/pods/top-level'));
+    assert.dom('button').hasStyle({ color: 'rgb(10, 20, 30)' });
+  });
 });

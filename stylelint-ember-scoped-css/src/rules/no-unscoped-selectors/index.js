@@ -83,7 +83,11 @@ function isScopedSelector(selectorNode) {
   }
 
   return selectorNode.nodes.some((node) => {
-    if (node.type === 'class' || node.type === 'tag') {
+    if (
+      node.type === 'class' ||
+      node.type === 'tag' ||
+      node.type === 'attribute'
+    ) {
       return true;
     } else if (node.type === 'pseudo') {
       return isScopedFunctionalPseudo(node);
