@@ -3,22 +3,30 @@ import * as recast from 'ember-template-recast';
 import { renameClass } from './renameClass.js';
 
 /**
- * Whether an element carries an attribute that appears in a scoped attribute
- * selector. This includes component invocations: a component receives the
- * postfix class through its `...attributes` the same way it receives the
- * matched attribute, so `[type="text"]` scopes `<Foo type="text">` just as it
- * scopes `<input type="text">`.
+ * Whether an element may carry an attribute that appears in a scoped
+ * attribute selector. This includes component invocations: a component
+ * receives the postfix class through its `...attributes` the same way it
+ * receives the matched attribute, so `[type="text"]` scopes
+ * `<Foo type="text">` just as it scopes `<input type="text">`.
+ *
+ * An element that spreads `...attributes` can receive any attribute from its
+ * caller at runtime, so it counts as long as the CSS scopes by attribute at
+ * all — the preserved attribute selector still decides which rules actually
+ * apply.
  *
  * `attributes` comes from parsing the CSS, so it can only contain valid
- * attribute-selector names — `@args` and `...attributes` can never be in it
- * and need no special handling.
+ * attribute-selector names — `@args` can never be in it and needs no special
+ * handling.
  *
  * Names in `attributes` are lowercased at discovery (CSS matches HTML
  * attribute names case-insensitively), so compare lowercased.
  */
 function elementHasScopedAttribute(node, attributes) {
-  return node.attributes.some((attr) =>
-    attributes.has(attr.name.toLowerCase()),
+  if (attributes.size === 0) return false;
+
+  return node.attributes.some(
+    (attr) =>
+      attr.name === '...attributes' || attributes.has(attr.name.toLowerCase()),
   );
 }
 

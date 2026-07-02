@@ -66,6 +66,7 @@
       "./components/alert.js": "./dist/_app_/components/alert.js",
       "./components/at-class/component-at-class.js": "./dist/_app_/components/at-class/component-at-class.js",
       "./components/at-class/has-at-class.js": "./dist/_app_/components/at-class/has-at-class.js",
+      "./components/attr.js": "./dist/_app_/components/attr.js",
       "./components/footer.js": "./dist/_app_/components/footer.js",
       "./components/header.js": "./dist/_app_/components/header.js",
       "./components/inline.js": "./dist/_app_/components/inline.js",

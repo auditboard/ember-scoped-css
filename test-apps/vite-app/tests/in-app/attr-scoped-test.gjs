@@ -4,6 +4,7 @@ import { setupRenderingTest } from 'ember-qunit';
 
 import CallsChild from 'vite-app/components/in-app/attr-scoped/calls-child';
 import AttrScopedElement from 'vite-app/components/in-app/attr-scoped/element';
+import AttrScopedSplat from 'vite-app/components/in-app/attr-scoped/splat';
 
 import { scopedClass } from 'ember-scoped-css/test-support';
 
@@ -31,5 +32,17 @@ module('[In App] attr-scoped', function (hooks) {
         scopedClass('vite-app/components/in-app/attr-scoped/calls-child')
       );
     assert.dom('span').hasStyle({ color: 'rgb(40, 50, 60)' });
+  });
+
+  test('scopes an element that spreads ...attributes', async function (assert) {
+    // `...attributes` can deliver any attribute at runtime, so the element
+    // receives the generated class; the preserved `[disabled]` selector still
+    // decides whether the rule applies.
+    await render(<template><AttrScopedSplat disabled /></template>);
+
+    assert
+      .dom('button')
+      .hasClass(scopedClass('vite-app/components/in-app/attr-scoped/splat'));
+    assert.dom('button').hasStyle({ color: 'rgb(70, 80, 90)' });
   });
 });

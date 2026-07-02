@@ -401,7 +401,7 @@ Both rules now match every element that isn't a disabled (or `div`) element in t
 
 ### Attributes that only appear at runtime
 
-Scoping looks at the attributes written literally in the template. An attribute that arrives some other way — through `...attributes` from a caller, or set by a modifier — is not visible at build time, so the element does not receive the generated class and the rule matches nothing.
+Scoping looks at the attributes written literally in the template, with one exception: an element that spreads `...attributes` can receive any attribute from its caller at runtime, so it receives the generated class whenever the file scopes by attribute at all. The preserved attribute selector still decides which rules actually apply.
 
 Input:
 
@@ -428,12 +428,14 @@ Output:
 
 ```html
 <!-- components/first.hbs -->
-<button ...attributes>...</button>
+<button ...attributes class="e55555f9d">...</button>
 ```
 
-The CSS is rewritten, but the template is unchanged — no attribute named `disabled` appears on the button, so it never receives `e55555f9d`. Even when a caller passes `disabled` through `...attributes` at runtime, the rendered button is `<button disabled>` without the generated class, and `[disabled].e55555f9d` matches nothing.
+When a caller passes `disabled`, the rendered button is `<button disabled class="e55555f9d">` and the rule applies; when it doesn't, the extra class matches nothing.
 
-If you are upgrading: attribute selectors used to be left untouched, so a rule like this leaked into other components but *appeared* to work on elements like the one above. Now that attribute selectors are scoped, the same rule applies to nothing. Add the attribute (or a class) to the element in the component's own template, or use `:global(...)` if the rule is intentionally global.
+An attribute set any other way — by a modifier, or by touching the DOM directly — is still invisible at build time, so the element does not receive the generated class and the rule matches nothing. Add the attribute (or `...attributes`, or a class) to the element in the component's own template, or use `:global(...)` if the rule is intentionally global.
+
+If you are upgrading: attribute selectors used to be left untouched, so they leaked into other components while *appearing* to work on modifier-set attributes. Now that attribute selectors are scoped, a rule that only ever matched such attributes applies to nothing.
 
 ### Class attribute operators
 

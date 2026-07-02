@@ -94,16 +94,24 @@ describe('attribute scoping', () => {
     });
   });
 
+  describe('...attributes may deliver any scoped attribute at runtime', () => {
+    it('scopes elements that spread ...attributes', () => {
+      expect(scopeByAttribute('<div ...attributes></div>', ['type'])).to.equal(
+        '<div ...attributes class="pfx"></div>',
+      );
+    });
+
+    it('does not scope ...attributes when the CSS has no attribute selectors', () => {
+      expect(scopeByAttribute('<div ...attributes></div>', [])).to.equal(
+        '<div ...attributes></div>',
+      );
+    });
+  });
+
   describe('non-attribute bindings are ignored', () => {
     it('does not match named args', () => {
       expect(scopeByAttribute('<Foo @type="text" />', ['type'])).to.equal(
         '<Foo @type="text" />',
-      );
-    });
-
-    it('does not match ...attributes', () => {
-      expect(scopeByAttribute('<div ...attributes></div>', ['type'])).to.equal(
-        '<div ...attributes></div>',
       );
     });
   });
