@@ -29,8 +29,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          # TODO: re-enable
-          # - windows-latest
+          - windows-latest
         dir:
           - "ember-scoped-css"
           - "stylelint-ember-scoped-css"
