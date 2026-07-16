@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-07-16)
+
+* ember-scoped-css 3.1.0 (minor)
+
+#### :rocket: Enhancement
+* `ember-scoped-css`
+  * [#395](https://github.com/auditboard/ember-scoped-css/pull/395) Add ember-scoped-css/types declaration entrypoint for tsconfig compilerOptions.types ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-07-02)
 
 * ember-scoped-css 3.0.0 (major)
