@@ -1,31 +1,21 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "major",
-      "oldVersion": "2.2.2",
-      "newVersion": "3.0.0",
+      "impact": "minor",
+      "oldVersion": "3.0.0",
+      "newVersion": "3.1.0",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "impact": "major",
-      "oldVersion": "1.0.2",
-      "newVersion": "2.0.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
-        }
-      ],
-      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
+      "oldVersion": "2.0.0"
     }
   },
-  "description": "## Release (2026-07-02)\n\n* ember-scoped-css 3.0.0 (major)\n* stylelint-ember-scoped-css 2.0.0 (major)\n\n#### :boom: Breaking Change\n* `ember-scoped-css`, `stylelint-ember-scoped-css`\n  * [#393](https://github.com/auditboard/ember-scoped-css/pull/393) feat: scope attribute selectors ([@adrianbw](https://github.com/adrianbw))\n\n#### Committers: 1\n- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))\n"
+  "description": "## Release (2026-07-16)\n\n* ember-scoped-css 3.1.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#395](https://github.com/auditboard/ember-scoped-css/pull/395) Add ember-scoped-css/types declaration entrypoint for tsconfig compilerOptions.types ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
