@@ -194,7 +194,25 @@ Requires
 - @glint/template 1.7.0 or higher
 - @glint/tsserver-plugin 2.0.5 or higher
 
-In `types/index.d.ts` (or similar for apps) or `unpublished-development-types/index.d.ts` (for libraries), we'll declaration merge merge the known attributes for the `<style>` tag:
+Add `ember-scoped-css/types` to the [`types`](https://www.typescriptlang.org/tsconfig#types) array in your `tsconfig.json`:
+
+```jsonc
+{
+  "compilerOptions": {
+    "types": ["ember-scoped-css/types"]
+  }
+}
+```
+
+If your project doesn't use `compilerOptions.types` (note that specifying it disables automatic inclusion of `@types/*` packages), you can instead import the declarations from a type-declaration file that is included in your project — `types/index.d.ts` (or similar for apps) or `unpublished-development-types/index.d.ts` (for libraries):
+
+```ts
+import 'ember-scoped-css/types';
+```
+
+<details><summary>What <code>ember-scoped-css/types</code> provides</summary>
+
+It declaration-merges the known attributes for the `<style>` tag:
 
 ```ts
 import '@glint/template';
@@ -206,6 +224,8 @@ declare global {
   }
 }
 ```
+
+</details>
 
 ### template-lint
 

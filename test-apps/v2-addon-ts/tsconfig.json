@@ -5,6 +5,7 @@
     "environment": ["ember-loose", "ember-template-imports"]
   },
   "compilerOptions": {
+    "types": ["ember-scoped-css/types"],
     "target": "ESNext",
     "allowJs": true,
     "skipLibCheck": true,
