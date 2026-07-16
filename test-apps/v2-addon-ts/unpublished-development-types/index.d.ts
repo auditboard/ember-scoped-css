@@ -17,10 +17,3 @@ declare module '@glint/environment-ember-loose/registry' {
     'AtClass::HasAtClass': typeof HasAtClass;
   }
 }
-
-declare global {
-  interface HTMLStyleElementAttributes {
-    scoped: '';
-    inline: '';
-  }
-}

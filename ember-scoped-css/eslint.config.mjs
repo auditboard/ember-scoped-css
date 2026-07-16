@@ -8,6 +8,7 @@ export default [
       'declarations',
       'dist',
       'template-registry.d.ts',
+      'types.d.ts',
       'vitest.config.mts',
     ],
   },

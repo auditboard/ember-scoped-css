@@ -19,7 +19,8 @@
     "dist",
     "declarations",
     "addon-main.cjs",
-    "template-registry.d.ts"
+    "template-registry.d.ts",
+    "types.d.ts"
   ],
   "exports": {
     ".": {
@@ -40,6 +41,10 @@
     },
     "./template-registry": {
       "types": "./template-registry.d.ts",
+      "default": "./src/noop.js"
+    },
+    "./types": {
+      "types": "./types.d.ts",
       "default": "./src/noop.js"
     },
     "./test-support": {
