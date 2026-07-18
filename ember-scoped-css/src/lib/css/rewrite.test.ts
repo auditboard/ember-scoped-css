@@ -1,12 +1,25 @@
+import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping';
 import { describe, expect, it } from 'vitest';
 
 import { rewriteCss } from './rewrite.js';
+
+/** Original line a generated `token` maps back to, via the source map. */
+function originalLineOf(code: string, map: object, token: string) {
+  const index = code.indexOf(token);
+  const before = code.slice(0, index);
+  const lines = before.split('\n');
+
+  return originalPositionFor(new TraceMap(map as never), {
+    line: lines.length,
+    column: lines[lines.length - 1].length,
+  }).line;
+}
 
 it('should rewrite css', function () {
   const css = '.foo { color: red; }';
   const postfix = 'postfix';
   const fileName = 'foo.css';
-  const rewritten = rewriteCss(css, postfix, fileName);
+  const { code: rewritten } = rewriteCss(css, postfix, fileName);
 
   expect(rewritten).to.equal(`/* foo.css */\n.foo_postfix { color: red; }\n`);
 });
@@ -15,7 +28,7 @@ it('should use a custom layer', function () {
   const css = '.foo { color: red; }';
   const postfix = 'postfix';
   const fileName = 'foo.css';
-  const rewritten = rewriteCss(css, postfix, fileName, 'utils');
+  const { code: rewritten } = rewriteCss(css, postfix, fileName, 'utils');
 
   expect(rewritten).toMatchInlineSnapshot(`
     "/* foo.css */
@@ -26,6 +39,36 @@ it('should use a custom layer', function () {
   `);
 });
 
+describe('source map', () => {
+  it('traces rewritten selectors back to their original lines', () => {
+    const css = [
+      '.foo {',
+      '  color: red;',
+      '}',
+      '',
+      '.bar {',
+      '  color: blue;',
+      '}',
+    ].join('\n');
+    const { code, map } = rewriteCss(css, 'postfix', 'foo.css');
+
+    expect(map.sources).toEqual(['foo.css']);
+    expect(map.sourcesContent?.[0]).toBe(css);
+    expect(map.mappings.length).toBeGreaterThan(0);
+
+    // `.foo` is line 1 and `.bar` is line 5 of the original source.
+    expect(originalLineOf(code, map, '.foo_postfix')).toBe(1);
+    expect(originalLineOf(code, map, '.bar_postfix')).toBe(5);
+  });
+
+  it('keeps mappings correct through the @layer wrapper', () => {
+    const css = '.foo {\n  color: red;\n}';
+    const { code, map } = rewriteCss(css, 'postfix', 'foo.css', 'utils');
+
+    expect(originalLineOf(code, map, '.foo_postfix')).toBe(1);
+  });
+});
+
 it(`understands nth-of-type syntax`, function () {
   const css = `
     li:nth-of-type(odd) {}
@@ -34,7 +77,7 @@ it(`understands nth-of-type syntax`, function () {
 
   const postfix = 'postfix';
   const fileName = 'foo.css';
-  const rewritten = rewriteCss(css, postfix, fileName);
+  const { code: rewritten } = rewriteCss(css, postfix, fileName);
 
   expect(rewritten).toMatchInlineSnapshot(`
     "/* foo.css */
@@ -56,7 +99,7 @@ describe('@container', () => {
 `;
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const { code: rewritten } = rewriteCss(css, postfix, fileName);
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -97,7 +140,7 @@ describe('@container', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName);
+    const { code: rewritten } = rewriteCss(css, postfix, fileName);
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -137,7 +180,7 @@ describe('@media', () => {
 `;
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'utils');
+    const { code: rewritten } = rewriteCss(css, postfix, fileName, 'utils');
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -164,7 +207,12 @@ describe('@keyframe', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -202,7 +250,12 @@ describe('@keyframe', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -271,7 +324,12 @@ describe('@keyframe', () => {
       `;
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -337,7 +395,12 @@ describe('@keyframe', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -373,7 +436,12 @@ describe('@counter-style', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -404,7 +472,12 @@ describe('@counter-style', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -437,7 +510,12 @@ describe('@position-try', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -469,7 +547,12 @@ describe('@position-try', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -503,7 +586,12 @@ describe('@property', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -547,7 +635,12 @@ describe('@property', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */
@@ -590,7 +683,12 @@ describe('@supports', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
 
     expect(rewritten).toMatchInlineSnapshot(`
       "/* foo.css */

@@ -136,8 +136,12 @@ function isInsideKeyframes(node) {
   return isInsideKeyframes(parent);
 }
 
+/**
+ * @returns {{ code: string, map: object }} the scoped CSS and a v3 source map
+ *   that traces the output back to `fileName`.
+ */
 export function rewriteCss(css, postfix, fileName, layerName) {
-  const ast = postcss.parse(css);
+  const ast = postcss.parse(css, { from: fileName });
   /**
    * kind => originalName => postfixedName
    * @type {{ [kind: string]: { [originalName: string]: string }}}
@@ -236,16 +240,29 @@ export function rewriteCss(css, postfix, fileName, layerName) {
     }
   });
 
-  const rewrittenCss = ast.toString();
+  /**
+   * The leading filename comment and optional `@layer` wrapper are generated
+   * decoration. Pushing them into the first node's leading whitespace (rather
+   * than concatenating strings afterwards) lets PostCSS account for them while
+   * generating the source map, so the mappings line up with the output with no
+   * manual offsetting.
+   */
+  const prefix =
+    `/* ${fileName} */\n` + (layerName ? `@layer ${layerName} {\n` : '');
 
-  return (
-    [
-      `/* ${fileName} */`,
-      layerName ? `@layer ${layerName} {` : '',
-      rewrittenCss.trimEnd(),
-      layerName ? `}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n') + '\n'
-  );
+  if (ast.first) {
+    ast.first.raws.before = prefix + (ast.first.raws.before ?? '');
+  }
+
+  const result = ast.toResult({
+    from: fileName,
+    map: { inline: false, annotation: false, sourcesContent: true },
+  });
+
+  // The closing `}` and trailing newline come after all mapped content, so
+  // appending them as strings doesn't affect the source map.
+  const body = ast.first ? result.css : `${prefix}${result.css}`;
+  const code = body.trimEnd() + (layerName ? '\n}' : '') + '\n';
+
+  return { code, map: result.map.toJSON() };
 }

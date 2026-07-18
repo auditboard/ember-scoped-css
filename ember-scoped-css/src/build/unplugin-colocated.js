@@ -78,14 +78,7 @@ export function colocated(options = {}) {
 
         let code = readFileSync(meta.fullPath, 'utf-8');
 
-        let css = rewriteCss(
-          code,
-          meta.postfix,
-          meta.fileName,
-          options.layerName,
-        );
-
-        return css;
+        return rewriteCss(code, meta.postfix, meta.fileName, options.layerName);
       }
     },
     vite: {
@@ -138,14 +131,12 @@ export function colocated(options = {}) {
             code = result.code;
           }
 
-          let css = rewriteCss(
+          return rewriteCss(
             code,
             parsed.postfix,
             relativeFilePath,
             options.layerName,
           );
-
-          return css;
         }
       },
     },

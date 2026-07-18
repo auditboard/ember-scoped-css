@@ -1,0 +1,33 @@
+{
+  "name": "sourcemaps",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Dedicated end-to-end sourcemap correctness tests for ember-scoped-css, running the real addon rollup pipeline.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@embroider/addon-shim": "^1.9.0",
+    "decorator-transforms": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/plugin-transform-typescript": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@embroider/addon-dev": "^8.1.0",
+    "@glimmer/env": "^0.1.7",
+    "@jridgewell/trace-mapping": "^0.3.25",
+    "@rollup/plugin-babel": "^6.1.0",
+    "babel-plugin-ember-template-compilation": "^2.3.0",
+    "ember-scoped-css": "workspace:*",
+    "rollup": "^4.52.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}
