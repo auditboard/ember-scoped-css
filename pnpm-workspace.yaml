@@ -1,4 +1,4 @@
 packages:
-  - "test-apps/*"
+  - "test-apps/**/*"
   - "ember-scoped-css"
   - "stylelint-ember-scoped-css"

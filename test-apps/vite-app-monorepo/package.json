@@ -1,0 +1,25 @@
+{
+  "name": "vite-app-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\" --prefixColors auto",
+    "format": "prettier . --write",
+    "lint:prettier": "prettier . --check",
+    "lint:fix": "concurrently \"pnpm:lint:*:fix\" --names \"fix:\" --prefixColors auto && pnpm format",
+    "lint:js": "pnpm --parallel --no-bail --filter \"vite-app-monorepo-*\" lint:js",
+    "lint:js:fix": "pnpm --parallel --no-bail --filter \"vite-app-monorepo-*\" lint:js:fix",
+    "test": "pnpm test:ember",
+    "test:ember": "pnpm --dir test-app test:ember"
+  },
+  "devDependencies": {
+    "concurrently": "9.2.1",
+    "ember-eslint": "0.5.0",
+    "eslint": "9.36.0",
+    "prettier": "3.6.2",
+    "prettier-plugin-ember-template-tag": "2.0.5",
+    "typescript": "5.7.3"
+  }
+}

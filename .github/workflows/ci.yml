@@ -39,6 +39,7 @@ jobs:
           - "test-apps/vite-app-layer"
           - "test-apps/vite-app-with-compat"
           - "test-apps/vite-app-with-compat-pods"
+          - "test-apps/vite-app-monorepo"
 
     steps:
       - uses: wyvox/action@v1
@@ -61,6 +62,7 @@ jobs:
           - "test-apps/vite-app-layer"
           - "test-apps/vite-app-with-compat"
           - "test-apps/vite-app-with-compat-pods"
+          - "test-apps/vite-app-monorepo"
 
     steps:
       - uses: wyvox/action@v1
