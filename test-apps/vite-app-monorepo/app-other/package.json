@@ -1,0 +1,16 @@
+{
+  "name": "vite-app-monorepo-app-other",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint:js": "eslint . --config ../eslint.config.mjs --cache",
+    "lint:js:fix": "eslint . --config ../eslint.config.mjs --fix"
+  },
+  "exports": {
+    "./*": "./src/*"
+  },
+  "devDependencies": {
+    "eslint": "9.36.0"
+  }
+}

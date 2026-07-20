@@ -3,8 +3,13 @@ import { scopedCSS } from 'ember-scoped-css/babel';
 import { fileURLToPath } from 'node:url';
 
 const macros = buildMacros({});
-const workspaceSource = fileURLToPath(new URL('../app/', import.meta.url));
-const scopedCssOptions = { additionalRoots: [workspaceSource] };
+const workspaceSource = fileURLToPath(new URL('../app', import.meta.url));
+const sameWorkspaceSource = fileURLToPath(
+  new URL('./src/additional', import.meta.url)
+);
+const scopedCssOptions = {
+  additionalRoots: [workspaceSource, sameWorkspaceSource],
+};
 
 export default {
   plugins: [

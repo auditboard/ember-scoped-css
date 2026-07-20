@@ -22,6 +22,7 @@
     "ember-resolver": "13.1.0",
     "ember-scoped-css": "workspace:*",
     "ember-source": "6.4.0-alpha.3",
+    "vite-app-monorepo-app-other": "workspace:*",
     "vite-app-monorepo-app": "workspace:*"
   },
   "devDependencies": {

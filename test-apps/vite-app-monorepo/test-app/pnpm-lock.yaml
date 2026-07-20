@@ -27,6 +27,9 @@ importers:
       vite-app-monorepo-app:
         specifier: workspace:*
         version: link:../app
+      vite-app-monorepo-app-other:
+        specifier: workspace:*
+        version: link:../app-other
     devDependencies:
       '@babel/core':
         specifier: 7.28.5
