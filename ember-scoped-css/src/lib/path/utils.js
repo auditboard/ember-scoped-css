@@ -235,15 +235,36 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
   if (fileName.startsWith(leadingSlashPath.atEmbroider)) return false;
   if (IRRELEVANT_PATHS.some((i) => fileName.includes(i))) return false;
 
-  let workspace = findWorkspacePath(fileName);
-
   assert(cwd, `cwd was not passed to isRelevantFile`);
+
+  let isInAdditionalRoot = additionalRoots?.some((root) => {
+    let relative = path.relative(path.resolve(cwd, root), fileName);
+
+    return (
+      relative !== '..' &&
+      !relative.startsWith(`..${path.sep}`) &&
+      !path.isAbsolute(relative)
+    );
+  });
+
+  let workspace = findWorkspacePath(fileName);
 
   let ourWorkspace = findWorkspacePath(cwd);
 
-  if (workspace !== ourWorkspace) {
+  if (workspace !== ourWorkspace && !isInAdditionalRoot) {
     return false;
   }
+
+  let isInWorkspaceAdditionalRoot =
+    workspace === ourWorkspace &&
+    additionalRoots?.some((root) => {
+      if (path.isAbsolute(root)) return false;
+
+      let normalizedFileName = `${path.sep}${path.normalize(fileName)}${path.sep}`;
+      let normalizedRoot = `${path.sep}${path.normalize(root)}${path.sep}`;
+
+      return normalizedFileName.includes(normalizedRoot);
+    });
 
   let local = fileName.replace(workspace, '');
   let [, ...parts] = local.split(path.sep).filter(Boolean);
@@ -260,10 +281,13 @@ export function isRelevantFile(fileName, { additionalRoots, cwd }) {
     leadingSlashPath.componentsDir,
     leadingSlashPath.templatesDir,
     leadingSlashPath.routesDir,
-    ...(additionalRoots || []),
   ];
 
-  if (!roots.some((root) => fileName.includes(root))) {
+  if (
+    !isInAdditionalRoot &&
+    !isInWorkspaceAdditionalRoot &&
+    !roots.some((root) => fileName.includes(root))
+  ) {
     return;
   }
 
