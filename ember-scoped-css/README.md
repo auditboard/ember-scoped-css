@@ -48,6 +48,7 @@ This build tool can emit CSS in a `@layer`.
 
 - Vite
 - V2 addons with `@embroider/addon-dev` @ v8+ (or similar)
+- V2 addons / libraries built with rolldown or tsdown (e.g. via [`@nullvoxpopuli/ember-rolldown`](https://github.com/NullVoxPopuli/ember.nvp/tree/main/packages/rolldown))
 - For [hbs, broccoli, or webpack-based builds, view this version of the docs](https://github.com/auditboard/ember-scoped-css/tree/hbs-classic-and-webpack-support)
   - For [bugfixes for the pre-ember-scoped-css-1.0 code, PR here](https://github.com/auditboard/ember-scoped-css/tree/hbs-classic-and-webpack-support)
 
@@ -55,6 +56,7 @@ This build tool can emit CSS in a `@layer`.
 | -------- | ----------- | ---------------------- | --- |
 | vite | >= 1.0.0 | 🚫 | [main][docs-main]
 | gjs / gts library (no hbs) | >= 1.0.0 | 🚫 | [main][docs-main]
+| rolldown / tsdown | >= 3.1.0 | 🚫 | [main][docs-main]
 | webpack | <= 0.24.3 | <= 10.0.0 | [0.24.3][docs-2]
 | hbs | <= 0.24.3 | <= 10.0.0 | [0.24.3][docs-2]
 | ember-template-imports@v4 or babel-plugin-ember-template-compilation@2.2.5+ | 0.19.0 | 10.0.0 | [0.19][docs-3] - [0.24][docs-2]
@@ -78,7 +80,7 @@ npm install --save-dev ember-scoped-css
 Configuration happens in multiple locations to take over the need portion of your build steps.
 
 - `vite.config.*` 
-- `rollup.config.*` 
+- `rollup.config.*` (or `rolldown.config.*` / `tsdown.config.*`)
 - `babel.config.*` 
 
 #### Vite
@@ -148,6 +150,42 @@ plugins: [
 ##### Configuration Options
 
 - `layerName: string` - Wrap your CSS in a `@layer` with this given name
+
+#### Rolldown / tsdown
+
+The rollup plugin also works under [rolldown](https://rolldown.rs/) and [tsdown](https://tsdown.dev/).
+For a v2 library built with tsdown via [`@nullvoxpopuli/ember-rolldown`](https://github.com/NullVoxPopuli/ember.nvp/tree/main/packages/rolldown),
+the whole setup lives in `tsdown.config.js` — no `babel.config.js` needed:
+
+```js
+import { defineConfig } from 'tsdown';
+import { ember } from '@nullvoxpopuli/ember-rolldown';
+import { scopedCSS } from 'ember-scoped-css/rollup';
+import { scopedCSS as scopedCssBabel } from 'ember-scoped-css/babel';
+
+export default defineConfig({
+  entry: ['./src/index.ts'],
+  css: { inject: true },
+  plugins: [
+    ember({
+      babel: {
+        // only needed if you use scopedClass in module code
+        plugins: [scopedCssBabel()],
+        templateTransforms: [scopedCssBabel.template({})],
+      },
+    }),
+    scopedCSS(),
+  ],
+});
+```
+
+Notes:
+
+- [`@tsdown/css`](https://www.npmjs.com/package/@tsdown/css) must be installed (it releases in lockstep with tsdown) — it bundles the scoped CSS into `dist/style.css`.
+- `css: { inject: true }` keeps the `import './style.css'` statement in the built JS, so consuming apps load the CSS through the module graph. Without it the CSS is emitted but nothing imports it.
+- If your library has its own `babel.config.js`, configure the plugins there instead (see [Babel](#babel) below) — `ember()` picks the config file up automatically.
+
+This supports co-located `.css` files, inline `<style scoped>` blocks, and the `scopedClass` pseudo-helper, same as the other build tools.
 
 #### Babel
 
