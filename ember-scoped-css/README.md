@@ -219,7 +219,7 @@ There are two plugins, but you made only need one:
 ##### Configuration Options (`scopedCSS.template()`)
 
 - `layerName: string` - Wrap your CSS in a `@layer` with this given name
-- `additionalRoots: string[]` - When you want to procss more folders. For example you want to support pods structure
+- `additionalRoots: string[]` - Process additional directories, for example pods or directories from other packages in a monorepo.
 
 ### TypeScript
 

@@ -1,0 +1,30 @@
+{
+  "name": "vite-app-monorepo-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint:js": "eslint . --config ../eslint.config.mjs --cache",
+    "lint:js:fix": "eslint . --config ../eslint.config.mjs --fix"
+  },
+  "exports": {
+    "./*": "./src/*"
+  },
+  "devDependencies": {
+    "@babel/core": "7.28.5",
+    "@babel/plugin-transform-runtime": "7.28.5",
+    "@babel/plugin-transform-typescript": "7.28.5",
+    "@babel/runtime": "7.28.4",
+    "@glimmer/component": "2.0.0",
+    "ember-scoped-css": "workspace:*",
+    "ember-source": "6.4.0-alpha.3",
+    "eslint": "9.36.0"
+  },
+  "engines": {
+    "node": ">= 22.16"
+  },
+  "ember-addon": {
+    "type": "app",
+    "version": 2
+  }
+}
