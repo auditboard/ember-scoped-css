@@ -1,5 +1,21 @@
 # Changelog
 
+## Release (2026-07-22)
+
+* ember-scoped-css 3.2.0 (minor)
+
+#### :rocket: Enhancement
+* `ember-scoped-css`
+  * [#397](https://github.com/auditboard/ember-scoped-css/pull/397) feat: support additional roots across monorepo packages ([@alexraputa](https://github.com/alexraputa))
+
+#### :memo: Documentation
+* `ember-scoped-css`
+  * [#399](https://github.com/auditboard/ember-scoped-css/pull/399) docs: rolldown / tsdown usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 2
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+- Alex Raputa ([@alexraputa](https://github.com/alexraputa))
+
 ## Release (2026-07-16)
 
 * ember-scoped-css 3.1.0 (minor)

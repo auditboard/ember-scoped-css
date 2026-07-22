@@ -2,13 +2,17 @@
   "solution": {
     "ember-scoped-css": {
       "impact": "minor",
-      "oldVersion": "3.0.0",
-      "newVersion": "3.1.0",
+      "oldVersion": "3.1.0",
+      "newVersion": "3.2.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :memo: Documentation"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
@@ -17,5 +21,5 @@
       "oldVersion": "2.0.0"
     }
   },
-  "description": "## Release (2026-07-16)\n\n* ember-scoped-css 3.1.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#395](https://github.com/auditboard/ember-scoped-css/pull/395) Add ember-scoped-css/types declaration entrypoint for tsconfig compilerOptions.types ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-07-22)\n\n* ember-scoped-css 3.2.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#397](https://github.com/auditboard/ember-scoped-css/pull/397) feat: support additional roots across monorepo packages ([@alexraputa](https://github.com/alexraputa))\n\n#### :memo: Documentation\n* `ember-scoped-css`\n  * [#399](https://github.com/auditboard/ember-scoped-css/pull/399) docs: rolldown / tsdown usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 2\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- Alex Raputa ([@alexraputa](https://github.com/alexraputa))\n"
 }
