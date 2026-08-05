@@ -42,6 +42,21 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     return scopedClassCandidates.some((candidate) => candidate === str);
   }
 
+  /**
+   * Only string literals are reachable: a path expression such as
+   * `{{this.fooClass}}` resolves at runtime, so it carries no class name to
+   * rename at build time.
+   */
+  function renameLiteralClasses(mustache) {
+    recast.traverse(mustache, {
+      StringLiteral(node) {
+        const renamedClass = renameClass(node.value, postfix, classes);
+
+        node.value = renamedClass;
+      },
+    });
+  }
+
   return {
     AttrNode(node) {
       if (node.name === 'class') {
@@ -56,19 +71,14 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
 
               part.chars = renamedClass;
             } else if (part.type === 'MustacheStatement') {
-              recast.traverse(part, {
-                StringLiteral(node) {
-                  const renamedClass = renameClass(
-                    node.value,
-                    postfix,
-                    classes,
-                  );
-
-                  node.value = renamedClass;
-                },
-              });
+              renameLiteralClasses(part);
             }
           }
+        } else if (node.value.type === 'MustacheStatement') {
+          // Glimmer parses a quoted attribute value as a ConcatStatement and an
+          // unquoted one as a bare MustacheStatement, so `class={{if x "a"}}`
+          // lands here rather than in the branch above.
+          renameLiteralClasses(node.value);
         }
       }
     },
