@@ -1,9 +1,11 @@
 ## scoped-class-helper
 
-This rule checks if `scoped-class` helper has one positional param of type StringLiteral.
-The following example shows the correct use of the helper:
+This rule checks if the helper has one positional param of type StringLiteral. It
+applies to both spellings: the imported `scopedClass` and the legacy hbs global
+`scoped-class`. The following examples show the correct use of the helper:
 
 ```hbs
+<SomeComponent @class={{scopedClass 'first-class second-class'}} />
 <SomeComponent @class={{scoped-class 'first-class second-class'}} />
 ```
 
@@ -14,6 +16,8 @@ This rule forbids the following:
 1. Wrong number of positional params
 
 ```hbs
+<SomeComponent @class={{scopedClass}} />
+<SomeComponent @class={{scopedClass 'first-class' 'second-param'}} />
 <SomeComponent @class={{scoped-class}} />
 <SomeComponent @class={{scoped-class 'first-class' 'second-param'}} />
 ```
@@ -21,5 +25,6 @@ This rule forbids the following:
 2. Dynamic properties
 
 ```hbs
-<SomeComponet @class={{scoped-class this.myClass}} />
+<SomeComponent @class={{scopedClass this.myClass}} />
+<SomeComponent @class={{scoped-class this.myClass}} />
 ```
