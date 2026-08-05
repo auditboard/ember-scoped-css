@@ -30,4 +30,15 @@ module('[In App] unquoted class attribute', function (hooks) {
 
     assert.dom('[data-test-global]').hasClass('not-in-css');
   });
+
+  test('leaves a comparand that happens to match a class alone', async function (assert) {
+    // The comparand spells a real class name, so postfixing it would make the
+    // comparison fail and select the other branch.
+    await render(<template><UnquotedClass /></template>);
+
+    assert
+      .dom('[data-test-comparand]')
+      .hasClass(scopedClass('chosen', modulePath));
+    assert.dom('[data-test-comparand]').hasStyle({ color: 'rgb(10, 20, 30)' });
+  });
 });

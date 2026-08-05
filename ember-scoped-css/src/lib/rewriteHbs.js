@@ -30,6 +30,23 @@ function elementHasScopedAttribute(node, attributes) {
   );
 }
 
+/**
+ * Helpers whose result is assembled from their own params, mapped to the params
+ * that land in the result. `concat` joins all of them; `if` and `unless` return
+ * one of their branches, so the condition at index 0 is excluded -- it decides
+ * which branch wins rather than contributing to the class string.
+ *
+ * Any helper absent from this map is opaque: it may return a class name, but
+ * what it does with its arguments is unknown, so those arguments are left
+ * alone. `{{scopedClass "..."}}` is the way to rename a literal such a helper
+ * receives.
+ */
+const CLASS_BUILDING_HELPERS = new Map([
+  ['concat', (params) => params],
+  ['if', (params) => params.slice(1)],
+  ['unless', (params) => params.slice(1)],
+]);
+
 export function templatePlugin({ classes, tags, attributes, postfix }) {
   let stack = [];
   // scoped-class is a global we allow in hbs
@@ -43,18 +60,38 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   }
 
   /**
-   * Only string literals are reachable: a path expression such as
-   * `{{this.fooClass}}` resolves at runtime, so it carries no class name to
-   * rename at build time.
+   * Rename the string literals whose value reaches the class attribute.
+   *
+   * A literal qualifies only if every helper between it and the attribute
+   * builds its result out of that literal, so the walk descends through the
+   * params listed in CLASS_BUILDING_HELPERS and stops everywhere else. A
+   * literal that some other helper merely reads is data: postfixing it would
+   * change what that helper computes, as in `{{if (eq this.mode "a") "a" "b"}}`
+   * where only the two branches are class names.
+   *
+   * A path expression such as `{{this.fooClass}}` resolves at runtime, so it
+   * carries no class name to rename at build time.
    */
-  function renameLiteralClasses(mustache) {
-    recast.traverse(mustache, {
-      StringLiteral(node) {
-        const renamedClass = renameClass(node.value, postfix, classes);
+  function renameLiteralClasses(node) {
+    if (node.type === 'StringLiteral') {
+      const renamedClass = renameClass(node.value, postfix, classes);
 
-        node.value = renamedClass;
-      },
-    });
+      node.value = renamedClass;
+
+      return;
+    }
+
+    if (node.type !== 'MustacheStatement' && node.type !== 'SubExpression') {
+      return;
+    }
+
+    const classParamsOf = CLASS_BUILDING_HELPERS.get(getValue(node.path));
+
+    if (!classParamsOf) return;
+
+    for (let param of classParamsOf(node.params ?? [])) {
+      renameLiteralClasses(param);
+    }
   }
 
   return {

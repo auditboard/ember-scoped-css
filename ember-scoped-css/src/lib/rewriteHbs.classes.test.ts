@@ -54,11 +54,23 @@ describe('class attribute values', () => {
       );
     });
 
-    it('reaches literals nested in a subexpression', () => {
+    it('reaches literals nested in a class-building subexpression', () => {
       expect(
         rewrite('<div class={{if x (concat "a" "-suffix") "b"}}></div>'),
       ).to.equal(
         '<div class={{if x (concat "a_pfx" "-suffix") "b_pfx"}}></div>',
+      );
+    });
+
+    it('renames the branches of unless', () => {
+      expect(rewrite('<div class={{unless x "a" "b"}}></div>')).to.equal(
+        '<div class={{unless x "a_pfx" "b_pfx"}}></div>',
+      );
+    });
+
+    it('renames the single branch of a two-param if', () => {
+      expect(rewrite('<div class={{if x "a"}}></div>')).to.equal(
+        '<div class={{if x "a_pfx"}}></div>',
       );
     });
 
@@ -90,6 +102,49 @@ describe('class attribute values', () => {
     it('only touches the class attribute', () => {
       expect(rewrite('<div data-x={{if x "a" "b"}}></div>')).to.equal(
         '<div data-x={{if x "a" "b"}}></div>',
+      );
+    });
+  });
+
+  describe('literals that are not class names', () => {
+    it('leaves the arguments of a helper in the condition alone', () => {
+      expect(
+        rewrite('<div class={{if (checkAlphabet "a" "b") "a" "b"}}></div>'),
+      ).to.equal(
+        '<div class={{if (checkAlphabet "a" "b") "a_pfx" "b_pfx"}}></div>',
+      );
+    });
+
+    it('leaves the arguments of a condition alone in a quoted value too', () => {
+      expect(
+        rewrite(`<div class="{{if (checkAlphabet 'a' 'b') 'a' 'b'}}"></div>`),
+      ).to.equal(
+        `<div class="{{if (checkAlphabet 'a' 'b') 'a_pfx' 'b_pfx'}}"></div>`,
+      );
+    });
+
+    it('leaves a comparand alone', () => {
+      // Postfixing it would stop the comparison ever matching this.mode.
+      expect(
+        rewrite('<div class={{if (eq this.mode "a") "a" "b"}}></div>'),
+      ).to.equal('<div class={{if (eq this.mode "a") "a_pfx" "b_pfx"}}></div>');
+    });
+
+    it('leaves a comparand alone inside a class-building helper', () => {
+      expect(
+        rewrite(
+          '<div class={{concat "a" (if (eq this.x "b") "-on" "-off")}}></div>',
+        ),
+      ).to.equal(
+        '<div class={{concat "a_pfx" (if (eq this.x "b") "-on" "-off")}}></div>',
+      );
+    });
+
+    it('leaves the arguments of an opaque helper alone', () => {
+      // The helper may well return a class name, but what it does with its
+      // arguments is unknown. {{scopedClass "a"}} renames a literal here.
+      expect(rewrite('<div class={{someHelper "a"}}></div>')).to.equal(
+        '<div class={{someHelper "a"}}></div>',
       );
     });
   });
