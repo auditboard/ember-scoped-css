@@ -1,3 +1,5 @@
+import { concat } from '@ember/helper';
+
 const yes = true;
 const no = false;
 const eq = (a, b) => a === b;
@@ -11,4 +13,5 @@ const mode = 'chosen';
     data-test-comparand
     class={{if (eq mode "chosen") "chosen" "other"}}
   >comparand</p>
+  <p data-test-concat class={{concat "chosen" " " "extra"}}>concat</p>
 </template>

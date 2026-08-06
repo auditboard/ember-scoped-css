@@ -260,30 +260,6 @@ describe('class attribute values', () => {
     });
   });
 
-  describe('strict mode', () => {
-    function rewriteStrict(hbs) {
-      return rewriteHbs(hbs, classes, new Set(), postfix, new Set(), true);
-    }
-
-    it('trusts if, which needs no import', () => {
-      expect(rewriteStrict('<div class={{if x "a" "b"}}></div>')).to.equal(
-        '<div class={{if x "a_pfx" "b_pfx"}}></div>',
-      );
-    });
-
-    it('trusts unless, which needs no import', () => {
-      expect(rewriteStrict('<div class={{unless x "a" "b"}}></div>')).to.equal(
-        '<div class={{unless x "a_pfx" "b_pfx"}}></div>',
-      );
-    });
-
-    it('does not trust concat, which must be imported from somewhere', () => {
-      expect(
-        rewriteStrict('<div class={{concat "a" " " "b"}}></div>'),
-      ).to.equal('<div class={{concat "a" " " "b"}}></div>');
-    });
-  });
-
   describe('the scopedClass helper still collapses to a text node', () => {
     it('renames unconditionally, without a CSS lookup', () => {
       expect(

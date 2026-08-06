@@ -31,6 +31,20 @@ module('[In App] unquoted class attribute', function (hooks) {
     assert.dom('[data-test-global]').hasClass('not-in-css');
   });
 
+  test('postfixes the classes of an imported concat', async function (assert) {
+    // concat has to be imported in strict mode, so it is trusted by name.
+    await render(<template><UnquotedClass /></template>);
+
+    assert
+      .dom('[data-test-concat]')
+      .hasClass(scopedClass('chosen', modulePath));
+    assert.dom('[data-test-concat]').hasClass(scopedClass('extra', modulePath));
+    assert.dom('[data-test-concat]').hasStyle({
+      color: 'rgb(10, 20, 30)',
+      fontWeight: '700',
+    });
+  });
+
   test('leaves a comparand that happens to match a class alone', async function (assert) {
     // The comparand spells a real class name, so postfixing it would make the
     // comparison fail and select the other branch.

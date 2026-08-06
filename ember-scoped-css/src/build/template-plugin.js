@@ -112,7 +112,6 @@ export function createPlugin(config) {
       tags: scopedTags,
       attributes: scopedAttributes,
       postfix,
-      strictMode: env.strictMode,
     });
 
     return {

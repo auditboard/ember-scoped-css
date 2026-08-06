@@ -39,15 +39,13 @@ function elementHasScopedAttribute(node, attributes) {
  * Any other helper is opaque: it may return a class name, but what it does with
  * its arguments is unknown, so those arguments are left alone.
  * `{{scopedClass "..."}}` is the way to rename a literal such a helper receives.
+ *
+ * Matching is by name, so a block param that shadows one of these is checked
+ * for. A strict-mode template has to import `concat`, and the module it came
+ * from is not visible here, so a `concat` imported from elsewhere is taken at
+ * face value.
  */
 const CLASS_BUILDING_HELPERS = new Set(['concat', 'if', 'unless']);
-
-/**
- * Of the above, the ones a strict-mode template gets for free. `concat` is not
- * among them: strict mode requires it to be imported, and which module it came
- * from is not visible from the template, so there it could be any function.
- */
-const KEYWORDS = new Set(['if', 'unless']);
 
 function endsAtClassBoundary(value) {
   return /\s$/.test(value);
@@ -84,13 +82,7 @@ function isWholeClassName(params, index) {
   return boundedLeft && boundedRight;
 }
 
-export function templatePlugin({
-  classes,
-  tags,
-  attributes,
-  postfix,
-  strictMode = false,
-}) {
+export function templatePlugin({ classes, tags, attributes, postfix }) {
   let stack = [];
   // scoped-class is a global we allow in hbs
   // scopedClass is importable, and we'll error if someone tries to rename it
@@ -122,10 +114,7 @@ export function templatePlugin({
   }
 
   function isClassBuilding(name) {
-    if (!CLASS_BUILDING_HELPERS.has(name)) return false;
-    if (strictMode && !KEYWORDS.has(name)) return false;
-
-    return !isShadowed(name);
+    return CLASS_BUILDING_HELPERS.has(name) && !isShadowed(name);
   }
 
   /**
@@ -348,14 +337,10 @@ export default function rewriteHbs(
   tags,
   postfix,
   attributes = new Set(),
-  strictMode = false,
 ) {
   let ast = recast.parse(hbs);
 
-  recast.traverse(
-    ast,
-    templatePlugin({ classes, tags, attributes, postfix, strictMode }),
-  );
+  recast.traverse(ast, templatePlugin({ classes, tags, attributes, postfix }));
 
   let result = recast.print(ast);
 
