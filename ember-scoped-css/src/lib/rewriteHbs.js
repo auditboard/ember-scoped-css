@@ -62,15 +62,14 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   /**
    * Rename the string literals whose value reaches the class attribute.
    *
-   * A literal qualifies only if every helper between it and the attribute
-   * builds its result out of that literal, so the walk descends through the
-   * params listed in CLASS_BUILDING_HELPERS and stops everywhere else. A
-   * literal that some other helper merely reads is data: postfixing it would
-   * change what that helper computes, as in `{{if (eq this.mode "a") "a" "b"}}`
-   * where only the two branches are class names.
+   *   {{if x "a" "b"}}                     -> both branches
+   *   {{if x "a b"}}                       -> every class in the literal
+   *   {{concat "a" " " "b"}}               -> every param
+   *   {{if x (concat "a" "-suffix") "b"}}  -> nested subexpressions too
    *
-   * A path expression such as `{{this.fooClass}}` resolves at runtime, so it
-   * carries no class name to rename at build time.
+   *   {{this.fooClass}}                    -> resolved at runtime, nothing to rename
+   *   {{someHelper "a"}}                   -> opaque; use {{scopedClass "a"}}
+   *   {{if (eq this.mode "a") "a" "b"}}    -> the branches, but not the comparand
    */
   function renameLiteralClasses(node) {
     if (node.type === 'StringLiteral') {
