@@ -47,19 +47,35 @@ function elementHasScopedAttribute(node, attributes) {
  */
 const CLASS_BUILDING_HELPERS = new Set(['concat', 'if', 'unless']);
 
+/**
+ *   "a "     -> true
+ *   "a b"    -> false, b runs on into whatever follows
+ *   "a"      -> false
+ *   ""       -> false
+ */
 function endsAtClassBoundary(value) {
   return /\s$/.test(value);
 }
 
+/**
+ *   " b"     -> true
+ *   "a b"    -> false, a runs on from whatever precedes
+ *   "b"      -> false
+ *   ""       -> false
+ */
 function startsAtClassBoundary(value) {
   return /^\s/.test(value);
 }
 
 /**
- * Whether the literal at `index` is a whole class name rather than a fragment
- * that `concat` fuses onto a neighbour. In `{{concat "a" "-suffix"}}` the "a"
- * is a fragment: the result is one class, `a-suffix`, so postfixing "a" on its
- * own would bury the postfix in the middle of it.
+ * Whether the param at `index` is a whole class name rather than a fragment
+ * that `concat` fuses onto a neighbour. Postfixing a fragment would bury the
+ * postfix in the middle of the class the fragments build.
+ *
+ *   {{concat "a" " " "b"}}     -> all three, the spaces separate them
+ *   {{concat "a" "-suffix"}}   -> neither, the result is the one class a-suffix
+ *   {{concat "a" this.x}}      -> neither, "a" fuses with an unknown value
+ *   {{concat "a " this.x}}     -> both, the space ends "a" and bounds this.x
  */
 function isWholeClassName(params, index) {
   const param = params[index];
