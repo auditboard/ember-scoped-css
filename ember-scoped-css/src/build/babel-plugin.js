@@ -90,8 +90,6 @@ export const scopedCSS = (config) => (env, options, workingDirectory) => {
           }
 
           const original = path.node.arguments[0].value;
-          // The co-located CSS is not parsed on this path, so there is nothing
-          // to check the classes against: naming them explicitly is the opt-in.
           const renamed = renameClass(original, state.postfix);
           const transformedString = env.types.stringLiteral(renamed);
 
