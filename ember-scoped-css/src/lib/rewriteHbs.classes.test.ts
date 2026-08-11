@@ -15,11 +15,12 @@ function rewrite(hbs) {
 }
 
 /**
- * Only the unquoted (bare `MustacheStatement`) class attribute value is new
- * here. The quoted (`ConcatStatement`) path already renames every string
- * literal it finds -- including the `if`/`scopedClass`-adjacent cases below --
- * so it isn't retested; see `legacy-conditional` in vite-app-with-compat for
- * existing end-to-end coverage of `if` + `scopedClass` together, unquoted.
+ * This suite covers only the unquoted (bare `MustacheStatement`) class
+ * attribute value. The quoted (`ConcatStatement`) path renames every string
+ * literal it finds, including the `if`/`scopedClass`-adjacent cases below,
+ * so it isn't retested here; see `legacy-conditional` in
+ * vite-app-with-compat for end-to-end coverage of `if` + `scopedClass`
+ * together, unquoted.
  */
 describe('unquoted class attribute values', () => {
   describe('if', () => {
