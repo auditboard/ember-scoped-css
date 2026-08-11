@@ -90,11 +90,7 @@ export const scopedCSS = (config) => (env, options, workingDirectory) => {
           }
 
           const original = path.node.arguments[0].value;
-          const renamed = renameClass(
-            original,
-            state.postfix,
-            new Set([original]),
-          );
+          const renamed = renameClass(original, state.postfix);
           const transformedString = env.types.stringLiteral(renamed);
 
           path.replaceWith(transformedString);

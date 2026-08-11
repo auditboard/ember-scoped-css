@@ -10,6 +10,11 @@ export function splitClassList(classList) {
 }
 
 /**
+ * Postfixes every class in `className`, which may be a space-separated list.
+ *
+ * `classesInCss` is consulted one class at a time, so it has to be keyed on
+ * individual class names — a Set built from a whole space-separated list
+ * matches nothing. Omit it to postfix every class unconditionally.
  *
  * @param {string} className
  * @param {string} postfix

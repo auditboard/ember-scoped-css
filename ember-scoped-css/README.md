@@ -496,15 +496,25 @@ const Outer = <template>
 
 ### Passing classes as arguments to a component
 
-There is a `scopedClass` helper that you can use to pass a class name as an argument to a component. The helper takes a class name and returns a scoped class name. `scopedClass` helper is replaced at build time so there is no performance hit when running the app.
+There is a `scopedClass` helper that you can use to pass a class name as an argument to a component. The helper takes a class name — or a space-separated list of class names — and returns the scoped equivalent. `scopedClass` helper is replaced at build time so there is no performance hit when running the app.
 
 ```gjs
 import { scopedClass } from 'ember-scoped-css';
 
 <template>
   <OtherComponent @internalClass={{scopedClass 'hello-class'}} />
-  <OtherComponent @internalClass="{{scopedClass 'hello-class'}} other-class" />
+  <OtherComponent @internalClass={{scopedClass 'hello-class other-class'}} />
+  <OtherComponent @internalClass="{{scopedClass 'hello-class'}} global-class" />
 </template>
+```
+
+Every class in the argument is scoped, so 
+```hbs
+<div class={{scopedClass 'hello-class other-class'}}>
+```
+is equivalent to 
+```hbs
+<div class="{{scopedClass 'hello-class'}} {{scopedClass 'other-class'}}">
 ```
 
 ## Testing
