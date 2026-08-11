@@ -30,6 +30,23 @@ function elementHasScopedAttribute(node, attributes) {
   );
 }
 
+/**
+ * Helpers whose result is assembled from their own params, so a literal
+ * param can be a class name in its own right. `if`'s condition at index 0 is
+ * excluded -- it decides which branch wins rather than contributing to the
+ * class string, so postfixing it (e.g. a comparand: `{{if (eq this.mode
+ * "a") "a" "b"}}`) would stop the comparison ever matching.
+ *
+ * Any other helper is opaque: it may return a class name, but what it does
+ * with its arguments is unknown, so those arguments are left alone.
+ * `{{scopedClass "..."}}` is the way to rename a literal such a helper
+ * receives.
+ *
+ * Matching is by name, so a block param that shadows `if` is checked for --
+ * see isShadowed.
+ */
+const CLASS_BUILDING_HELPERS = new Set(['if']);
+
 export function templatePlugin({ classes, tags, attributes, postfix }) {
   let stack = [];
   // scoped-class is a global we allow in hbs
@@ -40,6 +57,54 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     if (!str) return false;
 
     return scopedClassCandidates.some((candidate) => candidate === str);
+  }
+
+  /**
+   * Block params introduced by elements, e.g. `<Foo as |if|>`. The `All`
+   * visitor only runs for node types that have no visitor of their own, so
+   * ElementNode never reaches `stack` and has to be tracked separately.
+   */
+  let elementScope = [];
+
+  /**
+   * Whether `name` refers to the helper it appears to. A block param wins
+   * over both a helper and a keyword, so `{{#each xs as |if|}}` puts
+   * something else entirely behind the name for the length of the block.
+   */
+  function isShadowed(name) {
+    return (
+      stack.some((ancestor) => ancestor.blockParams?.includes(name)) ||
+      elementScope.some((element) => element.blockParams.includes(name))
+    );
+  }
+
+  function isClassBuilding(name) {
+    return CLASS_BUILDING_HELPERS.has(name) && !isShadowed(name);
+  }
+
+  /**
+   * Rename the string literals whose value reaches the class attribute.
+   *
+   *   {{if x "a" "b"}}                     -> both branches
+   *   {{if (checkAlphabet "a" "b") "a" "b"}} -> the branches, not the condition
+   *   {{this.fooClass}}                    -> resolved at runtime, nothing to rename
+   */
+  function renameLiteralClasses(node) {
+    if (node.type !== 'MustacheStatement') return node;
+
+    const name = getValue(node.path);
+
+    if (!isClassBuilding(name)) return node;
+
+    for (let index = 1; index < (node.params?.length ?? 0); index++) {
+      const param = node.params[index];
+
+      if (param.type === 'StringLiteral') {
+        param.value = renameClass(param.value, postfix, classes);
+      }
+    }
+
+    return node;
   }
 
   return {
@@ -69,40 +134,55 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
               });
             }
           }
+        } else if (node.value.type === 'MustacheStatement') {
+          // Glimmer parses a quoted attribute value as a ConcatStatement and
+          // an unquoted one as a bare MustacheStatement, so `class={{if x
+          // "a" "b"}}` lands here rather than in the branch above.
+          renameLiteralClasses(node.value);
         }
       }
     },
 
-    ElementNode(node) {
-      // An element is in scope if its tag matches a tag selector, or if it
-      // carries an attribute named in a scoped attribute selector. We add the
-      // postfix class at most once regardless of how many things matched.
-      const shouldScope =
-        tags.has(node.tag) || elementHasScopedAttribute(node, attributes);
+    ElementNode: {
+      enter(node) {
+        // Only elements that introduce a name need tracking, which also
+        // keeps the stack balanced when a visitor removes a node and skips
+        // its exit.
+        if (node.blockParams?.length) elementScope.push(node);
 
-      if (!shouldScope) return;
+        // An element is in scope if its tag matches a tag selector, or if it
+        // carries an attribute named in a scoped attribute selector. We add the
+        // postfix class at most once regardless of how many things matched.
+        const shouldScope =
+          tags.has(node.tag) || elementHasScopedAttribute(node, attributes);
 
-      // check if class attribute already exists
-      const classAttr = node.attributes.find((attr) => attr.name === 'class');
+        if (!shouldScope) return;
 
-      if (!classAttr) {
-        // push class attribute
-        node.attributes.push(
-          recast.builders.attr('class', recast.builders.text(postfix)),
-        );
-      } else if (classAttr.value.type === 'TextNode') {
-        classAttr.value.chars += ' ' + postfix;
-      } else if (classAttr.value.type === 'ConcatStatement') {
-        // class="foo {{bar}}"
-        classAttr.value.parts.push(recast.builders.text(' ' + postfix));
-      } else {
-        // class={{this.foo}} — wrap in a concat so we can append the text part
-        classAttr.value = recast.builders.concat([
-          classAttr.value,
-          recast.builders.text(' ' + postfix),
-        ]);
-        classAttr.quoteType = '"';
-      }
+        // check if class attribute already exists
+        const classAttr = node.attributes.find((attr) => attr.name === 'class');
+
+        if (!classAttr) {
+          // push class attribute
+          node.attributes.push(
+            recast.builders.attr('class', recast.builders.text(postfix)),
+          );
+        } else if (classAttr.value.type === 'TextNode') {
+          classAttr.value.chars += ' ' + postfix;
+        } else if (classAttr.value.type === 'ConcatStatement') {
+          // class="foo {{bar}}"
+          classAttr.value.parts.push(recast.builders.text(' ' + postfix));
+        } else {
+          // class={{this.foo}} — wrap in a concat so we can append the text part
+          classAttr.value = recast.builders.concat([
+            classAttr.value,
+            recast.builders.text(' ' + postfix),
+          ]);
+          classAttr.quoteType = '"';
+        }
+      },
+      exit(node) {
+        if (elementScope.at(-1) === node) elementScope.pop();
+      },
     },
 
     All: {
