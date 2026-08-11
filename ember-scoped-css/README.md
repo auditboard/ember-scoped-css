@@ -511,7 +511,9 @@ import { scopedClass } from 'ember-scoped-css';
 </template>
 ```
 
-Every class in the argument is scoped, so `scopedClass 'hello-class other-class'` is equivalent to `concat (scopedClass 'hello-class') ' ' (scopedClass 'other-class')`.
+Every class in the argument is scoped, so 
+```hbs
+<div class={{scopedClass 'hello-class other-class'}}`>
 
 ## Testing
 
