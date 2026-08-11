@@ -1,7 +1,7 @@
 import stylelint from 'stylelint';
-import flattenNestedSelectorsForRule from 'stylelint/lib/utils/flattenNestedSelectorsForRule.mjs';
 
 import buildDisplaySelector from '../../utils/buildDisplaySelector.js';
+import flattenNestedSelectorsForRule from '../../utils/flattenNestedSelectorsForRule.js';
 import { AT_RULES_WITH_STYLE_RULES } from '../no-unscoped-selectors/index.js';
 
 const ruleName = 'ember-scoped-css/no-unscopable-class-attribute-selectors';

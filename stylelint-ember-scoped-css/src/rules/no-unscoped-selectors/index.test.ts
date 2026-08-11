@@ -1,8 +1,14 @@
+import { fileURLToPath } from 'node:url';
+
 import { getTestRule } from 'vitest-stylelint-utils';
 
 import rule from './index.js';
 
-const testRule = getTestRule({ plugins: ['./'] });
+// stylelint 17 resolves relative plugin paths against configBasedir rather than
+// the cwd, so point at the plugin entry directly.
+const testRule = getTestRule({
+  plugins: [fileURLToPath(new URL('../../index.js', import.meta.url))],
+});
 
 testRule({
   ruleName: rule.ruleName,
