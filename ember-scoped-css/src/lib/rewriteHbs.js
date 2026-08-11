@@ -98,6 +98,17 @@ function isWholeClassName(params, index) {
   return boundedLeft && boundedRight;
 }
 
+/**
+ * A collapsed `concat` call becomes a StringLiteral, which is the right shape
+ * for a helper param but not for an attribute value -- there it needs to be a
+ * TextNode instead.
+ */
+function toAttributeValue(node) {
+  return node.type === 'StringLiteral'
+    ? recast.builders.text(node.value)
+    : node;
+}
+
 export function templatePlugin({ classes, tags, attributes, postfix }) {
   let stack = [];
   // scoped-class is a global we allow in hbs
@@ -135,11 +146,18 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
 
   /**
    * `concat` fuses its params into one string, so a literal is only a class
-   * name of its own when a boundary separates it from its neighbours.
+   * name of its own when a boundary separates it from its neighbours. When
+   * every param is a literal and they all fuse, the call produces exactly one
+   * class name, so `concat` has nothing left to join -- the caller replaces
+   * the whole call with that renamed literal, the same way `{{scopedClass}}`
+   * collapses to a literal.
    *
-   *   {{concat "a" " " "b"}}   -> two classes, rename each
-   *   {{concat "a" "-suffix"}} -> one class, fold it and rename the whole thing
+   *   {{concat "a" " " "b"}}   -> two classes, rename each, concat stays
+   *   {{concat "a" "-suffix"}} -> one class; the call is replaced by it
    *   {{concat "a" this.x}}    -> "a" fuses with an unknown value, so leave it
+   *
+   * Returns the replacement literal when the call collapses; otherwise renames
+   * in place and returns nothing.
    */
   function renameConcatParams(node) {
     const params = node.params ?? [];
@@ -152,9 +170,9 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
       const folded = params.map((param) => param.value).join('');
       const renamed = renameClass(folded, postfix, classes);
 
-      // Collapsing the params is only worth the churn if it renamed something.
+      // Collapsing to a literal is only worth the churn if it renamed something.
       if (renamed !== folded) {
-        node.params = [recast.builders.literal('StringLiteral', renamed)];
+        return recast.builders.literal('StringLiteral', renamed);
       }
 
       return;
@@ -163,17 +181,20 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     for (const [index, param] of params.entries()) {
       if (!isWholeClassName(params, index)) continue;
 
-      renameLiteralClasses(param);
+      params[index] = renameLiteralClasses(param);
     }
   }
 
   /**
-   * Rename the string literals whose value reaches the class attribute.
+   * Rename the string literals whose value reaches the class attribute, and
+   * return the node that should stand in this one's place. That's the same
+   * node for everything but a `concat` call that collapses to a single
+   * literal, which is replaced by that literal.
    *
    *   {{if x "a" "b"}}                     -> both branches
    *   {{if x "a b"}}                       -> every class in the literal
-   *   {{concat "a" " " "b"}}               -> every param
-   *   {{concat "a" "-suffix"}}             -> folded to one class, then renamed
+   *   {{concat "a" " " "b"}}               -> every param, concat stays
+   *   {{concat "a" "-suffix"}}             -> replaced by the renamed literal
    *
    *   {{this.fooClass}}                    -> resolved at runtime, nothing to rename
    *   {{someHelper "a"}}                   -> opaque; use {{scopedClass "a"}}
@@ -182,30 +203,28 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
    */
   function renameLiteralClasses(node) {
     if (node.type === 'StringLiteral') {
-      const renamedClass = renameClass(node.value, postfix, classes);
+      node.value = renameClass(node.value, postfix, classes);
 
-      node.value = renamedClass;
-
-      return;
+      return node;
     }
 
     if (node.type !== 'MustacheStatement' && node.type !== 'SubExpression') {
-      return;
+      return node;
     }
 
     const name = getValue(node.path);
 
-    if (!isClassBuilding(name)) return;
+    if (!isClassBuilding(name)) return node;
 
     if (name === 'concat') {
-      renameConcatParams(node);
-
-      return;
+      return renameConcatParams(node) ?? node;
     }
 
-    for (let branch of (node.params ?? []).slice(1)) {
-      renameLiteralClasses(branch);
+    for (let index = 1; index < (node.params?.length ?? 0); index++) {
+      node.params[index] = renameLiteralClasses(node.params[index]);
     }
+
+    return node;
   }
 
   return {
@@ -216,20 +235,26 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
 
           node.value.chars = renamedClass;
         } else if (node.value.type === 'ConcatStatement') {
-          for (let part of node.value.parts) {
+          for (const [index, part] of node.value.parts.entries()) {
             if (part.type === 'TextNode' && part.chars) {
               const renamedClass = renameClass(part.chars, postfix, classes);
 
               part.chars = renamedClass;
             } else if (part.type === 'MustacheStatement') {
-              renameLiteralClasses(part);
+              node.value.parts[index] = toAttributeValue(
+                renameLiteralClasses(part),
+              );
             }
           }
         } else if (node.value.type === 'MustacheStatement') {
           // Glimmer parses a quoted attribute value as a ConcatStatement and an
           // unquoted one as a bare MustacheStatement, so `class={{if x "a"}}`
           // lands here rather than in the branch above.
-          renameLiteralClasses(node.value);
+          const replaced = renameLiteralClasses(node.value);
+
+          if (replaced.type === 'StringLiteral') node.quoteType = '"';
+
+          node.value = toAttributeValue(replaced);
         }
       }
     },

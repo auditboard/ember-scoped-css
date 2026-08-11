@@ -178,18 +178,26 @@ describe('class attribute values', () => {
       );
     }
 
-    it('folds fused literals so the postfix lands at the end', () => {
+    it('collapses a fully-fused concat to the renamed literal', () => {
       expect(
         rewriteWithSuffixClass('<div class={{concat "a" "-suffix"}}></div>'),
-      ).to.equal('<div class={{concat "a-suffix_pfx"}}></div>');
+      ).to.equal('<div class="a-suffix_pfx"></div>');
     });
 
-    it('folds fused literals inside a branch too', () => {
+    it('collapses a fully-fused concat inside a branch too', () => {
       expect(
         rewriteWithSuffixClass(
           '<div class={{if x (concat "a" "-suffix") "b"}}></div>',
         ),
-      ).to.equal('<div class={{if x (concat "a-suffix_pfx") "b_pfx"}}></div>');
+      ).to.equal('<div class={{if x "a-suffix_pfx" "b_pfx"}}></div>');
+    });
+
+    it('collapses a fully-fused concat inside a quoted attribute too', () => {
+      expect(
+        rewriteWithSuffixClass(
+          '<div class="c {{concat "a" "-suffix"}}"></div>',
+        ),
+      ).to.equal('<div class="c a-suffix_pfx"></div>');
     });
 
     it('leaves fused literals alone when the fold is not a class', () => {
