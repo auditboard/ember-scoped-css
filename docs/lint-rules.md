@@ -31,7 +31,6 @@ This rule forbids the following:
 import { scopedClass } from 'ember-scoped-css';
 
 <template>
-  <SomeComponent @class={{scopedClass}} />
   <SomeComponent @class={{scopedClass 'first-class' 'second-param'}} />
 </template>
 ```
