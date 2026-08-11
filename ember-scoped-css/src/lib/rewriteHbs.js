@@ -35,17 +35,69 @@ function elementHasScopedAttribute(node, attributes) {
  * param can be a class name in its own right. `if`'s condition at index 0 is
  * excluded -- it decides which branch wins rather than contributing to the
  * class string, so postfixing it (e.g. a comparand: `{{if (eq this.mode
- * "a") "a" "b"}}`) would stop the comparison ever matching.
+ * "a") "a" "b"}}`) would stop the comparison ever matching. `concat` has no
+ * such condition, but fuses its params together -- see isWholeClassName.
  *
  * Any other helper is opaque: it may return a class name, but what it does
  * with its arguments is unknown, so those arguments are left alone.
  * `{{scopedClass "..."}}` is the way to rename a literal such a helper
  * receives.
  *
- * Matching is by name, so a block param that shadows `if` is checked for --
- * see isShadowed.
+ * Matching is by name, so a block param that shadows one of these is checked
+ * for -- see isShadowed.
  */
-const CLASS_BUILDING_HELPERS = new Set(['if']);
+const CLASS_BUILDING_HELPERS = new Set(['if', 'concat']);
+
+/**
+ *   "a "     -> true
+ *   "a b"    -> false, b runs on into whatever follows
+ *   "a"      -> false
+ *   ""       -> false
+ */
+function endsAtClassBoundary(value) {
+  return /\s$/.test(value);
+}
+
+/**
+ *   " b"     -> true
+ *   "a b"    -> false, a runs on from whatever precedes
+ *   "b"      -> false
+ *   ""       -> false
+ */
+function startsAtClassBoundary(value) {
+  return /^\s/.test(value);
+}
+
+/**
+ * Whether the param at `index` is a whole class name rather than a fragment
+ * that `concat` fuses onto a neighbour. Postfixing a fragment would bury the
+ * postfix in the middle of the class the fragments build.
+ *
+ *   {{concat "a" " " "b"}}     -> all three, the spaces separate them
+ *   {{concat "a" "-suffix"}}   -> neither, the result is the one class a-suffix
+ *   {{concat "a" this.x}}      -> neither, "a" fuses with an unknown value
+ *   {{concat "a " this.x}}     -> both, the space ends "a" and bounds this.x
+ */
+function isWholeClassName(params, index) {
+  const param = params[index];
+  // A param whose value is only known at runtime is bounded by its neighbours
+  // alone, so it contributes no boundary of its own.
+  const value = param.type === 'StringLiteral' ? param.value : '';
+  const previous = params[index - 1];
+  const next = params[index + 1];
+
+  const boundedLeft =
+    startsAtClassBoundary(value) ||
+    index === 0 ||
+    (previous.type === 'StringLiteral' && endsAtClassBoundary(previous.value));
+
+  const boundedRight =
+    endsAtClassBoundary(value) ||
+    index === params.length - 1 ||
+    (next.type === 'StringLiteral' && startsAtClassBoundary(next.value));
+
+  return boundedLeft && boundedRight;
+}
 
 export function templatePlugin({ classes, tags, attributes, postfix }) {
   let stack = [];
@@ -86,14 +138,43 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   }
 
   /**
+   * Rename each `concat` param that is a whole class name of its own -- a
+   * fragment `concat` fuses onto a neighbour is left alone, since postfixing
+   * it would bury the postfix mid-name where it matches no selector the CSS
+   * rewrite produces.
+   *
+   *   {{concat "a" " " "b"}}   -> both "a" and "b", the space separates them
+   *   {{concat "a" "-suffix"}} -> neither, "a" fuses with "-suffix"
+   */
+  function renameConcatParams(node) {
+    const params = node.params ?? [];
+
+    for (const [index, param] of params.entries()) {
+      if (param.type !== 'StringLiteral') continue;
+      if (!isWholeClassName(params, index)) continue;
+
+      param.value = renameClass(param.value, postfix, classes);
+    }
+  }
+
+  /**
    * Rename the string literals whose value reaches the class attribute.
    *
-   *   {{if x "a" "b"}}                     -> both branches
-   *   {{if (checkAlphabet "a" "b") "a" "b"}} -> the branches, not the condition
-   *   {{this.fooClass}}                    -> resolved at runtime, nothing to rename
+   *   {{if x "a" "b"}}                       -> both branches
+   *   {{if (checkAlphabet "a" "b") "a" "b"}}  -> the branches, not the condition
+   *   {{concat "a" " " "b"}}                  -> every param that's a whole class name
+   *   {{this.fooClass}}                       -> resolved at runtime, nothing to rename
    */
   function renameLiteralClasses(node) {
-    if (!isClassBuilding(getValue(node.path))) return;
+    const name = getValue(node.path);
+
+    if (!isClassBuilding(name)) return;
+
+    if (name === 'concat') {
+      renameConcatParams(node);
+
+      return;
+    }
 
     for (let param of node.params.slice(1)) {
       if (param.type === 'StringLiteral') {
@@ -116,17 +197,7 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
 
               part.chars = renamedClass;
             } else if (part.type === 'MustacheStatement') {
-              recast.traverse(part, {
-                StringLiteral(node) {
-                  const renamedClass = renameClass(
-                    node.value,
-                    postfix,
-                    classes,
-                  );
-
-                  node.value = renamedClass;
-                },
-              });
+              renameLiteralClasses(part);
             }
           }
         } else if (node.value.type === 'MustacheStatement') {

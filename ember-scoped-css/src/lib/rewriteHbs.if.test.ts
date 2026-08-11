@@ -48,6 +48,14 @@ describe('if in a class attribute', () => {
     );
   });
 
+  it('leaves the condition alone, even when it is a helper call, quoted', () => {
+    expect(
+      rewrite(`<div class="{{if (checkAlphabet 'a' 'b') 'a' 'b'}}"></div>`),
+    ).to.equal(
+      `<div class="{{if (checkAlphabet 'a' 'b') 'a_pfx' 'b_pfx'}}"></div>`,
+    );
+  });
+
   it('skips if when it is a block param', () => {
     expect(
       rewrite(
