@@ -517,7 +517,7 @@ Every class in the argument is scoped, so
 ```
 is equivalent to 
 ```hbs
-<div class="{{scopedClass 'hello-class'}} {{scopedClass 'other-class'}}">`
+<div class="{{scopedClass 'hello-class'}} {{scopedClass 'other-class'}}">
 ```
 
 ## Testing
