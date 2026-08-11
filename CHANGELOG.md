@@ -1,5 +1,26 @@
 # Changelog
 
+## Release (2026-08-11)
+
+* ember-scoped-css 3.3.0 (minor)
+* stylelint-ember-scoped-css 2.1.0 (minor)
+
+#### :rocket: Enhancement
+* `stylelint-ember-scoped-css`
+  * [#406](https://github.com/auditboard/ember-scoped-css/pull/406) Support stylelint 17 ([@wagenet](https://github.com/wagenet))
+* `ember-scoped-css`
+  * [#403](https://github.com/auditboard/ember-scoped-css/pull/403) Match the imported scopedClass form in the template-lint rule ([@adrianbw](https://github.com/adrianbw))
+  * [#402](https://github.com/auditboard/ember-scoped-css/pull/402) Postfix every class passed to scopedClass() ([@adrianbw](https://github.com/adrianbw))
+
+#### :memo: Documentation
+* `ember-scoped-css`
+  * [#404](https://github.com/auditboard/ember-scoped-css/pull/404) Update README.md ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 3
+- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))
+- Peter Wagenet ([@wagenet](https://github.com/wagenet))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-07-22)
 
 * ember-scoped-css 3.2.0 (minor)

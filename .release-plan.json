@@ -2,8 +2,8 @@
   "solution": {
     "ember-scoped-css": {
       "impact": "minor",
-      "oldVersion": "3.1.0",
-      "newVersion": "3.2.0",
+      "oldVersion": "3.2.0",
+      "newVersion": "3.3.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -18,8 +18,18 @@
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "oldVersion": "2.0.0"
+      "impact": "minor",
+      "oldVersion": "2.0.0",
+      "newVersion": "2.1.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        }
+      ],
+      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
     }
   },
-  "description": "## Release (2026-07-22)\n\n* ember-scoped-css 3.2.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#397](https://github.com/auditboard/ember-scoped-css/pull/397) feat: support additional roots across monorepo packages ([@alexraputa](https://github.com/alexraputa))\n\n#### :memo: Documentation\n* `ember-scoped-css`\n  * [#399](https://github.com/auditboard/ember-scoped-css/pull/399) docs: rolldown / tsdown usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 2\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- Alex Raputa ([@alexraputa](https://github.com/alexraputa))\n"
+  "description": "## Release (2026-08-11)\n\n* ember-scoped-css 3.3.0 (minor)\n* stylelint-ember-scoped-css 2.1.0 (minor)\n\n#### :rocket: Enhancement\n* `stylelint-ember-scoped-css`\n  * [#406](https://github.com/auditboard/ember-scoped-css/pull/406) Support stylelint 17 ([@wagenet](https://github.com/wagenet))\n* `ember-scoped-css`\n  * [#403](https://github.com/auditboard/ember-scoped-css/pull/403) Match the imported scopedClass form in the template-lint rule ([@adrianbw](https://github.com/adrianbw))\n  * [#402](https://github.com/auditboard/ember-scoped-css/pull/402) Postfix every class passed to scopedClass() ([@adrianbw](https://github.com/adrianbw))\n\n#### :memo: Documentation\n* `ember-scoped-css`\n  * [#404](https://github.com/auditboard/ember-scoped-css/pull/404) Update README.md ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 3\n- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))\n- Peter Wagenet ([@wagenet](https://github.com/wagenet))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
