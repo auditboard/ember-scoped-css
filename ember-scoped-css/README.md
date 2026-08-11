@@ -503,11 +503,8 @@ import { scopedClass } from 'ember-scoped-css';
 
 <template>
   <OtherComponent @internalClass={{scopedClass 'hello-class'}} />
-  <OtherComponent @internalClass={{(scopedClass 'hello-class')}} />
-  <OtherComponent
-    @internalClass={{concat (scopedClass 'hello-class') ' other-class'}}
-  />
   <OtherComponent @internalClass={{scopedClass 'hello-class other-class'}} />
+  <OtherComponent @internalClass="{{scopedClass 'hello-class'}} global-class" />
 </template>
 ```
 
