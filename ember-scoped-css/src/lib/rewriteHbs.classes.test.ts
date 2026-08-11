@@ -20,10 +20,9 @@ function rewriteWithScopedDiv(hbs) {
 }
 
 /**
- * This suite covers only the unquoted (bare `MustacheStatement`) class
- * attribute value. The quoted (`ConcatStatement`) path renames every string
- * literal it finds, including the `if`/`scopedClass`-adjacent cases below,
- * so it isn't retested here; see `legacy-conditional` in
+ * The quoted (`ConcatStatement`) and unquoted (bare `MustacheStatement`)
+ * class attribute values share the same literal-renaming dispatch, so most
+ * cases are only exercised once, unquoted; see `legacy-conditional` in
  * vite-app-with-compat for end-to-end coverage of `if` + `scopedClass`
  * together, unquoted.
  */
@@ -90,11 +89,43 @@ describe('unquoted class attribute values', () => {
     });
   });
 
-  describe('scopedClass', () => {
-    it('collapses to a quoted literal unconditionally, without a CSS lookup', () => {
+  describe('concat', () => {
+    it('renames every param that is a whole class name', () => {
+      expect(rewrite('<div class={{concat "a" " " "b"}}></div>')).to.equal(
+        '<div class={{concat "a_pfx" " " "b_pfx"}}></div>',
+      );
+    });
+
+    it('leaves a param that is not in the CSS alone', () => {
       expect(
-        rewrite('<div class={{scopedClass "global-thing"}}></div>'),
-      ).to.equal('<div class="global-thing_pfx"></div>');
+        rewrite('<div class={{concat "a" " " "global-thing"}}></div>'),
+      ).to.equal('<div class={{concat "a_pfx" " " "global-thing"}}></div>');
+    });
+
+    it('leaves a param that fuses with a neighbour alone', () => {
+      // Renaming "a" here would emit a_pfx-suffix, which matches no selector
+      // the CSS rewrite produces.
+      expect(rewrite('<div class={{concat "a" "-suffix"}}></div>')).to.equal(
+        '<div class={{concat "a" "-suffix"}}></div>',
+      );
+    });
+
+    it('leaves an arbitrary helper call among its params alone', () => {
+      expect(
+        rewrite('<div class={{concat "a " (someHelper "x") " b"}}></div>'),
+      ).to.equal(
+        '<div class={{concat "a_pfx " (someHelper "x") " b_pfx"}}></div>',
+      );
+    });
+
+    it('skips concat when it is a block param', () => {
+      expect(
+        rewrite(
+          '{{#let x as |concat|}}<div class={{concat "a" " " "b"}}></div>{{/let}}',
+        ),
+      ).to.equal(
+        '{{#let x as |concat|}}<div class={{concat "a" " " "b"}}></div>{{/let}}',
+      );
     });
   });
 
@@ -113,6 +144,18 @@ describe('unquoted class attribute values', () => {
   it('leaves a helper that is not if alone', () => {
     expect(rewrite('<div class={{someHelper "a" "b"}}></div>')).to.equal(
       '<div class={{someHelper "a" "b"}}></div>',
+    );
+  });
+});
+
+describe('quoted class attribute values', () => {
+  it('leaves the condition of an if alone, even when it is a helper call', () => {
+    // checkAlphabet's own arguments are data, not class names -- only the
+    // branches (params 1+) reach the class attribute, same as unquoted.
+    expect(
+      rewrite(`<div class="{{if (checkAlphabet 'a' 'b') 'a' 'b'}}"></div>`),
+    ).to.equal(
+      `<div class="{{if (checkAlphabet 'a' 'b') 'a_pfx' 'b_pfx'}}"></div>`,
     );
   });
 });
