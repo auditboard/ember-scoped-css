@@ -32,11 +32,12 @@ function elementHasScopedAttribute(node, attributes) {
 
 /**
  * Helpers whose result is assembled from their own params, so a literal
- * param can be a class name in its own right. `if`'s condition at index 0 is
- * excluded -- it decides which branch wins rather than contributing to the
- * class string, so postfixing it (e.g. a comparand: `{{if (eq this.mode
- * "a") "a" "b"}}`) would stop the comparison ever matching. `concat` has no
- * such condition, but fuses its params together -- see isWholeClassName.
+ * param can be a class name in its own right. `if` and `unless`'s condition
+ * at index 0 is excluded -- it decides which branch wins rather than
+ * contributing to the class string, so postfixing it (e.g. a comparand:
+ * `{{if (eq this.mode "a") "a" "b"}}`) would stop the comparison ever
+ * matching. `concat` has no such condition, but fuses its params together --
+ * see isWholeClassName.
  *
  * Any other helper is opaque: it may return a class name, but what it does
  * with its arguments is unknown, so those arguments are left alone.
@@ -46,7 +47,7 @@ function elementHasScopedAttribute(node, attributes) {
  * Matching is by name, so a block param that shadows one of these is checked
  * for -- see isShadowed.
  */
-const CLASS_BUILDING_HELPERS = new Set(['if', 'concat']);
+const CLASS_BUILDING_HELPERS = new Set(['if', 'unless', 'concat']);
 
 function endsAtClassBoundary(value) {
   return /\s$/.test(value);
