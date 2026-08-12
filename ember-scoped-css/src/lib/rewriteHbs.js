@@ -48,52 +48,39 @@ function elementHasScopedAttribute(node, attributes) {
  */
 const CLASS_BUILDING_HELPERS = new Set(['if', 'concat']);
 
-/**
- *   "a "     -> true
- *   "a b"    -> false, b runs on into whatever follows
- *   "a"      -> false
- *   ""       -> false
- */
 function endsAtClassBoundary(value) {
   return /\s$/.test(value);
 }
 
-/**
- *   " b"     -> true
- *   "a b"    -> false, a runs on from whatever precedes
- *   "b"      -> false
- *   ""       -> false
- */
 function startsAtClassBoundary(value) {
   return /^\s/.test(value);
 }
 
 /**
- * Whether the param at `index` is a whole class name rather than a fragment
+ * Whether the literal at `index` is a whole class name rather than a fragment
  * that `concat` fuses onto a neighbour. Postfixing a fragment would bury the
- * postfix in the middle of the class the fragments build.
+ * postfix in the middle of the class the fragments build. A neighbour whose
+ * value is only known at runtime bounds nothing, since it could begin or end
+ * with anything.
  *
- *   {{concat "a" " " "b"}}     -> all three, the spaces separate them
- *   {{concat "a" "-suffix"}}   -> neither, the result is the one class a-suffix
- *   {{concat "a" this.x}}      -> neither, "a" fuses with an unknown value
- *   {{concat "a " this.x}}     -> both, the space ends "a" and bounds this.x
+ *   {{concat "a" " " "b"}}   -> "a" and "b", the space separates them
+ *   {{concat "a" "-suffix"}} -> neither, the result is the one class a-suffix
+ *   {{concat "a" this.x}}    -> not "a", it fuses with an unknown value
+ *   {{concat "a " this.x}}   -> "a ", its own trailing space ends it
  */
 function isWholeClassName(params, index) {
-  const param = params[index];
-  // A param whose value is only known at runtime is bounded by its neighbours
-  // alone, so it contributes no boundary of its own.
-  const value = param.type === 'StringLiteral' ? param.value : '';
+  const { value } = params[index];
   const previous = params[index - 1];
   const next = params[index + 1];
 
   const boundedLeft =
-    startsAtClassBoundary(value) ||
     index === 0 ||
+    startsAtClassBoundary(value) ||
     (previous.type === 'StringLiteral' && endsAtClassBoundary(previous.value));
 
   const boundedRight =
-    endsAtClassBoundary(value) ||
     index === params.length - 1 ||
+    endsAtClassBoundary(value) ||
     (next.type === 'StringLiteral' && startsAtClassBoundary(next.value));
 
   return boundedLeft && boundedRight;
@@ -137,15 +124,6 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     return CLASS_BUILDING_HELPERS.has(name) && !isShadowed(name);
   }
 
-  /**
-   * Rename each `concat` param that is a whole class name of its own -- a
-   * fragment `concat` fuses onto a neighbour is left alone, since postfixing
-   * it would bury the postfix mid-name where it matches no selector the CSS
-   * rewrite produces.
-   *
-   *   {{concat "a" " " "b"}}   -> both "a" and "b", the space separates them
-   *   {{concat "a" "-suffix"}} -> neither, "a" fuses with "-suffix"
-   */
   function renameConcatParams(node) {
     const params = node.params ?? [];
 
