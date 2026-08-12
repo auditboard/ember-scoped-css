@@ -233,6 +233,12 @@ describe('unquoted class attribute values', () => {
 });
 
 describe('quoted class attribute values', () => {
+  it('renames both branches', () => {
+    expect(rewrite('<div class="{{if x "a" "b"}}"></div>')).to.equal(
+      '<div class="{{if x "a_pfx" "b_pfx"}}"></div>',
+    );
+  });
+
   it('leaves the condition of an if alone, even when it is a helper call', () => {
     // checkAlphabet's own arguments are data, not class names -- only the
     // branches (params 1+) reach the class attribute, same as unquoted.
