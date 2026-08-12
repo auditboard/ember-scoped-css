@@ -30,6 +30,23 @@ function elementHasScopedAttribute(node, attributes) {
   );
 }
 
+/**
+ * Helpers whose result is assembled from their own params, so a literal
+ * param can be a class name in its own right. `if`'s condition at index 0 is
+ * excluded -- it decides which branch wins rather than contributing to the
+ * class string, so postfixing it (e.g. a comparand: `{{if (eq this.mode
+ * "a") "a" "b"}}`) would stop the comparison ever matching.
+ *
+ * Any other helper is opaque: it may return a class name, but what it does
+ * with its arguments is unknown, so those arguments are left alone.
+ * `{{scopedClass "..."}}` is the way to rename a literal such a helper
+ * receives.
+ *
+ * Matching is by name, so a block param that shadows `if` is checked for --
+ * see isShadowed.
+ */
+const CLASS_BUILDING_HELPERS = new Set(['if']);
+
 export function templatePlugin({ classes, tags, attributes, postfix }) {
   let stack = [];
   // scoped-class is a global we allow in hbs
@@ -40,6 +57,49 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     if (!str) return false;
 
     return scopedClassCandidates.some((candidate) => candidate === str);
+  }
+
+  /**
+   * Stack of ElementNode ancestors that introduce a block param, e.g.
+   * `<Foo as |if|>` -- pushed in ElementNode's own `enter` and popped in its
+   * own `exit` below. A `{{#each xs as |if|}}` block has no dedicated
+   * visitor, so it reaches `stack` through the generic `All` visitor
+   * instead; ElementNode has its own visitor, so `All` never runs for it,
+   * and this tracks it separately.
+   */
+  let elementScope = [];
+
+  /**
+   * Whether `name` refers to the helper it appears to. A block param wins
+   * over both a helper and a keyword, so `{{#each xs as |if|}}` puts
+   * something else entirely behind the name for the length of the block.
+   */
+  function isShadowed(name) {
+    return (
+      stack.some((ancestor) => ancestor.blockParams?.includes(name)) ||
+      elementScope.some((element) => element.blockParams.includes(name))
+    );
+  }
+
+  function isClassBuilding(name) {
+    return CLASS_BUILDING_HELPERS.has(name) && !isShadowed(name);
+  }
+
+  /**
+   * Rename the string literals whose value reaches the class attribute.
+   *
+   *   {{if x "a" "b"}}                     -> both branches
+   *   {{if (checkAlphabet "a" "b") "a" "b"}} -> the branches, not the condition
+   *   {{this.fooClass}}                    -> resolved at runtime, nothing to rename
+   */
+  function renameLiteralClasses(node) {
+    if (!isClassBuilding(getValue(node.path))) return;
+
+    for (let param of node.params.slice(1)) {
+      if (param.type === 'StringLiteral') {
+        param.value = renameClass(param.value, postfix, classes);
+      }
+    }
   }
 
   return {
@@ -69,40 +129,61 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
               });
             }
           }
+        } else if (node.value.type === 'MustacheStatement') {
+          // Glimmer parses a quoted attribute value as a ConcatStatement and
+          // an unquoted one as a bare MustacheStatement, so `class={{if x
+          // "a" "b"}}` lands here rather than in the branch above.
+          renameLiteralClasses(node.value);
         }
       }
     },
 
-    ElementNode(node) {
-      // An element is in scope if its tag matches a tag selector, or if it
-      // carries an attribute named in a scoped attribute selector. We add the
-      // postfix class at most once regardless of how many things matched.
-      const shouldScope =
-        tags.has(node.tag) || elementHasScopedAttribute(node, attributes);
+    ElementNode: {
+      enter(node) {
+        // Only elements that introduce a name need tracking, which also
+        // keeps the stack balanced when a visitor removes a node and skips
+        // its exit.
+        if (node.blockParams?.length) elementScope.push(node);
+      },
 
-      if (!shouldScope) return;
+      // Appending runs on the way out so that AttrNode has already seen the
+      // class attribute in its authored shape. Wrapping `class={{if ...}}` in
+      // a concat first would hand AttrNode a ConcatStatement, whose every
+      // string literal is a class name by assumption -- including an `if`
+      // condition's, which must not be renamed.
+      exit(node) {
+        if (elementScope.at(-1) === node) elementScope.pop();
 
-      // check if class attribute already exists
-      const classAttr = node.attributes.find((attr) => attr.name === 'class');
+        // An element is in scope if its tag matches a tag selector, or if it
+        // carries an attribute named in a scoped attribute selector. We add the
+        // postfix class at most once regardless of how many things matched.
+        const shouldScope =
+          tags.has(node.tag) || elementHasScopedAttribute(node, attributes);
 
-      if (!classAttr) {
-        // push class attribute
-        node.attributes.push(
-          recast.builders.attr('class', recast.builders.text(postfix)),
-        );
-      } else if (classAttr.value.type === 'TextNode') {
-        classAttr.value.chars += ' ' + postfix;
-      } else if (classAttr.value.type === 'ConcatStatement') {
-        // class="foo {{bar}}"
-        classAttr.value.parts.push(recast.builders.text(' ' + postfix));
-      } else {
-        // class={{this.foo}} — wrap in a concat so we can append the text part
-        classAttr.value = recast.builders.concat([
-          classAttr.value,
-          recast.builders.text(' ' + postfix),
-        ]);
-        classAttr.quoteType = '"';
-      }
+        if (!shouldScope) return;
+
+        // check if class attribute already exists
+        const classAttr = node.attributes.find((attr) => attr.name === 'class');
+
+        if (!classAttr) {
+          // push class attribute
+          node.attributes.push(
+            recast.builders.attr('class', recast.builders.text(postfix)),
+          );
+        } else if (classAttr.value.type === 'TextNode') {
+          classAttr.value.chars += ' ' + postfix;
+        } else if (classAttr.value.type === 'ConcatStatement') {
+          // class="foo {{bar}}"
+          classAttr.value.parts.push(recast.builders.text(' ' + postfix));
+        } else {
+          // class={{this.foo}} — wrap in a concat so we can append the text part
+          classAttr.value = recast.builders.concat([
+            classAttr.value,
+            recast.builders.text(' ' + postfix),
+          ]);
+          classAttr.quoteType = '"';
+        }
+      },
     },
 
     All: {

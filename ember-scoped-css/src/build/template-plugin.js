@@ -171,43 +171,47 @@ export function createPlugin(config) {
         AttrNode(...args) {
           return visitors.AttrNode(...args);
         },
-        ElementNode(node, walker) {
-          // class attribute handling
-          visitors.ElementNode(node, walker);
+        ElementNode: {
+          enter(node, walker) {
+            visitors.ElementNode.enter(node, walker);
 
-          if (hasScopedAttribute(node)) {
-            if (walker.parent?.node.type !== 'Template') {
-              throw new Error(
-                '<style scoped> tags must be at the root of the template, they cannot be nested',
-              );
+            if (hasScopedAttribute(node)) {
+              if (walker.parent?.node.type !== 'Template') {
+                throw new Error(
+                  '<style scoped> tags must be at the root of the template, they cannot be nested',
+                );
+              }
+
+              if (hasInlineAttributeWithoutLang(node)) {
+                let text = textContent(node);
+                let scopedText = rewriteCss(
+                  text,
+                  postfix,
+                  localCssPath,
+                  config.layerName,
+                );
+
+                /**
+                 * Traverse this and allow interpolation
+                 */
+                node.children = [env.syntax.builders.text(scopedText)];
+
+                return;
+              }
+
+              // Returning null removes the node
+              return null;
             }
 
             if (hasInlineAttributeWithoutLang(node)) {
-              let text = textContent(node);
-              let scopedText = rewriteCss(
-                text,
-                postfix,
-                localCssPath,
-                config.layerName,
+              throw new Error(
+                `<style inline> is not valid. Please add the scoped attribute: <style scoped inline>`,
               );
-
-              /**
-               * Traverse this and allow interpolation
-               */
-              node.children = [env.syntax.builders.text(scopedText)];
-
-              return;
             }
-
-            // Returning null removes the node
-            return null;
-          }
-
-          if (hasInlineAttributeWithoutLang(node)) {
-            throw new Error(
-              `<style inline> is not valid. Please add the scoped attribute: <style scoped inline>`,
-            );
-          }
+          },
+          exit(...args) {
+            return visitors.ElementNode.exit(...args);
+          },
         },
         MustacheStatement(...args) {
           return visitors.MustacheStatement(...args);
