@@ -90,21 +90,13 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
    *   {{this.fooClass}}                    -> resolved at runtime, nothing to rename
    */
   function renameLiteralClasses(node) {
-    if (node.type !== 'MustacheStatement') return node;
+    if (!isClassBuilding(getValue(node.path))) return;
 
-    const name = getValue(node.path);
-
-    if (!isClassBuilding(name)) return node;
-
-    for (let index = 1; index < (node.params?.length ?? 0); index++) {
-      const param = node.params[index];
-
+    for (let param of node.params.slice(1)) {
       if (param.type === 'StringLiteral') {
         param.value = renameClass(param.value, postfix, classes);
       }
     }
-
-    return node;
   }
 
   return {
@@ -149,6 +141,15 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
         // keeps the stack balanced when a visitor removes a node and skips
         // its exit.
         if (node.blockParams?.length) elementScope.push(node);
+      },
+
+      // Appending runs on the way out so that AttrNode has already seen the
+      // class attribute in its authored shape. Wrapping `class={{if ...}}` in
+      // a concat first would hand AttrNode a ConcatStatement, whose every
+      // string literal is a class name by assumption -- including an `if`
+      // condition's, which must not be renamed.
+      exit(node) {
+        if (elementScope.at(-1) === node) elementScope.pop();
 
         // An element is in scope if its tag matches a tag selector, or if it
         // carries an attribute named in a scoped attribute selector. We add the
@@ -179,9 +180,6 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
           ]);
           classAttr.quoteType = '"';
         }
-      },
-      exit(node) {
-        if (elementScope.at(-1) === node) elementScope.pop();
       },
     },
 

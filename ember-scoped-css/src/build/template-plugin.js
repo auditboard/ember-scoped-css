@@ -173,7 +173,6 @@ export function createPlugin(config) {
         },
         ElementNode: {
           enter(node, walker) {
-            // class attribute handling, and tracking the element's block params
             visitors.ElementNode.enter(node, walker);
 
             if (hasScopedAttribute(node)) {

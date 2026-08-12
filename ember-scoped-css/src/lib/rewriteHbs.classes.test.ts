@@ -14,6 +14,11 @@ function rewrite(hbs) {
   return rewriteHbs(hbs, classes, new Set(), postfix);
 }
 
+/** As `rewrite`, but with `div` also matched by a tag selector in the CSS. */
+function rewriteWithScopedDiv(hbs) {
+  return rewriteHbs(hbs, classes, new Set(['div']), postfix);
+}
+
 /**
  * This suite covers only the unquoted (bare `MustacheStatement`) class
  * attribute value. The quoted (`ConcatStatement`) path renames every string
@@ -55,6 +60,34 @@ describe('unquoted class attribute values', () => {
         '{{#each xs as |if|}}<div class={{if y "a" "b"}}></div>{{/each}}',
       );
     });
+
+    it('skips if when an element introduces it, and resumes after that element', () => {
+      expect(
+        rewrite(
+          '<Foo as |if|><div class={{if y "a"}}></div></Foo><div class={{if y "b"}}></div>',
+        ),
+      ).to.equal(
+        '<Foo as |if|><div class={{if y "a"}}></div></Foo><div class={{if y "b_pfx"}}></div>',
+      );
+    });
+
+    it('matches a branch against the CSS whole, not by prefix', () => {
+      expect(rewrite('<div class={{if x "ab"}}></div>')).to.equal(
+        '<div class={{if x "ab"}}></div>',
+      );
+    });
+
+    it('still leaves the condition alone when the element is itself scoped', () => {
+      // A scoped element gets the postfix appended to its class attribute,
+      // which turns an unquoted value into a concat.
+      expect(
+        rewriteWithScopedDiv(
+          '<div class={{if (eq this.m "a") "a" "b"}}></div>',
+        ),
+      ).to.equal(
+        '<div class="{{if (eq this.m "a") "a_pfx" "b_pfx"}} pfx"></div>',
+      );
+    });
   });
 
   describe('scopedClass', () => {
@@ -68,6 +101,18 @@ describe('unquoted class attribute values', () => {
   it('only touches the class attribute', () => {
     expect(rewrite('<div data-x={{if x "a" "b"}}></div>')).to.equal(
       '<div data-x={{if x "a" "b"}}></div>',
+    );
+  });
+
+  it('leaves if alone outside an attribute', () => {
+    expect(rewrite('<div>{{if x "a" "b"}}</div>')).to.equal(
+      '<div>{{if x "a" "b"}}</div>',
+    );
+  });
+
+  it('leaves a helper that is not if alone', () => {
+    expect(rewrite('<div class={{someHelper "a" "b"}}></div>')).to.equal(
+      '<div class={{someHelper "a" "b"}}></div>',
     );
   });
 });
