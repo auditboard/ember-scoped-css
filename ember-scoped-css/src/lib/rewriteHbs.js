@@ -198,8 +198,15 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
    *
    *   {{if x "a" "b"}}                       -> both branches
    *   {{if (checkAlphabet "a" "b") "a" "b"}}  -> the branches, not the condition
+   *   {{if x (concat "a" " " "b") "c"}}       -> concat's own whole-class-name params too
+   *   {{if x (someHelper "a") "b"}}           -> someHelper is opaque, left alone
    *   {{concat "a" " " "b"}}                  -> every param that's a whole class name
    *   {{this.fooClass}}                       -> resolved at runtime, nothing to rename
+   *
+   * The shadowing checked at each depth is the one in effect at the element
+   * carrying the attribute: only a block or an element can introduce a block
+   * param, and neither can appear inside a subexpression, so no name can be
+   * rebound part-way down a class attribute's value.
    */
   function renameLiteralClasses(node) {
     const name = getValue(node.path);
@@ -215,6 +222,8 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     for (let param of node.params.slice(1)) {
       if (param.type === 'StringLiteral') {
         param.value = renameClass(param.value, postfix, classes);
+      } else {
+        renameLiteralClasses(param);
       }
     }
   }
