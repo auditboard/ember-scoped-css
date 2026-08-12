@@ -97,16 +97,14 @@ describe('unquoted class attribute values', () => {
     });
 
     it('leaves a branch that is not in the CSS alone', () => {
-      expect(
-        rewrite('<div class={{unless x "global-thing"}}></div>'),
-      ).to.equal('<div class={{unless x "global-thing"}}></div>');
+      expect(rewrite('<div class={{unless x "global-thing"}}></div>')).to.equal(
+        '<div class={{unless x "global-thing"}}></div>',
+      );
     });
 
     it('leaves the condition alone, even when it is a helper call', () => {
       expect(
-        rewrite(
-          '<div class={{unless (checkAlphabet "a" "b") "a" "b"}}></div>',
-        ),
+        rewrite('<div class={{unless (checkAlphabet "a" "b") "a" "b"}}></div>'),
       ).to.equal(
         '<div class={{unless (checkAlphabet "a" "b") "a_pfx" "b_pfx"}}></div>',
       );
