@@ -97,6 +97,70 @@ describe('unquoted class attribute values', () => {
     });
   });
 
+  /**
+   * A branch of `if` may itself be a class-building subexpression, in which
+   * case its own literals are reached the same way a top-level `concat` call
+   * would be.
+   */
+  describe('deep if', () => {
+    it('reaches whole-class-name params of a concat branch', () => {
+      expect(
+        rewrite('<div class={{if x (concat "a" " " "b") "b"}}></div>'),
+      ).to.equal(
+        '<div class={{if x (concat "a_pfx" " " "b_pfx") "b_pfx"}}></div>',
+      );
+    });
+
+    it('leaves a param not in the CSS alone inside a concat branch', () => {
+      expect(
+        rewrite(
+          '<div class={{if x (concat "a" " " "global-thing") "b"}}></div>',
+        ),
+      ).to.equal(
+        '<div class={{if x (concat "a_pfx" " " "global-thing") "b_pfx"}}></div>',
+      );
+    });
+
+    it('recurses into a branch that is itself an if', () => {
+      expect(rewrite('<div class={{if x (if y "a" "b") "b"}}></div>')).to.equal(
+        '<div class={{if x (if y "a_pfx" "b_pfx") "b_pfx"}}></div>',
+      );
+    });
+
+    it('leaves an opaque helper call in a branch alone, params and all', () => {
+      // someHelper is not a class-building helper, so what it does with the
+      // concat's result is unknown -- the concat is an argument to someHelper
+      // rather than a value reaching the class attribute.
+      expect(
+        rewrite(
+          '<div class={{if x (someHelper (concat "a" " " "b")) "b"}}></div>',
+        ),
+      ).to.equal(
+        '<div class={{if x (someHelper (concat "a" " " "b")) "b_pfx"}}></div>',
+      );
+    });
+
+    it('skips a concat shadowed by a block param at any depth', () => {
+      expect(
+        rewrite(
+          '{{#let q as |concat|}}<div class={{if x (if y (concat "a" " " "b") "b") "b"}}></div>{{/let}}',
+        ),
+      ).to.equal(
+        '{{#let q as |concat|}}<div class={{if x (if y (concat "a" " " "b") "b_pfx") "b_pfx"}}></div>{{/let}}',
+      );
+    });
+
+    it('skips the whole branch subtree when if itself is a block param', () => {
+      expect(
+        rewrite(
+          '{{#let q as |if|}}<div class={{if y (concat "a" " " "b") "b"}}></div>{{/let}}',
+        ),
+      ).to.equal(
+        '{{#let q as |if|}}<div class={{if y (concat "a" " " "b") "b"}}></div>{{/let}}',
+      );
+    });
+  });
+
   it('only touches the class attribute', () => {
     expect(rewrite('<div data-x={{if x "a" "b"}}></div>')).to.equal(
       '<div data-x={{if x "a" "b"}}></div>',
