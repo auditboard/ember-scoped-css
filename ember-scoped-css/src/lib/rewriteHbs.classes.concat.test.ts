@@ -128,4 +128,25 @@ describe('concat in a class attribute', () => {
       rewrite('<div class={{concat (concat "a" " " "b") " b"}}></div>'),
     ).to.equal('<div class="{{concat "a_pfx" " " "b_pfx"}} b_pfx"></div>');
   });
+
+  it("recurses into a class-building call among a nested concat's own params", () => {
+    // "a " is a literal param of the surviving inner concat, boundary-aware
+    // renamed as usual. (if x "a" "b") sits in a whole-class-name position of
+    // that same concat, so it's looked inside rather than skipped.
+    expect(
+      rewrite('<div class={{concat (concat "a " (if x "a" "b")) " c"}}></div>'),
+    ).to.equal(
+      '<div class="{{concat "a_pfx " (if x "a_pfx" "b_pfx")}} c"></div>',
+    );
+  });
+
+  it("leaves an opaque helper among a nested concat's params alone, even in a whole-class-name position", () => {
+    expect(
+      rewrite(
+        '<div class={{concat (concat "a " (someHelper "z") " b") " c"}}></div>',
+      ),
+    ).to.equal(
+      '<div class="{{concat "a_pfx " (someHelper "z") " b_pfx"}} c"></div>',
+    );
+  });
 });
