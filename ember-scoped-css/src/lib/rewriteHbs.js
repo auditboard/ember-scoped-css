@@ -60,9 +60,12 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   }
 
   /**
-   * Block params introduced by elements, e.g. `<Foo as |if|>`. The `All`
-   * visitor only runs for node types that have no visitor of their own, so
-   * ElementNode never reaches `stack` and has to be tracked separately.
+   * Stack of ElementNode ancestors that introduce a block param, e.g.
+   * `<Foo as |if|>` -- pushed in ElementNode's own `enter` and popped in its
+   * own `exit` below. A `{{#each xs as |if|}}` block has no dedicated
+   * visitor, so it reaches `stack` through the generic `All` visitor
+   * instead; ElementNode has its own visitor, so `All` never runs for it,
+   * and this tracks it separately.
    */
   let elementScope = [];
 
