@@ -32,8 +32,8 @@ function elementHasScopedAttribute(node, attributes) {
 
 /**
  * Helpers whose result is assembled from their own params, so a literal
- * param can be a class name in its own right. `if` and `unless`'s condition
- * at index 0 is excluded -- it decides which branch wins rather than
+ * param can be a class name in its own right. The condition at index 0 of
+ * `if` and `unless` is excluded -- it decides which branch wins rather than
  * contributing to the class string, so postfixing it (e.g. a comparand:
  * `{{if (eq this.mode "a") "a" "b"}}`) would stop the comparison ever
  * matching. `concat` has no such condition, but fuses its params together --
