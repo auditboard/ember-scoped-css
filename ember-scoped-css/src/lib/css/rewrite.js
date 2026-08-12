@@ -167,6 +167,14 @@ export function rewriteCss(css, postfix, fileName, layerName) {
     }
   }
 
+  function updateDeclarationName(node) {
+    let replacement = referenceables.property[node.prop];
+
+    if (replacement) {
+      node.prop = replacement;
+    }
+  }
+
   function updateShorthandContents(node) {
     if (node.prop === 'animation') {
       let parts = node.value.split(' ');
@@ -218,6 +226,7 @@ export function rewriteCss(css, postfix, fileName, layerName) {
   // Step 2: postfix and update referenced referenceables
   ast.walk((node) => {
     if (isDeclaration(node)) {
+      updateDeclarationName(node);
       updateDirectReferences(node);
       updateShorthandContents(node);
 

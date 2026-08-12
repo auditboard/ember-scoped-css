@@ -565,7 +565,7 @@ describe('@property', () => {
               border: 1px dashed black;
 
               /* set custom property values on parent */
-              --item-size: 20%;
+              --item-size__postfix: 20%;
               --item-color: orange;
             }
 
@@ -578,6 +578,40 @@ describe('@property', () => {
       }
       "
     `);
+  });
+
+  it('updates assignments inside keyframes', () => {
+    const css = `
+      @property --loading-angle {
+        syntax: "<angle>";
+        inherits: false;
+        initial-value: 0turn;
+      }
+
+      .button::after {
+        background: conic-gradient(from var(--loading-angle), blue, transparent);
+        animation: loading-ring 1s linear infinite;
+      }
+
+      @keyframes loading-ring {
+        to {
+          --loading-angle: 1turn;
+        }
+      }
+    `;
+
+    const postfix = 'postfix';
+    const fileName = 'foo.css';
+    const rewritten = rewriteCss(css, postfix, fileName, 'components');
+    const postfixedProperty = '--loading-angle__postfix';
+
+    expect(rewritten).toContain(`@property ${postfixedProperty}`);
+    expect(rewritten).toContain(`var(${postfixedProperty})`);
+    expect(rewritten).toContain(`${postfixedProperty}: 1turn;`);
+    expect(rewritten).toContain(
+      'animation: loading-ring__postfix 1s linear infinite;',
+    );
+    expect(rewritten).toContain('@keyframes loading-ring__postfix');
   });
 });
 
