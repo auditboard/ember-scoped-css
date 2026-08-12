@@ -7,17 +7,19 @@ import Legacy from 'vite-app-with-compat/components/in-app/legacy-if-literal-quo
 
 import { scopedClass } from 'ember-scoped-css/test-support';
 
-function cell<T>(value: T) {
-  return new (class {
-    @tracked current = value;
-  })();
+class State<T> {
+  @tracked current: T;
+
+  constructor(initial: T) {
+    this.current = initial;
+  }
 }
 
 module('[In App] legacy-if-literal-quoted (hbs)', function (hooks) {
   setupRenderingTest(hooks);
 
   test('postfixes a bare literal branch of a quoted if', async function (assert) {
-    const truthiness = cell(true);
+    const truthiness = new State(true);
     await render(
       <template><Legacy @isTrue={{truthiness.current}} /></template>
     );
