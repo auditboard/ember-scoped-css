@@ -116,3 +116,11 @@ describe('unquoted class attribute values', () => {
     );
   });
 });
+
+describe('quoted class attribute values', () => {
+  it('renames both branches', () => {
+    expect(rewrite('<div class="{{if x "a" "b"}}"></div>')).to.equal(
+      '<div class="{{if x "a_pfx" "b_pfx"}}"></div>',
+    );
+  });
+});
