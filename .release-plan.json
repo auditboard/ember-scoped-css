@@ -2,17 +2,13 @@
   "solution": {
     "ember-scoped-css": {
       "impact": "minor",
-      "oldVersion": "3.3.0",
-      "newVersion": "3.4.0",
+      "oldVersion": "3.4.0",
+      "newVersion": "3.5.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
@@ -21,5 +17,5 @@
       "oldVersion": "2.1.0"
     }
   },
-  "description": "## Release (2026-08-13)\n\n* ember-scoped-css 3.4.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#412](https://github.com/auditboard/ember-scoped-css/pull/412) Recurse into a class-building call among concat's own params ([@adrianbw](https://github.com/adrianbw))\n  * [#411](https://github.com/auditboard/ember-scoped-css/pull/411) Extend class-building literal renaming to unless ([@adrianbw](https://github.com/adrianbw))\n  * [#410](https://github.com/auditboard/ember-scoped-css/pull/410) Recurse into an if branch that is itself a class-building subexpression ([@adrianbw](https://github.com/adrianbw))\n  * [#409](https://github.com/auditboard/ember-scoped-css/pull/409) Compile away concat when it is the outer call on the class attribute ([@adrianbw](https://github.com/adrianbw))\n  * [#408](https://github.com/auditboard/ember-scoped-css/pull/408) Rename concat's literal params that reach the class attribute ([@adrianbw](https://github.com/adrianbw))\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#416](https://github.com/auditboard/ember-scoped-css/pull/416) Fix registered custom property assignments ([@jacojoubert](https://github.com/jacojoubert))\n  * [#407](https://github.com/auditboard/ember-scoped-css/pull/407) Rewrite if-literal class names in unquoted class attributes ([@adrianbw](https://github.com/adrianbw))\n\n#### Committers: 2\n- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))\n- Jaco Joubert ([@jacojoubert](https://github.com/jacojoubert))\n"
+  "description": "## Release (2026-08-13)\n\n* ember-scoped-css 3.5.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#417](https://github.com/auditboard/ember-scoped-css/pull/417) Distribute concat over a nested if/unless branch's classes ([@adrianbw](https://github.com/adrianbw))\n\n#### Committers: 1\n- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))\n"
 }
