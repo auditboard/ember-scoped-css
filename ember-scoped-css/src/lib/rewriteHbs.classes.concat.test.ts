@@ -172,10 +172,10 @@ describe('a concat nested in an if/unless branch, fused onto a nested condition'
   it('distributes over a nested if, replacing the concat with an if over the renamed classes', () => {
     expect(
       rewriteWithVariants(
-        '<div class={{if outer (concat "a" (if x "-on" "-off")) "c"}}></div>',
+        '<div class={{if outer (concat "a" (if x "-on" "-off")) "global-thing"}}></div>',
       ),
     ).to.equal(
-      '<div class={{if outer (if x "a-on_pfx" "a-off_pfx") "c"}}></div>',
+      '<div class={{if outer (if x "a-on_pfx" "a-off_pfx") "global-thing"}}></div>',
     );
   });
 
@@ -185,10 +185,10 @@ describe('a concat nested in an if/unless branch, fused onto a nested condition'
     // reach each renamed class through the opposite branch.
     expect(
       rewriteWithVariants(
-        '<div class={{if outer (concat "a" (unless x "-on" "-off")) "c"}}></div>',
+        '<div class={{if outer (concat "a" (unless x "-on" "-off")) "global-thing"}}></div>',
       ),
     ).to.equal(
-      '<div class={{if outer (if x "a-off_pfx" "a-on_pfx") "c"}}></div>',
+      '<div class={{if outer (if x "a-off_pfx" "a-on_pfx") "global-thing"}}></div>',
     );
   });
 
@@ -197,18 +197,20 @@ describe('a concat nested in an if/unless branch, fused onto a nested condition'
     // the concat could produce aren't knowable ahead of time.
     expect(
       rewriteWithVariants(
-        '<div class={{if outer (concat "a" this.suffix) "c"}}></div>',
+        '<div class={{if outer (concat "a" this.suffix) "global-thing"}}></div>',
       ),
-    ).to.equal('<div class={{if outer (concat "a" this.suffix) "c"}}></div>');
+    ).to.equal(
+      '<div class={{if outer (concat "a" this.suffix) "global-thing"}}></div>',
+    );
   });
 
   it('leaves the concat as a call when a fused param is an opaque helper call', () => {
     expect(
       rewriteWithVariants(
-        '<div class={{if outer (concat "a" (someHelper "z")) "c"}}></div>',
+        '<div class={{if outer (concat "a" (someHelper "z")) "global-thing"}}></div>',
       ),
     ).to.equal(
-      '<div class={{if outer (concat "a" (someHelper "z")) "c"}}></div>',
+      '<div class={{if outer (concat "a" (someHelper "z")) "global-thing"}}></div>',
     );
   });
 
@@ -217,13 +219,13 @@ describe('a concat nested in an if/unless branch, fused onto a nested condition'
 
     expect(
       rewriteHbs(
-        '<div class={{if outer (concat (if p "a" "b") (if q "-on" "-off")) "c"}}></div>',
+        '<div class={{if outer (concat (if p "a" "b") (if q "-on" "-off")) "global-thing"}}></div>',
         classesWithBothVariants,
         new Set(),
         postfix,
       ),
     ).to.equal(
-      '<div class={{if outer (if p (if q "a-on_pfx" "a-off_pfx") (if q "b-on_pfx" "b-off_pfx")) "c"}}></div>',
+      '<div class={{if outer (if p (if q "a-on_pfx" "a-off_pfx") (if q "b-on_pfx" "b-off_pfx")) "global-thing"}}></div>',
     );
   });
 
@@ -233,30 +235,30 @@ describe('a concat nested in an if/unless branch, fused onto a nested condition'
     // conditions doesn't blow up the rewrite.
     expect(
       rewriteWithVariants(
-        '<div class={{if outer (concat (if p "a" "b") "-" (if q "x" "y") "-" (if r "1" "2")) "c"}}></div>',
+        '<div class={{if outer (concat (if p "a" "b") "-" (if q "x" "y") "-" (if r "1" "2")) "global-thing"}}></div>',
       ),
     ).to.equal(
-      '<div class={{if outer (concat (if p "a" "b") "-" (if q "x" "y") "-" (if r "1" "2")) "c"}}></div>',
+      '<div class={{if outer (concat (if p "a" "b") "-" (if q "x" "y") "-" (if r "1" "2")) "global-thing"}}></div>',
     );
   });
 
   it('leaves the concat as a call when none of the classes it could produce need renaming', () => {
     expect(
       rewrite(
-        '<div class={{if outer (concat "z" (if x "-on" "-off")) "c"}}></div>',
+        '<div class={{if outer (concat "z" (if x "-on" "-off")) "global-thing"}}></div>',
       ),
     ).to.equal(
-      '<div class={{if outer (concat "z" (if x "-on" "-off")) "c"}}></div>',
+      '<div class={{if outer (concat "z" (if x "-on" "-off")) "global-thing"}}></div>',
     );
   });
 
   it('skips a shadowed concat, leaving it and its nested if alone', () => {
     expect(
       rewriteWithVariants(
-        '{{#let x as |concat|}}<div class={{if outer (concat "a" (if x "-on" "-off")) "c"}}></div>{{/let}}',
+        '{{#let x as |concat|}}<div class={{if outer (concat "a" (if x "-on" "-off")) "global-thing"}}></div>{{/let}}',
       ),
     ).to.equal(
-      '{{#let x as |concat|}}<div class={{if outer (concat "a" (if x "-on" "-off")) "c"}}></div>{{/let}}',
+      '{{#let x as |concat|}}<div class={{if outer (concat "a" (if x "-on" "-off")) "global-thing"}}></div>{{/let}}',
     );
   });
 });
