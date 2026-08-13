@@ -154,3 +154,109 @@ describe('concat in a class attribute', () => {
     ).to.equal('<div class={{if x (concat "a_pfx" " " "b_pfx") "c"}}></div>');
   });
 });
+
+/**
+ * A `concat` nested inside an `if`/`unless` branch survives as a call (the
+ * branch has to stay one value), so a param fused onto a nested `if`/`unless`
+ * -- "a" and (if x "-on" "-off") share no boundary -- is never a whole class
+ * name on its own; the boundary-aware rename above has nothing to postfix.
+ * But every class the branch could actually produce is still known ahead of
+ * time, so enumerating them lets the fused run collapse into an `if`/`unless`
+ * over the renamed classes instead, with nothing left for `concat` to join.
+ */
+describe('a concat nested in an if/unless branch, fused onto a nested condition', () => {
+  const classesWithVariants = new Set(['a', 'b', 'a-on', 'a-off']);
+  const rewriteWithVariants = (hbs) =>
+    rewriteHbs(hbs, classesWithVariants, new Set(), postfix);
+
+  it('distributes over a nested if, replacing the concat with an if over the renamed classes', () => {
+    expect(
+      rewriteWithVariants(
+        '<div class={{if outer (concat "a" (if x "-on" "-off")) "c"}}></div>',
+      ),
+    ).to.equal(
+      '<div class={{if outer (if x "a-on_pfx" "a-off_pfx") "c"}}></div>',
+    );
+  });
+
+  it('distributes over a nested unless, inverting the branches it reaches through', () => {
+    // unless resolves to its second param when falsy and its third when
+    // truthy -- the opposite of if -- so the if built in its place has to
+    // reach each renamed class through the opposite branch.
+    expect(
+      rewriteWithVariants(
+        '<div class={{if outer (concat "a" (unless x "-on" "-off")) "c"}}></div>',
+      ),
+    ).to.equal(
+      '<div class={{if outer (if x "a-off_pfx" "a-on_pfx") "c"}}></div>',
+    );
+  });
+
+  it('leaves the concat as a call when a fused param is a genuine runtime value', () => {
+    // this.suffix has no statically-known value to enumerate, so the classes
+    // the concat could produce aren't knowable ahead of time.
+    expect(
+      rewriteWithVariants(
+        '<div class={{if outer (concat "a" this.suffix) "c"}}></div>',
+      ),
+    ).to.equal('<div class={{if outer (concat "a" this.suffix) "c"}}></div>');
+  });
+
+  it('leaves the concat as a call when a fused param is an opaque helper call', () => {
+    expect(
+      rewriteWithVariants(
+        '<div class={{if outer (concat "a" (someHelper "z")) "c"}}></div>',
+      ),
+    ).to.equal(
+      '<div class={{if outer (concat "a" (someHelper "z")) "c"}}></div>',
+    );
+  });
+
+  it('distributes over two independent conditions', () => {
+    const classesWithBothVariants = new Set(['a-on', 'a-off', 'b-on', 'b-off']);
+
+    expect(
+      rewriteHbs(
+        '<div class={{if outer (concat (if p "a" "b") (if q "-on" "-off")) "c"}}></div>',
+        classesWithBothVariants,
+        new Set(),
+        postfix,
+      ),
+    ).to.equal(
+      '<div class={{if outer (if p (if q "a-on_pfx" "a-off_pfx") (if q "b-on_pfx" "b-off_pfx")) "c"}}></div>',
+    );
+  });
+
+  it('leaves the concat as a call once a third independent condition would be needed', () => {
+    // Every independent condition doubles the leaves a full enumeration has
+    // to cover; the budget caps how many may combine so a long run of fused
+    // conditions doesn't blow up the rewrite.
+    expect(
+      rewriteWithVariants(
+        '<div class={{if outer (concat (if p "a" "b") "-" (if q "x" "y") "-" (if r "1" "2")) "c"}}></div>',
+      ),
+    ).to.equal(
+      '<div class={{if outer (concat (if p "a" "b") "-" (if q "x" "y") "-" (if r "1" "2")) "c"}}></div>',
+    );
+  });
+
+  it('leaves the concat as a call when none of the classes it could produce need renaming', () => {
+    expect(
+      rewrite(
+        '<div class={{if outer (concat "z" (if x "-on" "-off")) "c"}}></div>',
+      ),
+    ).to.equal(
+      '<div class={{if outer (concat "z" (if x "-on" "-off")) "c"}}></div>',
+    );
+  });
+
+  it('skips a shadowed concat, leaving it and its nested if alone', () => {
+    expect(
+      rewriteWithVariants(
+        '{{#let x as |concat|}}<div class={{if outer (concat "a" (if x "-on" "-off")) "c"}}></div>{{/let}}',
+      ),
+    ).to.equal(
+      '{{#let x as |concat|}}<div class={{if outer (concat "a" (if x "-on" "-off")) "c"}}></div>{{/let}}',
+    );
+  });
+});

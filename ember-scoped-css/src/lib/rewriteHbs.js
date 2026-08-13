@@ -93,6 +93,62 @@ function isWholeClassName(params, index) {
   return boundedLeft && boundedRight;
 }
 
+/**
+ * A collapsed `concat`/`if`/`unless` run becomes a StringLiteral or a
+ * SubExpression (`(if ...)`), which are the right shape for a helper param
+ * but not for an attribute value -- there they need to be a TextNode or
+ * MustacheStatement instead.
+ */
+function toAttributeValue(node) {
+  if (node.type === 'StringLiteral') return recast.builders.text(node.value);
+
+  if (node.type === 'SubExpression') {
+    return recast.builders.mustache(node.path, node.params, node.hash);
+  }
+
+  return node;
+}
+
+/**
+ * How many independent `if`/`unless` conditions may be combined when
+ * expanding a concat run into a decision tree. Each one roughly doubles the
+ * leaves, so this bounds the blowup rather than the leaf count directly.
+ */
+const MAX_CONDITION_DEPTH = 2;
+
+const EMPTY_VALUE = { kind: 'literal', value: '' };
+
+/**
+ * Concatenate two statically-known values. Two literals just join; a literal
+ * against a choice distributes into both of the choice's branches, and two
+ * choices nest, doubling the leaves.
+ *
+ *   "a" + "b"                          -> "ab"
+ *   "a" + (C ? "x" : "y")              -> C ? "ax" : "ay"
+ *   (C ? "x" : "y") + (D ? "1" : "2")  -> C ? (D ? "x1" : "x2") : (D ? "y1" : "y2")
+ */
+function concatValueExprs(left, right) {
+  if (left.kind === 'literal' && right.kind === 'literal') {
+    return { kind: 'literal', value: left.value + right.value };
+  }
+
+  if (left.kind === 'choice') {
+    return {
+      kind: 'choice',
+      condition: left.condition,
+      whenTrue: concatValueExprs(left.whenTrue, right),
+      whenFalse: concatValueExprs(left.whenFalse, right),
+    };
+  }
+
+  return {
+    kind: 'choice',
+    condition: right.condition,
+    whenTrue: concatValueExprs(left, right.whenTrue),
+    whenFalse: concatValueExprs(left, right.whenFalse),
+  };
+}
+
 export function templatePlugin({ classes, tags, attributes, postfix }) {
   let stack = [];
   // scoped-class is a global we allow in hbs
@@ -131,17 +187,152 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     return CLASS_BUILDING_HELPERS.has(name) && !isShadowed(name);
   }
 
+  /**
+   * The statically-known values a class-building expression can produce,
+   * shaped as the decision tree of the `if`/`unless` conditions involved.
+   * `null` means the value isn't pinned down at build time -- either it's a
+   * genuine runtime value, or pinning it down would need more conditions
+   * than `budget` allows.
+   *
+   *   "a"                 -> { kind: 'literal', value: 'a' }
+   *   (if C "a" "b")       -> { kind: 'choice', condition: C, whenTrue: ..., whenFalse: ... }
+   *   (if C "a")           -> the same, with whenFalse the empty string
+   *   this.x               -> null, an arbitrary runtime value
+   *   (someHelper "a")     -> null, its contract is opaque
+   *
+   * `budget.remaining` is shared across one whole enumeration attempt (it is
+   * not reset per branch), since sibling conditions multiply leaves exactly
+   * as nested ones do.
+   */
+  function toValueExpr(node, budget) {
+    if (node.type === 'StringLiteral') {
+      return { kind: 'literal', value: node.value };
+    }
+
+    if (node.type !== 'MustacheStatement' && node.type !== 'SubExpression') {
+      return null;
+    }
+
+    const name = getValue(node.path);
+
+    if (!isClassBuilding(name)) return null;
+
+    if (name === 'concat') {
+      let combined = EMPTY_VALUE;
+
+      for (const param of node.params ?? []) {
+        const next = toValueExpr(param, budget);
+
+        if (!next) return null;
+
+        combined = concatValueExprs(combined, next);
+      }
+
+      return combined;
+    }
+
+    if (budget.remaining <= 0) return null;
+
+    budget.remaining -= 1;
+
+    const [condition, thenBranch, elseBranch] = node.params ?? [];
+    const thenExpr = thenBranch ? toValueExpr(thenBranch, budget) : EMPTY_VALUE;
+    const elseExpr = elseBranch ? toValueExpr(elseBranch, budget) : EMPTY_VALUE;
+
+    if (!thenExpr || !elseExpr) return null;
+
+    return name === 'unless'
+      ? { kind: 'choice', condition, whenTrue: elseExpr, whenFalse: thenExpr }
+      : { kind: 'choice', condition, whenTrue: thenExpr, whenFalse: elseExpr };
+  }
+
+  /**
+   * Rename every leaf of a value tree in one pass, reporting alongside it
+   * whether any leaf's value actually changed -- the tree is rebuilt either
+   * way, so this is the only point that can tell without walking it twice.
+   */
+  function renameValueExpr(expr) {
+    if (expr.kind === 'literal') {
+      const value = renameClass(expr.value, postfix, classes);
+
+      return {
+        expr: { kind: 'literal', value },
+        changed: value !== expr.value,
+      };
+    }
+
+    const whenTrue = renameValueExpr(expr.whenTrue);
+    const whenFalse = renameValueExpr(expr.whenFalse);
+
+    return {
+      expr: {
+        kind: 'choice',
+        condition: expr.condition,
+        whenTrue: whenTrue.expr,
+        whenFalse: whenFalse.expr,
+      },
+      changed: whenTrue.changed || whenFalse.changed,
+    };
+  }
+
+  /**
+   * Turn a value tree into the AST it describes -- a literal for a plain
+   * leaf, or nested `if`s reproducing the conditions. A condition reused
+   * across sibling branches (two independent `if`s in one concat) appears
+   * more than once in the output, exactly as it would if written by hand.
+   */
+  function buildValueExprNode(expr) {
+    if (expr.kind === 'literal') {
+      return recast.builders.literal('StringLiteral', expr.value);
+    }
+
+    return recast.builders.sexpr(recast.builders.path('if'), [
+      expr.condition,
+      buildValueExprNode(expr.whenTrue),
+      buildValueExprNode(expr.whenFalse),
+    ]);
+  }
+
+  /**
+   * `concat` fuses its params into one string, so a literal is only a class
+   * name of its own when a boundary separates it from its neighbours (see
+   * isWholeClassName). When every param's value is statically known and they
+   * all fuse, the call produces one of a fixed set of class names, so
+   * `concat` has nothing left to join -- the caller replaces the whole call
+   * with the literal (no conditions involved) or the `if` expression (one
+   * per condition) that reaches each renamed leaf.
+   *
+   *   {{concat "a" " " "b"}}               -> two classes, rename each, concat stays
+   *   {{concat "a" "-suffix"}}             -> one class; the call is replaced by it
+   *   {{concat "a" (if C "-on" "-off")}}   -> replaced by {{if C "a-on_pfx" "a-off_pfx"}}
+   *   {{concat "a" this.x}}                -> "a" fuses with an unknown value, so leave it
+   *
+   * Returns the replacement when the call collapses; otherwise renames
+   * whole-class-name params in place and returns nothing.
+   */
   function renameConcatParams(node) {
     const params = node.params ?? [];
+    const fuses = params.some(
+      (param, index) => !isWholeClassName(params, index),
+    );
+
+    if (fuses) {
+      const expr = toValueExpr(node, { remaining: MAX_CONDITION_DEPTH });
+      const renamed = expr && renameValueExpr(expr);
+
+      // Collapsing is only worth the churn if it renamed something -- and
+      // only possible at all if every leaf's value was statically known.
+      if (renamed?.changed) {
+        return buildValueExprNode(renamed.expr);
+      }
+
+      return;
+    }
 
     for (const [index, param] of params.entries()) {
       if (!isWholeClassName(params, index)) continue;
 
-      if (param.type === 'StringLiteral') {
-        param.value = renameClass(param.value, postfix, classes);
-      } else {
-        renameLiteralClasses(param);
-      }
+      params[index] = renameLiteralClasses(param);
     }
   }
 
@@ -223,13 +414,17 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   }
 
   /**
-   * Rename the string literals whose value reaches the class attribute.
+   * Rename the string literals whose value reaches the class attribute, and
+   * return the node that should stand in this one's place. That's the same
+   * node for everything but a `concat` call that collapses to a single
+   * literal or `if` expression -- see renameConcatParams.
    *
    *   {{if x "a" "b"}}                       -> both branches
    *   {{if (checkAlphabet "a" "b") "a" "b"}}  -> the branches, not the condition
    *   {{if x (concat "a" " " "b") "c"}}       -> concat's own whole-class-name params too
    *   {{if x (someHelper "a") "b"}}           -> someHelper is opaque, left alone
    *   {{concat "a" " " "b"}}                  -> every param that's a whole class name
+   *   {{concat "a" "-suffix"}}                -> replaced by the renamed literal
    *   {{this.fooClass}}                       -> resolved at runtime, nothing to rename
    *
    * The shadowing checked at each depth is the one in effect at the element
@@ -238,23 +433,25 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
    * rebound part-way down a class attribute's value.
    */
   function renameLiteralClasses(node) {
+    if (node.type === 'StringLiteral') {
+      node.value = renameClass(node.value, postfix, classes);
+
+      return node;
+    }
+
     const name = getValue(node.path);
 
-    if (!isClassBuilding(name)) return;
+    if (!isClassBuilding(name)) return node;
 
     if (name === 'concat') {
-      renameConcatParams(node);
-
-      return;
+      return renameConcatParams(node) ?? node;
     }
 
-    for (let param of node.params.slice(1)) {
-      if (param.type === 'StringLiteral') {
-        param.value = renameClass(param.value, postfix, classes);
-      } else {
-        renameLiteralClasses(param);
-      }
+    for (let index = 1; index < (node.params?.length ?? 0); index++) {
+      node.params[index] = renameLiteralClasses(node.params[index]);
     }
+
+    return node;
   }
 
   return {
@@ -278,20 +475,26 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
 
           node.value.chars = renamedClass;
         } else if (node.value.type === 'ConcatStatement') {
-          for (let part of node.value.parts) {
+          for (const [index, part] of node.value.parts.entries()) {
             if (part.type === 'TextNode' && part.chars) {
               const renamedClass = renameClass(part.chars, postfix, classes);
 
               part.chars = renamedClass;
             } else if (part.type === 'MustacheStatement') {
-              renameLiteralClasses(part);
+              node.value.parts[index] = toAttributeValue(
+                renameLiteralClasses(part),
+              );
             }
           }
         } else if (node.value.type === 'MustacheStatement') {
           // Glimmer parses a quoted attribute value as a ConcatStatement and
           // an unquoted one as a bare MustacheStatement, so `class={{if x
           // "a" "b"}}` lands here rather than in the branch above.
-          renameLiteralClasses(node.value);
+          const replaced = renameLiteralClasses(node.value);
+
+          if (replaced.type === 'StringLiteral') node.quoteType = '"';
+
+          node.value = toAttributeValue(replaced);
         }
       }
     },
