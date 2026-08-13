@@ -98,6 +98,9 @@ function isWholeClassName(params, index) {
  * SubExpression (`(if ...)`), which are the right shape for a helper param
  * but not for an attribute value -- there they need to be a TextNode or
  * MustacheStatement instead.
+ *
+ *   "a-suffix"     -> the TextNode a-suffix
+ *   (if C "a" "b") -> {{if C "a" "b"}}
  */
 function toAttributeValue(node) {
   if (node.type === 'StringLiteral') return recast.builders.text(node.value);

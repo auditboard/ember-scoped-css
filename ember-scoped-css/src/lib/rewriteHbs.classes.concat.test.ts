@@ -242,7 +242,7 @@ describe('a concat nested in an if/unless branch, fused onto a nested condition'
     );
   });
 
-  it('leaves the concat as a call when none of the classes it could produce need renaming', () => {
+  it('leaves the concat as a call when none of the classes it could produce are in the CSS', () => {
     expect(
       rewrite(
         '<div class={{if outer (concat "z" (if x "-on" "-off")) "global-thing"}}></div>',
