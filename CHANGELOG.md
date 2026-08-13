@@ -1,5 +1,26 @@
 # Changelog
 
+## Release (2026-08-13)
+
+* ember-scoped-css 3.4.0 (minor)
+
+#### :rocket: Enhancement
+* `ember-scoped-css`
+  * [#412](https://github.com/auditboard/ember-scoped-css/pull/412) Recurse into a class-building call among concat's own params ([@adrianbw](https://github.com/adrianbw))
+  * [#411](https://github.com/auditboard/ember-scoped-css/pull/411) Extend class-building literal renaming to unless ([@adrianbw](https://github.com/adrianbw))
+  * [#410](https://github.com/auditboard/ember-scoped-css/pull/410) Recurse into an if branch that is itself a class-building subexpression ([@adrianbw](https://github.com/adrianbw))
+  * [#409](https://github.com/auditboard/ember-scoped-css/pull/409) Compile away concat when it is the outer call on the class attribute ([@adrianbw](https://github.com/adrianbw))
+  * [#408](https://github.com/auditboard/ember-scoped-css/pull/408) Rename concat's literal params that reach the class attribute ([@adrianbw](https://github.com/adrianbw))
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#416](https://github.com/auditboard/ember-scoped-css/pull/416) Fix registered custom property assignments ([@jacojoubert](https://github.com/jacojoubert))
+  * [#407](https://github.com/auditboard/ember-scoped-css/pull/407) Rewrite if-literal class names in unquoted class attributes ([@adrianbw](https://github.com/adrianbw))
+
+#### Committers: 2
+- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))
+- Jaco Joubert ([@jacojoubert](https://github.com/jacojoubert))
+
 ## Release (2026-08-11)
 
 * ember-scoped-css 3.3.0 (minor)

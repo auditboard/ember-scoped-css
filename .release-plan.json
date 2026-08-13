@@ -2,8 +2,8 @@
   "solution": {
     "ember-scoped-css": {
       "impact": "minor",
-      "oldVersion": "3.2.0",
-      "newVersion": "3.3.0",
+      "oldVersion": "3.3.0",
+      "newVersion": "3.4.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -12,24 +12,14 @@
         },
         {
           "impact": "patch",
-          "reason": "Appears in changelog section :memo: Documentation"
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "impact": "minor",
-      "oldVersion": "2.0.0",
-      "newVersion": "2.1.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        }
-      ],
-      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
+      "oldVersion": "2.1.0"
     }
   },
-  "description": "## Release (2026-08-11)\n\n* ember-scoped-css 3.3.0 (minor)\n* stylelint-ember-scoped-css 2.1.0 (minor)\n\n#### :rocket: Enhancement\n* `stylelint-ember-scoped-css`\n  * [#406](https://github.com/auditboard/ember-scoped-css/pull/406) Support stylelint 17 ([@wagenet](https://github.com/wagenet))\n* `ember-scoped-css`\n  * [#403](https://github.com/auditboard/ember-scoped-css/pull/403) Match the imported scopedClass form in the template-lint rule ([@adrianbw](https://github.com/adrianbw))\n  * [#402](https://github.com/auditboard/ember-scoped-css/pull/402) Postfix every class passed to scopedClass() ([@adrianbw](https://github.com/adrianbw))\n\n#### :memo: Documentation\n* `ember-scoped-css`\n  * [#404](https://github.com/auditboard/ember-scoped-css/pull/404) Update README.md ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 3\n- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))\n- Peter Wagenet ([@wagenet](https://github.com/wagenet))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-08-13)\n\n* ember-scoped-css 3.4.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#412](https://github.com/auditboard/ember-scoped-css/pull/412) Recurse into a class-building call among concat's own params ([@adrianbw](https://github.com/adrianbw))\n  * [#411](https://github.com/auditboard/ember-scoped-css/pull/411) Extend class-building literal renaming to unless ([@adrianbw](https://github.com/adrianbw))\n  * [#410](https://github.com/auditboard/ember-scoped-css/pull/410) Recurse into an if branch that is itself a class-building subexpression ([@adrianbw](https://github.com/adrianbw))\n  * [#409](https://github.com/auditboard/ember-scoped-css/pull/409) Compile away concat when it is the outer call on the class attribute ([@adrianbw](https://github.com/adrianbw))\n  * [#408](https://github.com/auditboard/ember-scoped-css/pull/408) Rename concat's literal params that reach the class attribute ([@adrianbw](https://github.com/adrianbw))\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#416](https://github.com/auditboard/ember-scoped-css/pull/416) Fix registered custom property assignments ([@jacojoubert](https://github.com/jacojoubert))\n  * [#407](https://github.com/auditboard/ember-scoped-css/pull/407) Rewrite if-literal class names in unquoted class attributes ([@adrianbw](https://github.com/adrianbw))\n\n#### Committers: 2\n- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))\n- Jaco Joubert ([@jacojoubert](https://github.com/jacojoubert))\n"
 }
