@@ -136,6 +136,64 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   }
 
   /**
+   * Whether `node` is a `concat` call sitting in the class attribute's value
+   * itself, where the attribute joins the call's result into its own string.
+   * A `concat` nested any deeper -- an `if` branch, another `concat`'s
+   * params -- has to stay one value, so it keeps its call.
+   */
+  function isAttributeLevelConcat(node) {
+    return (
+      node.type === 'MustacheStatement' &&
+      getValue(node.path) === 'concat' &&
+      isClassBuilding('concat')
+    );
+  }
+
+  /**
+   * `concat`'s own job -- joining its params into one string -- is exactly
+   * what an attribute value already does natively: adjacent literal params
+   * join into one `TextNode`, and each other param becomes its own part. So
+   * a `concat` the attribute would join anyway can be spliced into the parts
+   * it's equivalent to, leaving the existing per-part handling (below) to
+   * treat it as it would a hand-written attribute string.
+   *
+   *   {{concat x y z}}                     -> {{x}}{{y}}{{z}}
+   *   {{concat (if x y z) " " (if a b c)}} -> {{if x y z}} {{if a b c}}
+   *   {{concat "a" "-suffix"}}             -> the single TextNode a-suffix
+   */
+  function concatParts(node) {
+    const parts = [];
+    let pendingText = '';
+
+    for (const param of node.params ?? []) {
+      if (param.type === 'StringLiteral') {
+        pendingText += param.value;
+
+        continue;
+      }
+
+      if (pendingText) {
+        parts.push(recast.builders.text(pendingText));
+        pendingText = '';
+      }
+
+      parts.push(
+        param.type === 'SubExpression'
+          ? recast.builders.mustache(param.path, param.params, param.hash)
+          : recast.builders.mustache(param),
+      );
+    }
+
+    // A ConcatStatement needs at least one part, and joining no params -- or
+    // only empty ones -- still gives the empty string to carry.
+    if (pendingText || parts.length === 0) {
+      parts.push(recast.builders.text(pendingText));
+    }
+
+    return parts;
+  }
+
+  /**
    * Rename the string literals whose value reaches the class attribute.
    *
    *   {{if x "a" "b"}}                       -> both branches
@@ -164,6 +222,19 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   return {
     AttrNode(node) {
       if (node.name === 'class') {
+        if (isAttributeLevelConcat(node.value)) {
+          node.value = recast.builders.concat(concatParts(node.value));
+          node.quoteType = '"';
+        } else if (node.value.type === 'ConcatStatement') {
+          // Quoting always produces a ConcatStatement, even for a value
+          // that's nothing but a single concat call (`class="{{concat
+          // ...}}"`), so the concat to splice away can be any one of the
+          // parts rather than the whole value.
+          node.value.parts = node.value.parts.flatMap((part) =>
+            isAttributeLevelConcat(part) ? concatParts(part) : part,
+          );
+        }
+
         if (node.value.type === 'TextNode' && node.value.chars) {
           const renamedClass = renameClass(node.value.chars, postfix, classes);
 
