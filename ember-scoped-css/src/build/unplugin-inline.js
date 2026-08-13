@@ -79,14 +79,12 @@ export function inline(options = {}) {
           rawCss = result.code;
         }
 
-        const css = rewriteCss(
+        return rewriteCss(
           rawCss,
           meta.postfix,
           `<inline>/${meta.fileName}`,
           options.layerName,
         );
-
-        return css;
       }
     },
     vite: {
