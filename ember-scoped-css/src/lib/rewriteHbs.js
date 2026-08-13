@@ -451,8 +451,9 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     }
 
     for (const [index, param] of (node.params ?? []).entries()) {
-      // Index 0 decides which branch wins rather than contributing to the
-      // class string, so it's never a class name to rename.
+      // `name` is 'if' or 'unless' here ('concat' returned above), so
+      // params[0] is the condition itself -- e.g. `x` in `(if x "a" "b")` --
+      // not one of the branches, so it's never a class name to rename.
       if (index === 0) continue;
 
       node.params[index] = renameLiteralClasses(param);
