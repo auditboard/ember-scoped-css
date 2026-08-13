@@ -695,7 +695,12 @@ describe('@property', () => {
 
     const postfix = 'postfix';
     const fileName = 'foo.css';
-    const { code: rewritten } = rewriteCss(css, postfix, fileName, 'components');
+    const { code: rewritten } = rewriteCss(
+      css,
+      postfix,
+      fileName,
+      'components',
+    );
     const postfixedProperty = '--loading-angle__postfix';
 
     expect(rewritten).toContain(`@property ${postfixedProperty}`);

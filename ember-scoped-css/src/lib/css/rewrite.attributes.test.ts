@@ -5,7 +5,7 @@ import { rewriteCss } from './rewrite.js';
 
 /** Rewrite a single rule and return just the scoped selector. */
 function scopeSelector(css) {
-  const rewritten = rewriteCss(css, 'postfix', 'foo.css');
+  const { code: rewritten } = rewriteCss(css, 'postfix', 'foo.css');
 
   let selector = '';
 
