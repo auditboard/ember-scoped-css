@@ -1,0 +1,20 @@
+{
+  "extends": "@ember/library-tsconfig",
+  "include": ["./src/**/*"],
+  "compilerOptions": {
+    "target": "esnext",
+    "allowImportingTsExtensions": true,
+
+    // Required by the tsdown build: ember-rolldown emits declarations through
+    // the isolated-declarations pipeline, the only one that can see compiled
+    // .gts modules.
+    "isolatedDeclarations": true,
+    "isolatedModules": false,
+
+    // Because we want our declarations' structure to match our build output,
+    // this "rootDir" must match the src glob in the tsdown.config.mjs.
+    "rootDir": "./src",
+
+    "types": ["ember-source/types"]
+  }
+}
