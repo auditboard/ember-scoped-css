@@ -450,8 +450,12 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
       return renameConcatParams(node) ?? node;
     }
 
-    for (let index = 1; index < (node.params?.length ?? 0); index++) {
-      node.params[index] = renameLiteralClasses(node.params[index]);
+    for (const [index, param] of (node.params ?? []).entries()) {
+      // Index 0 decides which branch wins rather than contributing to the
+      // class string, so it's never a class name to rename.
+      if (index === 0) continue;
+
+      node.params[index] = renameLiteralClasses(param);
     }
 
     return node;
