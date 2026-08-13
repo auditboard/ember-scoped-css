@@ -19,9 +19,11 @@ function rewrite(hbs) {
  * unquoted value, a quoted value, or one part of a value the attribute
  * already has (e.g. once a scoped element's postfix class is appended) --
  * is spliced into the native parts it's equivalent to, so the call is gone
- * from every case here regardless of whether anything ends up renamed. Only
- * a `concat` nested deeper than that (another `concat`'s own params, or an
- * `if`/`unless` branch) keeps its call; see the last two tests.
+ * from every case here regardless of whether anything ends up renamed. A
+ * `concat` nested inside that one's own params joins in the same way, since
+ * concatenation doesn't care how its inputs were grouped. Only a `concat`
+ * nested inside an `if`/`unless` branch keeps its call, because a branch has
+ * to stay one value; see the last test.
  */
 describe('concat in a class attribute', () => {
   it('renames a lone param that is the whole class', () => {
@@ -120,33 +122,35 @@ describe('concat in a class attribute', () => {
     );
   });
 
-  it('keeps a concat nested below the attribute value, renaming its whole-class-name params', () => {
-    // The inner call's result has to stay one value for the outer call to
-    // join, so it survives as a call -- and gets the boundary-aware rename
-    // a concat that must stay one value needs, not the splice above.
+  it("joins a nested concat's params in directly, folding fused literals", () => {
+    // concat(concat("a", " ", "b"), " b") joins to the same string as
+    // concat("a", " ", "b", " b") -- the inner call's own params flatten
+    // into the outer one rather than surviving as a nested call.
     expect(
       rewrite('<div class={{concat (concat "a" " " "b") " b"}}></div>'),
-    ).to.equal('<div class="{{concat "a_pfx" " " "b_pfx"}} b_pfx"></div>');
+    ).to.equal('<div class="a_pfx b_pfx b_pfx"></div>');
   });
 
-  it("recurses into a class-building call among a nested concat's own params", () => {
-    // "a " is a literal param of the surviving inner concat, boundary-aware
-    // renamed as usual. (if x "a" "b") sits in a whole-class-name position of
-    // that same concat, so it's looked inside rather than skipped.
+  it("gives a class-building call among a nested concat's params its own mustache", () => {
     expect(
       rewrite('<div class={{concat (concat "a " (if x "a" "b")) " c"}}></div>'),
-    ).to.equal(
-      '<div class="{{concat "a_pfx " (if x "a_pfx" "b_pfx")}} c"></div>',
-    );
+    ).to.equal('<div class="a_pfx {{if x "a_pfx" "b_pfx"}} c"></div>');
   });
 
-  it("leaves an opaque helper among a nested concat's params alone, even in a whole-class-name position", () => {
+  it("gives an opaque helper among a nested concat's params its own mustache too", () => {
     expect(
       rewrite(
         '<div class={{concat (concat "a " (someHelper "z") " b") " c"}}></div>',
       ),
-    ).to.equal(
-      '<div class="{{concat "a_pfx " (someHelper "z") " b_pfx"}} c"></div>',
-    );
+    ).to.equal('<div class="a_pfx {{someHelper "z"}} b_pfx c"></div>');
+  });
+
+  it('keeps a concat nested inside an if branch, renaming its whole-class-name params', () => {
+    // The branch's result has to stay one value for if to choose between, so
+    // the concat inside it survives as a call -- and gets the boundary-aware
+    // rename a concat that must stay one value needs, not the splice above.
+    expect(
+      rewrite('<div class={{if x (concat "a" " " "b") "c"}}></div>'),
+    ).to.equal('<div class={{if x (concat "a_pfx" " " "b_pfx") "c"}}></div>');
   });
 });

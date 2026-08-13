@@ -160,6 +160,22 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   }
 
   /**
+   * `concat(concat(x, y), z)` joins to the same string as `concat(x, y, z)`
+   * -- string concatenation doesn't care how its inputs were grouped -- so a
+   * `concat` param that is itself an unshadowed `concat` call contributes
+   * its own params in its place rather than surviving as a nested call.
+   */
+  function flattenConcatParams(params) {
+    return params.flatMap((param) =>
+      param.type === 'SubExpression' &&
+      getValue(param.path) === 'concat' &&
+      isClassBuilding('concat')
+        ? flattenConcatParams(param.params ?? [])
+        : [param],
+    );
+  }
+
+  /**
    * `concat`'s own job -- joining its params into one string -- is exactly
    * what an attribute value already does natively: adjacent literal params
    * join into one `TextNode`, and each other param becomes its own part. So
@@ -170,12 +186,15 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
    *   {{concat x y z}}                     -> {{x}}{{y}}{{z}}
    *   {{concat (if x y z) " " (if a b c)}} -> {{if x y z}} {{if a b c}}
    *   {{concat "a" "-suffix"}}             -> the single TextNode a-suffix
+   *   {{concat (concat "a" " " "b") "c"}}  -> {{concat "a" " " "b"}}'s own
+   *                                          params joined in directly, not
+   *                                          wrapped as a surviving call
    */
   function concatParts(node) {
     const parts = [];
     let pendingText = '';
 
-    for (const param of node.params ?? []) {
+    for (const param of flattenConcatParams(node.params ?? [])) {
       if (param.type === 'StringLiteral') {
         pendingText += param.value;
 
