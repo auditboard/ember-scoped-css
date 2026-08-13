@@ -58,11 +58,13 @@ function startsAtClassBoundary(value) {
 }
 
 /**
- * Whether the literal at `index` is a whole class name rather than a fragment
- * that `concat` fuses onto a neighbour. Postfixing a fragment would bury the
- * postfix in the middle of the class the fragments build. A neighbour whose
- * value is only known at runtime bounds nothing, since it could begin or end
- * with anything.
+ * Whether the param at `index` sits in a whole-class-name position rather
+ * than fused onto a neighbour -- true whether that param is itself a literal
+ * or a class-building call, since a call is renamed by looking inside it
+ * (see renameConcatParams), not by postfixing its result. Postfixing a
+ * fused fragment would bury the postfix in the middle of the class the
+ * fragments build. A neighbour whose value is only known at runtime bounds
+ * nothing of its own, since it could begin or end with anything.
  *
  *   {{concat "a" " " "b"}}   -> "a" and "b", the space separates them
  *   {{concat "a" "-suffix"}} -> neither, the result is the one class a-suffix
@@ -70,7 +72,11 @@ function startsAtClassBoundary(value) {
  *   {{concat "a " this.x}}   -> "a ", its own trailing space ends it
  */
 function isWholeClassName(params, index) {
-  const { value } = params[index];
+  // Only a StringLiteral has a value of its own to test for a boundary; a
+  // call or a path contributes no boundary and is bounded by its neighbours
+  // alone.
+  const param = params[index];
+  const value = param.type === 'StringLiteral' ? param.value : '';
   const previous = params[index - 1];
   const next = params[index + 1];
 
@@ -129,10 +135,13 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
     const params = node.params ?? [];
 
     for (const [index, param] of params.entries()) {
-      if (param.type !== 'StringLiteral') continue;
       if (!isWholeClassName(params, index)) continue;
 
-      param.value = renameClass(param.value, postfix, classes);
+      if (param.type === 'StringLiteral') {
+        param.value = renameClass(param.value, postfix, classes);
+      } else {
+        renameLiteralClasses(param);
+      }
     }
   }
 
@@ -151,6 +160,22 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
   }
 
   /**
+   * `concat(concat(x, y), z)` joins to the same string as `concat(x, y, z)`
+   * -- string concatenation doesn't care how its inputs were grouped -- so a
+   * `concat` param that is itself an unshadowed `concat` call contributes
+   * its own params in its place rather than surviving as a nested call.
+   */
+  function flattenConcatParams(params) {
+    return params.flatMap((param) =>
+      param.type === 'SubExpression' &&
+      getValue(param.path) === 'concat' &&
+      isClassBuilding('concat')
+        ? flattenConcatParams(param.params ?? [])
+        : [param],
+    );
+  }
+
+  /**
    * `concat`'s own job -- joining its params into one string -- is exactly
    * what an attribute value already does natively: adjacent literal params
    * join into one `TextNode`, and each other param becomes its own part. So
@@ -161,12 +186,15 @@ export function templatePlugin({ classes, tags, attributes, postfix }) {
    *   {{concat x y z}}                     -> {{x}}{{y}}{{z}}
    *   {{concat (if x y z) " " (if a b c)}} -> {{if x y z}} {{if a b c}}
    *   {{concat "a" "-suffix"}}             -> the single TextNode a-suffix
+   *   {{concat (concat "a" " " "b") "c"}}  -> {{concat "a" " " "b"}}'s own
+   *                                          params joined in directly, not
+   *                                          wrapped as a surviving call
    */
   function concatParts(node) {
     const parts = [];
     let pendingText = '';
 
-    for (const param of node.params ?? []) {
+    for (const param of flattenConcatParams(node.params ?? [])) {
       if (param.type === 'StringLiteral') {
         pendingText += param.value;
 
