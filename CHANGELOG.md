@@ -2,6 +2,17 @@
 
 ## Release (2026-08-13)
 
+* ember-scoped-css 3.5.0 (minor)
+
+#### :rocket: Enhancement
+* `ember-scoped-css`
+  * [#417](https://github.com/auditboard/ember-scoped-css/pull/417) Distribute concat over a nested if/unless branch's classes ([@adrianbw](https://github.com/adrianbw))
+
+#### Committers: 1
+- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))
+
+## Release (2026-08-13)
+
 * ember-scoped-css 3.4.0 (minor)
 
 #### :rocket: Enhancement
