@@ -1,14 +1,14 @@
 {
   "solution": {
     "ember-scoped-css": {
-      "impact": "minor",
-      "oldVersion": "3.4.0",
-      "newVersion": "3.5.0",
+      "impact": "patch",
+      "oldVersion": "3.5.0",
+      "newVersion": "3.5.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
@@ -17,5 +17,5 @@
       "oldVersion": "2.1.0"
     }
   },
-  "description": "## Release (2026-08-13)\n\n* ember-scoped-css 3.5.0 (minor)\n\n#### :rocket: Enhancement\n* `ember-scoped-css`\n  * [#417](https://github.com/auditboard/ember-scoped-css/pull/417) Distribute concat over a nested if/unless branch's classes ([@adrianbw](https://github.com/adrianbw))\n\n#### Committers: 1\n- Adrian Bettridge-Wiese ([@adrianbw](https://github.com/adrianbw))\n"
+  "description": "## Release (2026-09-01)\n\n* ember-scoped-css 3.5.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#420](https://github.com/auditboard/ember-scoped-css/pull/420) Don't scope the An+B argument of positional pseudo-classes ([@wagenet](https://github.com/wagenet))\n\n#### Committers: 1\n- Peter Wagenet ([@wagenet](https://github.com/wagenet))\n"
 }

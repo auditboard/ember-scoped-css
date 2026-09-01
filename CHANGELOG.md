@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-09-01)
+
+* ember-scoped-css 3.5.1 (patch)
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#420](https://github.com/auditboard/ember-scoped-css/pull/420) Don't scope the An+B argument of positional pseudo-classes ([@wagenet](https://github.com/wagenet))
+
+#### Committers: 1
+- Peter Wagenet ([@wagenet](https://github.com/wagenet))
+
 ## Release (2026-08-13)
 
 * ember-scoped-css 3.5.0 (minor)
