@@ -45,6 +45,90 @@ it(`understands nth-of-type syntax`, function () {
   `);
 });
 
+it(`understands nth-child syntax`, function () {
+  const css = `
+    li:nth-child(2) {}
+    li:nth-child(odd) {}
+    li:nth-child(2n + 1) {}
+    li:nth-child(-n + 3) {}
+  `;
+
+  const postfix = 'postfix';
+  const fileName = 'foo.css';
+  const rewritten = rewriteCss(css, postfix, fileName);
+
+  expect(rewritten).toMatchInlineSnapshot(`
+    "/* foo.css */
+
+        li.postfix:nth-child(2) {}
+        li.postfix:nth-child(odd) {}
+        li.postfix:nth-child(2n + 1) {}
+        li.postfix:nth-child(-n + 3) {}
+    "
+  `);
+});
+
+it(`understands nth-last-child syntax`, function () {
+  const css = `
+    li:nth-last-child(2) {}
+    li:nth-last-child(odd) {}
+  `;
+
+  const postfix = 'postfix';
+  const fileName = 'foo.css';
+  const rewritten = rewriteCss(css, postfix, fileName);
+
+  expect(rewritten).toMatchInlineSnapshot(`
+    "/* foo.css */
+
+        li.postfix:nth-last-child(2) {}
+        li.postfix:nth-last-child(odd) {}
+    "
+  `);
+});
+
+it(`understands nth-last-of-type syntax`, function () {
+  const css = `
+    li:nth-last-of-type(2) {}
+    li:nth-last-of-type(even) {}
+  `;
+
+  const postfix = 'postfix';
+  const fileName = 'foo.css';
+  const rewritten = rewriteCss(css, postfix, fileName);
+
+  expect(rewritten).toMatchInlineSnapshot(`
+    "/* foo.css */
+
+        li.postfix:nth-last-of-type(2) {}
+        li.postfix:nth-last-of-type(even) {}
+    "
+  `);
+});
+
+it(`scopes the selector list in nth-child's "of S" argument`, function () {
+  const css = `
+    li:nth-child(2 of .highlighted) {}
+    li:nth-last-child(odd of li) {}
+    li:nth-child(2 of .highlighted, .selected) {}
+    li:nth-child(2 of .highlighted:hover) {}
+  `;
+
+  const postfix = 'postfix';
+  const fileName = 'foo.css';
+  const rewritten = rewriteCss(css, postfix, fileName);
+
+  expect(rewritten).toMatchInlineSnapshot(`
+    "/* foo.css */
+
+        li.postfix:nth-child(2 of .highlighted_postfix) {}
+        li.postfix:nth-last-child(odd of li.postfix) {}
+        li.postfix:nth-child(2 of .highlighted_postfix, .selected_postfix) {}
+        li.postfix:nth-child(2 of .highlighted_postfix:hover) {}
+    "
+  `);
+});
+
 describe('@container', () => {
   it('works', () => {
     const css = `

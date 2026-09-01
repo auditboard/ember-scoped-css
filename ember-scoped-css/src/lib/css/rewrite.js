@@ -75,14 +75,7 @@ function rewriteSelector(sel, postfix) {
     selectors.walk((selector) => {
       if (isInsideGlobal(selector)) return;
 
-      // We never want to touch psuedo selectors since we and the user doesn't own them.
-      if (selector.type === 'psuedo') return;
-
-      // :nth-of-type has special syntax where the values passed to nth-of-type()
-      // must either be exactly "odd", "even", or a simple formula
-      //
-      // https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-of-type
-      if (isNthOfType(selector)) return;
+      if (isInAnPlusB(selector)) return;
 
       if (selector.type === 'class') {
         selector.value += '_' + postfix;
@@ -121,10 +114,88 @@ function rewriteSelector(sel, postfix) {
   return transformed;
 }
 
-function isNthOfType(node) {
-  if (!node) return false;
+/**
+ * Pseudo-classes whose argument starts with an An+B value ("odd", "even", or a
+ * formula such as `2n + 1`).
+ *
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_selectors#tree-structural_pseudo-classes
+ */
+const AN_PLUS_B_PSEUDOS = new Set([
+  ':nth-child',
+  ':nth-last-child',
+  ':nth-of-type',
+  ':nth-last-of-type',
+  ':nth-col',
+  ':nth-last-col',
+]);
 
-  return node.parent?.value === ':nth-of-type' || isNthOfType(node.parent);
+/**
+ * An An+B value is not a selector, but postcss-selector-parser has no dedicated
+ * node for it and parses it as ordinary tag/combinator nodes (`2n + 1` becomes
+ * tag `2n`, combinator `+`, tag `1`). Scoping those emits invalid CSS like
+ * `:nth-child(2.postfix)`, which invalidates the whole selector list.
+ *
+ * `:nth-child()` and `:nth-last-child()` also accept a trailing
+ * `of <selector-list>`. That part *is* a selector, so it is scoped as usual --
+ * only the An+B value ahead of the `of` keyword is off limits.
+ *
+ * @param {import('postcss-selector-parser').Node} node
+ * @returns {boolean}
+ */
+function isInAnPlusB(node) {
+  let argument = node;
+
+  while (argument.parent) {
+    const parent = argument.parent;
+
+    if (
+      parent.type === 'pseudo' &&
+      AN_PLUS_B_PSEUDOS.has(parent.value.toLowerCase())
+    ) {
+      return !isInOfSelectorList(node, argument, parent);
+    }
+
+    argument = parent;
+  }
+
+  return false;
+}
+
+/**
+ * Whether `node` belongs to the `of <selector-list>` part of a positional
+ * pseudo-class rather than to its An+B value.
+ *
+ * The `of` keyword lives in the pseudo-class's first argument, and a comma in
+ * the selector list starts another argument -- `:nth-child(2 of .b, .c)` parses
+ * as the two arguments `2 of .b` and `.c` -- so everything after the first
+ * argument is part of the list.
+ *
+ * @param {import('postcss-selector-parser').Node} node
+ * @param {import('postcss-selector-parser').Container} argument the argument `node` sits in
+ * @param {import('postcss-selector-parser').Pseudo} pseudo
+ * @returns {boolean}
+ */
+function isInOfSelectorList(node, argument, pseudo) {
+  const [first] = pseudo.nodes;
+
+  if (!first) return false;
+
+  const ofIndex = first.nodes.findIndex(
+    (sibling) => sibling.type === 'tag' && sibling.value.toLowerCase() === 'of',
+  );
+
+  if (ofIndex === -1) return false;
+  if (argument !== first) return true;
+  // The argument container itself sits ahead of everything in it.
+  if (node === argument) return false;
+
+  // `node` may be nested (e.g. `.b` in `:nth-child(2 of .b:hover)`), so compare
+  // against whichever ancestor is a direct child of the argument.
+  let top = node;
+
+  while (top.parent !== argument) top = top.parent;
+
+  return first.nodes.indexOf(top) > ofIndex;
 }
 
 function isInsideKeyframes(node) {
