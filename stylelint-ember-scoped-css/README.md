@@ -88,10 +88,11 @@ Warnings report the line and column the CSS occupies in the `.gts` itself, and
 `--fix` rewrites only the CSS, leaving the surrounding component source
 byte-for-byte.
 
-This is opt-in on purpose. It is not part of the shipped config, it adds no
-dependencies to a project that does not use it, and nothing changes for an
-existing setup until you both add `customSyntax` and widen your glob to include
-`.gts`/`.gjs`. On a large codebase that has never linted its
+This is opt-in on purpose. It is not part of the shipped config, the two
+parsers above are optional peer dependencies a project that does not use it
+never installs, and nothing changes for an existing setup until you both add
+`customSyntax` and widen your glob to include `.gts`/`.gjs`. (`postcss` is a
+required peer, but it is already stylelint's own dependency.) On a large codebase that has never linted its
 inline styles, turning it on will surface a backlog all at once, so adopt it
 per package behind its own cleanup ticket.
 
@@ -101,19 +102,36 @@ The syntax parses the component with `content-tag` and the template with
 `@glimmer/syntax`, then walks the resulting AST, so it only ever picks up real
 style blocks. A `<style>` written inside a plain JS string is left alone.
 
-Three kinds of block are skipped:
+Four kinds of block are skipped:
 
 - **`<style>` without `scoped`.** That is intentionally global CSS, so
   `no-unscoped-selectors` must not fire on it. Global inline styles stay
   unlinted.
 - **`<style scoped lang="scss">` and `lang="sass"`.** Vite preprocesses these at
   build time and postcss's default parser cannot read them.
+- **Blocks containing a `{{mustache}}`.** `<style scoped inline>` supports
+  interpolation, which is not CSS postcss can parse. Linting part of such a
+  block would report a syntax error on valid source.
 - **Blocks in a component whose template does not parse.** The real error comes
   from glint or the template compiler; reporting it again as a CSS problem, or
   letting it abort the whole stylelint run, would not help.
 
 Note that only a `<style scoped>` at the root of a `<template>` is extracted,
 matching the build, which already rejects a nested one.
+
+### Known limitations
+
+- **`stylelint-disable` comments must sit inside the `<style>` block.** The
+  component source around a block belongs to no stylesheet, so a file-level
+  `/* stylelint-disable */` at the top of a `.gts` has no effect.
+  `stylelint-disable-next-line` inside the block works normally.
+- **A CSS syntax error in one block stops the others from being linted.** One
+  document is parsed per file, so the first unparseable block fails the file.
+  The reported position does point at the right line in the `.gts`.
+- **The build only extracts the first `<style>` element in a template.** If a
+  global `<style>` precedes a `<style scoped>`, the build drops the scoped CSS
+  while this syntax still lints it. That asymmetry is a build bug rather than a
+  linting one; see the tracking issue.
 
 ## List of rules
 

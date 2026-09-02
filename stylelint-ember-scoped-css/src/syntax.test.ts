@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import sharedConfig from './config.js';
 import * as syntax from './syntax.js';
-import { loadParsers } from './syntax.js';
+import { loadParsers, toStringRange } from './syntax.js';
 
 const component = `import Component from '@glimmer/component';
 
@@ -315,5 +315,201 @@ describe('optional peer dependencies', () => {
     expect(() => loadParsers(missing)).toThrowError(
       expect.objectContaining({ cause: original }),
     );
+  });
+});
+
+describe('content-tag range shapes', () => {
+  // 'こんにちは' is 5 characters but 15 bytes, so char 31 is byte 41 here.
+  const buffer = Buffer.from(
+    "const GREETING = 'こんにちは';\n<template>x</template>",
+    'utf8',
+  );
+
+  it('converts the byte offsets content-tag v3 reports', () => {
+    expect(toStringRange({ start: 41, end: 42 }, buffer)).toEqual({
+      start: 31,
+      end: 32,
+    });
+  });
+
+  it('converts the byte offsets content-tag v4 reports under new names', () => {
+    // v4 renamed start/end; reading only the v3 names yields undefined.
+    const v4 = { startByte: 41, endByte: 42, startChar: 31, endChar: 32 };
+
+    expect(toStringRange(v4, buffer)).toEqual({ start: 31, end: 32 });
+  });
+
+  it('throws a named error rather than silently linting nothing', () => {
+    expect(() => toStringRange({ begin: 41 }, buffer)).toThrowError(
+      /could not read a template range from content-tag/,
+    );
+  });
+});
+
+describe('fix offsets', () => {
+  it('reports a fix range that indexes the whole .gts, not the block', async () => {
+    const { results } = await stylelint.lint({
+      code: component,
+      codeFilename: 'demo.gts',
+      customSyntax: syntax,
+      computeEditInfo: true,
+      config: { rules: { 'color-hex-length': 'long' } },
+    });
+
+    const { fix } = results[0]!.warnings[0]!;
+    const [start, end] = fix!.range;
+    const applied =
+      component.slice(0, start) + fix!.text + component.slice(end);
+
+    // What an editor's "fix this problem" action produces must match --fix.
+    expect(applied).toBe(component.replace('#fff', '#ffffff'));
+  });
+
+  it('anchors the range on the CSS, not on the component preamble', async () => {
+    const { results } = await stylelint.lint({
+      code: component,
+      codeFilename: 'demo.gts',
+      customSyntax: syntax,
+      computeEditInfo: true,
+      config: { rules: { 'color-hex-length': 'long' } },
+    });
+
+    const [start] = results[0]!.warnings[0]!.fix!.range;
+
+    expect(component.slice(start)).toMatch(/^color: #fff;/);
+  });
+});
+
+describe('interpolated blocks', () => {
+  const interpolated = `<template>
+  <style scoped inline>
+    .a { color: {{this.color}}; }
+    .b { color: #fff; }
+  </style>
+</template>
+`;
+
+  it('does not report a CSS error for a block containing a mustache', async () => {
+    // <style scoped inline> supports interpolation, so this source is valid.
+    const { results } = await lint(interpolated, { 'color-no-hex': true });
+
+    expect(results[0]?.parseErrors).toEqual([]);
+    expect(results[0]?.warnings).toEqual([]);
+  });
+
+  it('leaves an interpolated block untouched under --fix', async () => {
+    const { code } = await lint(
+      interpolated,
+      { 'color-hex-length': 'long' },
+      true,
+    );
+
+    expect(code).toBe(interpolated);
+  });
+
+  it('still lints a plain block alongside an interpolated one', async () => {
+    const code = `<template>
+  <style scoped inline>
+    .a { color: {{this.color}}; }
+  </style>
+  <style scoped>
+    .b { color: #fff; }
+  </style>
+</template>
+`;
+
+    const { results } = await lint(code, { 'color-no-hex': true });
+
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 6, rule: 'color-no-hex' }),
+    ]);
+  });
+});
+
+describe('byte order mark', () => {
+  it('lints a component saved with a UTF-8 BOM', async () => {
+    const body = `<template>
+  <style scoped>
+    .a { color: #fff; }
+  </style>
+</template>
+`;
+
+    const { results } = await lint(`\uFEFF${body}`, { 'color-no-hex': true });
+
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 3, rule: 'color-no-hex' }),
+    ]);
+  });
+
+  it('round-trips a BOM component under --fix', async () => {
+    const source = `\uFEFF<template>
+  <style scoped>
+    .a { color: #fff; }
+  </style>
+</template>
+`;
+
+    const { code } = await lint(source, { 'color-hex-length': 'long' }, true);
+
+    expect(code).toBe(source.replace('#fff', '#ffffff'));
+  });
+});
+
+describe('CSS syntax errors', () => {
+  it('reports the error at the line it occupies in the .gts', async () => {
+    const code = `<template>
+  <div>x</div>
+
+  <style scoped>
+    @media (min-width: 1px) {
+      .a { color: red; }
+  </style>
+</template>
+`;
+
+    const { results } = await lint(code, { 'color-no-hex': true });
+    const [warning] = results[0]!.warnings;
+
+    // The unclosed @media is on line 5 of the .gts.
+    expect(warning).toEqual(
+      expect.objectContaining({
+        line: 5,
+        text: expect.stringContaining('Unclosed'),
+      }),
+    );
+  });
+});
+
+describe('lang attributes the build treats as plain CSS', () => {
+  it.each([
+    ['an empty lang value', '<style scoped lang="">'],
+    ['a bare lang attribute', '<style scoped lang>'],
+    ['lang="css"', '<style scoped lang="css">'],
+  ])('lints a block with %s', async (_name, tag) => {
+    // getLangAttribute returns `value.chars || null`, so the build parses all
+    // of these as plain CSS and scopes them.
+    const code = `<template>
+  ${tag}
+    .a { color: #fff; }
+  </style>
+</template>
+`;
+
+    const { results } = await lint(code, { 'color-no-hex': true });
+
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 3, rule: 'color-no-hex' }),
+    ]);
+  });
+});
+
+describe('document source', () => {
+  it('sets source on a component with no style blocks', () => {
+    const source = '<template>\n  <div>hi</div>\n</template>\n';
+
+    const doc = syntax.parse(source);
+
+    expect(doc.source?.input.css).toBe(source);
   });
 });
