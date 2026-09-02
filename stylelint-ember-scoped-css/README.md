@@ -52,8 +52,15 @@ By default stylelint only sees `.css` files, so a component that keeps all of
 its CSS in an inline `<style scoped>` block is silently unlinted. This package
 ships a PostCSS syntax that exposes those blocks to stylelint.
 
-Point it at your `.gts`/`.gjs` files with an override, so `.css` files keep the
-default syntax:
+The parsers it needs are optional peer dependencies, so a project that only
+uses the rules never installs them. Add them when you opt in:
+
+```bash
+npm install --save-dev content-tag @glimmer/syntax
+```
+
+Then point the syntax at your `.gts`/`.gjs` files with an override, so `.css`
+files keep the default syntax:
 
 ```json
 {
@@ -81,9 +88,10 @@ Warnings report the line and column the CSS occupies in the `.gts` itself, and
 `--fix` rewrites only the CSS, leaving the surrounding component source
 byte-for-byte.
 
-This is opt-in on purpose. It is not part of the shipped config, and nothing
-changes for an existing setup until you both add `customSyntax` and widen your
-glob to include `.gts`/`.gjs`. On a large codebase that has never linted its
+This is opt-in on purpose. It is not part of the shipped config, it adds no
+dependencies to a project that does not use it, and nothing changes for an
+existing setup until you both add `customSyntax` and widen your glob to include
+`.gts`/`.gjs`. On a large codebase that has never linted its
 inline styles, turning it on will surface a backlog all at once, so adopt it
 per package behind its own cleanup ticket.
 

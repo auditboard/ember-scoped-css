@@ -1,9 +1,40 @@
-import { preprocess as parseTemplate } from '@glimmer/syntax';
+import { createRequire } from 'node:module';
 
-import { Preprocessor } from 'content-tag';
 import postcss from 'postcss';
 
-const preprocessor = new Preprocessor();
+const nodeRequire = createRequire(import.meta.url);
+
+/**
+ * `content-tag` and `@glimmer/syntax` are optional peer dependencies, so that a
+ * consumer using only the rules does not pay for a parser it never runs. They
+ * are required rather than imported so a consumer who opts in without
+ * installing them gets a message naming both, instead of a bare
+ * ERR_MODULE_NOT_FOUND naming whichever resolved first.
+ *
+ * @param {(id: string) => unknown} [requireFn] seam for testing the failure
+ * @returns {{ Preprocessor: new () => { parse: (source: string) => Array<{ contentRange: { start: number, end: number } }> }, parseTemplate: (contents: string) => import('@glimmer/syntax').ASTv1.Template }}
+ */
+export function loadParsers(requireFn = nodeRequire) {
+  try {
+    return {
+      Preprocessor: requireFn('content-tag').Preprocessor,
+      parseTemplate: requireFn('@glimmer/syntax').preprocess,
+    };
+  } catch (error) {
+    throw new Error(
+      "stylelint-ember-scoped-css/syntax needs 'content-tag' and " +
+        "'@glimmer/syntax'. They are optional peer dependencies, so install " +
+        'them alongside it: npm i -D content-tag @glimmer/syntax',
+      { cause: error },
+    );
+  }
+}
+
+/** @type {ReturnType<typeof loadParsers> | undefined} */
+let parsers;
+
+/** @type {{ parse: (source: string) => Array<{ contentRange: { start: number, end: number } }> } | undefined} */
+let preprocessor;
 
 /**
  * content-tag reports UTF-8 byte offsets, but we slice JS strings, which are
@@ -39,7 +70,7 @@ function parseTemplates(source) {
  */
 function parseTemplateContents(contents) {
   try {
-    return parseTemplate(contents);
+    return parsers.parseTemplate(contents);
   } catch {
     return null;
   }
@@ -76,6 +107,9 @@ function isPreprocessed(node) {
  * @returns {Array<{ start: number, end: number }>}
  */
 function findStyleBlocks(source) {
+  parsers ??= loadParsers();
+  preprocessor ??= new parsers.Preprocessor();
+
   const buffer = Buffer.from(source, 'utf8');
   const blocks = [];
 
