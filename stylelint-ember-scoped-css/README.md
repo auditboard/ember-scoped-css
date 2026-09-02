@@ -46,6 +46,67 @@ This adds ember-scoped-css specific rules to your existing stylelint config.
 }
 ```
 
+## Linting inline `<style scoped>` blocks
+
+By default stylelint only sees `.css` files, so a component that keeps all of
+its CSS in an inline `<style scoped>` block is silently unlinted. This package
+ships a PostCSS syntax that exposes those blocks to stylelint.
+
+Point it at your `.gts`/`.gjs` files with an override, so `.css` files keep the
+default syntax:
+
+```json
+{
+  "overrides": [
+    {
+      "files": ["app/components/**/*.css", "app/templates/**/*.css"],
+      "extends": ["stylelint-ember-scoped-css/config"]
+    },
+    {
+      "files": ["app/components/**/*.{gts,gjs}"],
+      "extends": ["stylelint-ember-scoped-css/config"],
+      "customSyntax": "stylelint-ember-scoped-css/syntax"
+    }
+  ]
+}
+```
+
+Then widen the glob your `lint:css` script passes to stylelint:
+
+```json
+"lint:css": "stylelint 'app/**/*.{css,gts,gjs}'"
+```
+
+Warnings report the line and column the CSS occupies in the `.gts` itself, and
+`--fix` rewrites only the CSS, leaving the surrounding component source
+byte-for-byte.
+
+This is opt-in on purpose. It is not part of the shipped config, and nothing
+changes for an existing setup until you both add `customSyntax` and widen your
+glob to include `.gts`/`.gjs`. On a large codebase that has never linted its
+inline styles, turning it on will surface a backlog all at once, so adopt it
+per package behind its own cleanup ticket.
+
+### What gets linted
+
+The syntax parses the component with `content-tag` and the template with
+`@glimmer/syntax`, then walks the resulting AST, so it only ever picks up real
+style blocks. A `<style>` written inside a plain JS string is left alone.
+
+Three kinds of block are skipped:
+
+- **`<style>` without `scoped`.** That is intentionally global CSS, so
+  `no-unscoped-selectors` must not fire on it. Global inline styles stay
+  unlinted.
+- **`<style scoped lang="scss">` and `lang="sass"`.** Vite preprocesses these at
+  build time and postcss's default parser cannot read them.
+- **Blocks in a component whose template does not parse.** The real error comes
+  from glint or the template compiler; reporting it again as a CSS problem, or
+  letting it abort the whole stylelint run, would not help.
+
+Note that only a `<style scoped>` at the root of a `<template>` is extracted,
+matching the build, which already rejects a nested one.
+
 ## List of rules
 
 - [`no-unscoped-selectors`](./src/rules/no-unscoped-selectors/README.md)
