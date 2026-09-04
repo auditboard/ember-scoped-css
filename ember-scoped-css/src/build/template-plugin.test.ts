@@ -333,3 +333,83 @@ describe('lang attribute (SCSS preprocessor)', () => {
     `);
   });
 });
+
+/**
+ * https://github.com/auditboard/ember-scoped-css/issues/423
+ *
+ * The Template visitor used to pick the block to extract with
+ * `node.body.find((n) => n.tag === 'style')` -- the first style element,
+ * scoped or not -- while the ElementNode visitor removes *every* scoped
+ * element. So a scoped block the Template visitor never saw was still deleted
+ * from the output, and its CSS was emitted nowhere. No error, no warning.
+ *
+ * Both blocks below are at the root, so neither is rejected by the nesting
+ * rule; the ordering is the only thing under test.
+ */
+describe('a scoped <style> is found regardless of what precedes it', () => {
+  it('extracts the scoped CSS when a global <style> comes first', async () => {
+    let output = await transform(`
+      export const Foo = <template>
+        <div class="scoped">hi</div>
+        <style>
+          .global { color: red; }
+        </style>
+        <style scoped>
+          .scoped { color: blue; }
+        </style>
+      </template>;
+    `);
+
+    let emitted = virtualImportUrlsOf(output).map(decodeURIComponent).join('');
+
+    // Soft, so one run shows both halves of the loss rather than stopping at
+    // the first: the stylesheet was not emitted, and addInfo() never ran
+    // either, so the class was never collected and the CSS could not have
+    // matched the element anyway.
+    expect.soft(emitted).toContain('.scoped');
+    expect
+      .soft(templateContentsOf(output).join(''))
+      .toMatch(/class="scoped_\w+"/);
+  });
+
+  it('leaves a preceding global <style> in the template', async () => {
+    let output = await transform(`
+      export const Foo = <template>
+        <style>
+          .global { color: red; }
+        </style>
+        <style scoped>
+          .scoped { color: blue; }
+        </style>
+      </template>;
+    `);
+
+    let template = templateContentsOf(output).join('');
+
+    // The global block is deliberately not scoped, so it ships as written.
+    expect(template).toContain('.global { color: red; }');
+    // The scoped one is extracted to a stylesheet, so its tag is removed.
+    expect(template).not.toContain('.scoped');
+  });
+
+  it('refuses a second <style scoped> rather than dropping its CSS', async () => {
+    let build = () =>
+      transform(`
+        export const Foo = <template>
+          <div class="first second">hi</div>
+          <style scoped>
+            .first { color: blue; }
+          </style>
+          <style scoped>
+            .second { color: green; }
+          </style>
+        </template>;
+      `);
+
+    // Supporting several blocks is a larger question; until it is answered,
+    // an error beats emitting the first and silently discarding the second.
+    await expect(build()).rejects.toThrow(
+      /Only one <style scoped> is supported per template, but 2 were found/,
+    );
+  });
+});

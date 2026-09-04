@@ -129,9 +129,33 @@ export function createPlugin(config) {
           /**
            * We only allow a scoped <style> at the root
            */
-          let styleTag = node.body.find(
-            (n) => n.type === 'ElementNode' && n.tag === 'style',
+          let styleTags = node.body.filter(
+            (n) =>
+              n.type === 'ElementNode' &&
+              n.tag === 'style' &&
+              hasScopedAttribute(n),
           );
+
+          /**
+           * Selecting by tag alone used to pick a global <style> sitting
+           * earlier in the template, which made hasScopedAttribute below false
+           * and skipped this whole branch -- while the ElementNode visitor
+           * still removed the scoped tag. The CSS was emitted nowhere and
+           * nothing said so.
+           */
+          let styleTag = styleTags[0];
+
+          /**
+           * Only the first scoped block is ever extracted, and the rest are
+           * removed by the ElementNode visitor, so a second one silently lost
+           * its CSS the same way. Refuse it out loud instead.
+           */
+          if (styleTags.length > 1) {
+            throw new Error(
+              'Only one <style scoped> is supported per template, ' +
+                `but ${styleTags.length} were found. Merge them into one.`,
+            );
+          }
 
           if (hasScopedAttribute(styleTag)) {
             let css = textContent(styleTag);
