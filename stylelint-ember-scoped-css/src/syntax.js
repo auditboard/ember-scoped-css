@@ -21,9 +21,22 @@ const CSS_SYNTAX = { parse: postcss.parse, stringify: postcss.stringify };
  * back out by the same syntax that read it, so fixing one hex value cannot
  * move a byte anywhere else in the block.
  *
- * `sass` is missing on purpose. Indented Sass parses only under postcss-sass,
- * which drops trailing newlines when it stringifies, so a fixed block would
- * come back a byte short. See parse.
+ * `sass` is missing on purpose: indented Sass has no parser that reads it
+ * correctly, and both candidates were tried.
+ *
+ * postcss-styl is close, being indentation-based, but Stylus assigns with `=`
+ * where Sass uses `:`, so it reads `$brand: #fff` as a selector rather than a
+ * declaration and the file comes back with two `Cannot parse selector` errors
+ * on ordinary Sass. It also throws a raw TypeError on `=mixin`, which surfaces
+ * to the user as `Cannot read properties of undefined (reading 'op')`.
+ *
+ * postcss-sass reads the syntax but loses source: `=mixin`/`+include` returns
+ * an empty AST, and `@extend %placeholder` silently drops a rule. A block
+ * using either would lint clean forever, and `--fix` would write back less
+ * than it read.
+ *
+ * Skipping is the only option that neither invents errors on valid source nor
+ * quietly discards it. See findStyleBlocks.
  */
 const SYNTAXES = new Map([
   ['scss', scss],
@@ -164,8 +177,9 @@ function findStyleBlocks(source) {
 
       const lang = getLangAttribute(node)?.toLowerCase() ?? null;
 
-      // The one dialect with no byte-exact parser. Skipped rather than linted
-      // with a stringifier that would eat the block's trailing newline.
+      // The one dialect with no parser that reads it correctly. Linting it
+      // would mean either inventing syntax errors on valid Sass or silently
+      // dropping rules from it. See SYNTAXES.
       if (lang === 'sass') continue;
 
       // `<style scoped inline>` supports interpolation, and a mustache is not

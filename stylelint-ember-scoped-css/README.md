@@ -116,11 +116,17 @@ Four kinds of block are skipped:
 - **`<style>` without `scoped`.** That is intentionally global CSS, so
   `no-unscoped-selectors` must not fire on it. Global inline styles stay
   unlinted.
-- **`<style scoped lang="sass">`.** Indented Sass parses only under
-  `postcss-sass`, which drops trailing newlines when it writes a block back
-  out, so linting it would mean `--fix` silently changing a byte outside the
-  warning it is fixing. `lang="scss"` is unaffected; this is only the
-  indented dialect.
+- **`<style scoped lang="sass">`.** Indented Sass has no parser that reads it
+  correctly, and both candidates were tried. `postcss-styl` reads
+  `$brand: #fff` as a selector, because Stylus assigns with `=` where Sass
+  uses `:`, so an ordinary Sass block comes back with two `Cannot parse
+  selector` errors; it also throws a raw `TypeError` on `=mixin`.
+  `postcss-sass` reads the syntax but loses source, returning an empty AST for
+  `=mixin`/`+include` and dropping a rule from `@extend %placeholder`, so a
+  block using either would lint clean forever and `--fix` would write back
+  less than it read. Skipping is the only option that neither invents errors
+  on valid source nor quietly discards it. `lang="scss"` is unaffected; this
+  is only the indented dialect.
 - **Blocks containing a `{{mustache}}`.** `<style scoped inline>` supports
   interpolation, which is not CSS postcss can parse. Linting part of such a
   block would report a syntax error on valid source.
