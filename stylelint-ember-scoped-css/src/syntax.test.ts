@@ -456,14 +456,33 @@ describe('CSS syntax errors', () => {
   });
 });
 
+describe('lang attributes naming a preprocessor dialect', () => {
+  it.each([['scss'], ['sass'], ['less'], ['styl'], ['stylus'], ['SCSS']])(
+    'skips a block with lang="%s"',
+    async (lang) => {
+      // Not CSS, so postcss would report a bogus syntax error on valid source.
+      const code = `<template>
+  <style scoped lang="${lang}">
+    .a { .b { color: #fff; } }
+  </style>
+</template>
+`;
+
+      const { results } = await lint(code, { 'color-no-hex': true });
+
+      expect(results[0]?.warnings).toEqual([]);
+    },
+  );
+});
+
 describe('lang attributes the build treats as plain CSS', () => {
   it.each([
     ['an empty lang value', '<style scoped lang="">'],
     ['a bare lang attribute', '<style scoped lang>'],
     ['lang="css"', '<style scoped lang="css">'],
   ])('lints a block with %s', async (_name, tag) => {
-    // getLangAttribute returns `value.chars || null`, so the build parses all
-    // of these as plain CSS and scopes them.
+    // getLangAttribute returns `value.chars || null`, and `lang="css"` names
+    // no preprocessor, so the build parses all of these as plain CSS.
     const code = `<template>
   ${tag}
     .a { color: #fff; }

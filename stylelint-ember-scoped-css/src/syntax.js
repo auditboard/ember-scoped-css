@@ -1,6 +1,10 @@
 import { preprocess as parseTemplate } from '@glimmer/syntax';
 
 import { Preprocessor } from 'content-tag';
+import {
+  hasScopedAttribute,
+  isPreprocessed,
+} from 'ember-scoped-css/__private_do_not_use_are_you_serious__/style-tag';
 import postcss from 'postcss';
 
 const preprocessor = new Preprocessor();
@@ -92,49 +96,6 @@ function parseTemplateContents(contents) {
 }
 
 /**
- * Mirrors `hasScopedAttribute` in ember-scoped-css's template plugin: a bare
- * `<style>` is deliberately global CSS, so linting it as scoped CSS would be
- * wrong.
- *
- * @param {{ attributes: Array<{ name: string }> }} node
- * @returns {boolean}
- */
-function isScoped(node) {
-  return node.attributes.some((attribute) => attribute.name === 'scoped');
-}
-
-/**
- * Mirrors `getLangAttribute` in the template plugin, including its
- * `value.chars || null`: an empty or valueless `lang` reads as absent.
- *
- * @param {{ attributes: Array<{ name: string, value?: { type: string, chars?: string } }> }} node
- * @returns {string | null}
- */
-function getLang(node) {
-  const attribute = node.attributes.find((each) => each.name === 'lang');
-
-  if (!attribute) return null;
-  if (attribute.value?.type !== 'TextNode') return null;
-
-  return attribute.value.chars || null;
-}
-
-/**
- * Only scss and sass are preprocessed, and only those are unreadable by
- * postcss's default parser. Every other `lang` value -- including an empty one
- * -- is CSS the build scopes, so skipping on the attribute's mere presence
- * leaves genuinely scoped CSS unlinted.
- *
- * @param {{ attributes: Array<{ name: string, value?: { type: string, chars?: string } }> }} node
- * @returns {boolean}
- */
-function isPreprocessed(node) {
-  const lang = getLang(node);
-
-  return lang === 'scss' || lang === 'sass';
-}
-
-/**
  * The CSS text of every root-level plain `<style scoped>` element in the file,
  * as absolute offsets into `source`.
  *
@@ -159,8 +120,9 @@ function findStyleBlocks(source) {
     if (!ast) continue;
 
     for (const node of ast.body) {
-      if (node.type !== 'ElementNode' || node.tag !== 'style') continue;
-      if (!isScoped(node) || isPreprocessed(node)) continue;
+      // Both questions are answered by ember-scoped-css itself, so a block
+      // this lints is exactly a block it scopes.
+      if (!hasScopedAttribute(node) || isPreprocessed(node)) continue;
 
       // `<style scoped inline>` supports interpolation, and a mustache is not
       // CSS postcss can parse. Taking only children[0] would silently truncate

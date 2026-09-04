@@ -67,11 +67,37 @@ export function getLangAttribute(node) {
   return null;
 }
 
-/** File extensions that Vite can preprocess via its CSS preprocessor pipeline */
-export const PREPROCESSED_EXTENSIONS = new Set([
-  '.scss',
-  '.sass',
-  '.less',
-  '.styl',
-  '.stylus',
+/**
+ * The dialects Vite can preprocess into CSS. Named by `lang` on a `<style>`
+ * block, and by extension on a colocated file, so both spellings are derived
+ * from this one list.
+ */
+export const PREPROCESSED_LANGS = new Set([
+  'scss',
+  'sass',
+  'less',
+  'styl',
+  'stylus',
 ]);
+
+/** File extensions that Vite can preprocess via its CSS preprocessor pipeline */
+export const PREPROCESSED_EXTENSIONS = new Set(
+  [...PREPROCESSED_LANGS].map((lang) => `.${lang}`),
+);
+
+/**
+ * Whether this block's contents are a preprocessor dialect rather than CSS.
+ *
+ * `lang` is not the same question as "did the build touch it": unplugin-inline
+ * routes any `lang` through Vite, but `lang="css"` comes out the other side as
+ * the CSS it already was. Anything reading the contents as CSS has to skip
+ * only the dialects postcss cannot parse.
+ *
+ * @param {object} [node]
+ * @returns {boolean}
+ */
+export function isPreprocessed(node) {
+  const lang = getLangAttribute(node);
+
+  return lang !== null && PREPROCESSED_LANGS.has(lang.toLowerCase());
+}

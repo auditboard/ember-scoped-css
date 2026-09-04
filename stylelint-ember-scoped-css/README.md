@@ -93,13 +93,19 @@ The syntax parses the component with `content-tag` and the template with
 `@glimmer/syntax`, then walks the resulting AST, so it only ever picks up real
 style blocks. A `<style>` written inside a plain JS string is left alone.
 
+Which blocks count as scoped CSS is not decided here: the `scoped` and `lang`
+attributes are read with `ember-scoped-css`'s own helpers, so a block this
+lints is exactly a block the build scopes.
+
 Four kinds of block are skipped:
 
 - **`<style>` without `scoped`.** That is intentionally global CSS, so
   `no-unscoped-selectors` must not fire on it. Global inline styles stay
   unlinted.
-- **`<style scoped lang="scss">` and `lang="sass"`.** Vite preprocesses these at
-  build time and postcss's default parser cannot read them.
+- **`<style scoped lang="...">` naming a preprocessor dialect** (`scss`, `sass`,
+  `less`, `styl`, `stylus`). Vite preprocesses these at build time and
+  postcss's default parser cannot read them. `lang="css"` names no
+  preprocessor, so it is still linted.
 - **Blocks containing a `{{mustache}}`.** `<style scoped inline>` supports
   interpolation, which is not CSS postcss can parse. Linting part of such a
   block would report a syntax error on valid source.
