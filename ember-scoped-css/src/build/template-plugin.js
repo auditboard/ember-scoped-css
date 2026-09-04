@@ -19,6 +19,11 @@ import {
 } from '../lib/path/utils.js';
 import { request } from '../lib/request.js';
 import { templatePlugin } from '../lib/rewriteHbs.js';
+import {
+  getLangAttribute,
+  hasInlineAttributeWithoutLang,
+  hasScopedAttribute,
+} from './style-tag.js';
 
 const noopPlugin = {
   name: 'ember-scoped-css:noop',
@@ -234,62 +239,6 @@ export function createPlugin(config) {
       },
     };
   };
-}
-
-/**
- * Thanks, CardStack and @ef4 for this code.
- */
-const SCOPED_ATTRIBUTE_NAME = 'scoped';
-const INLINE_ATTRIBUTE_NAME = 'inline';
-const LANG_ATTRIBUTE_NAME = 'lang';
-
-function hasScopedAttribute(node) {
-  if (!node) return;
-  if (node.tag !== 'style') return;
-  if (node.type !== 'ElementNode') return;
-
-  return node.attributes.some(
-    (attribute) => attribute.name === SCOPED_ATTRIBUTE_NAME,
-  );
-}
-
-function hasInlineAttributeWithoutLang(node) {
-  if (!node) return;
-  if (node.tag !== 'style') return;
-  if (node.type !== 'ElementNode') return;
-
-  if (getLangAttribute(node)) {
-    return false;
-  }
-
-  return node.attributes.some(
-    (attribute) => attribute.name === INLINE_ATTRIBUTE_NAME,
-  );
-}
-
-/**
- * Returns the value of the `lang` attribute on a `<style>` node, or null if absent.
- *
- * @param {object} node
- * @returns {string | null}
- */
-function getLangAttribute(node) {
-  if (!node) return null;
-  if (node.tag !== 'style') return null;
-  if (node.type !== 'ElementNode') return null;
-
-  const attr = node.attributes.find(
-    (attribute) => attribute.name === LANG_ATTRIBUTE_NAME,
-  );
-
-  if (!attr) return null;
-
-  // The attribute value is a TextNode child of the AttrNode's value
-  const value = attr.value;
-
-  if (value?.type === 'TextNode') return value.chars || null;
-
-  return null;
 }
 
 function textContent(node) {
