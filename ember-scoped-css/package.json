@@ -27,6 +27,7 @@
       "types": "./declarations/runtime/index.d.ts",
       "default": "./dist/runtime/index.js"
     },
+    "./__private_do_not_use_are_you_serious__/style-tag": "./src/build/style-tag.js",
     "./babel": {
       "import": "./src/build/public-exports/babel.js",
       "require": "./dist/cjs/babel.cjs"

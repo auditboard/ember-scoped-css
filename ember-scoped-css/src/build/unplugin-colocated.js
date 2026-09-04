@@ -4,17 +4,9 @@ import path from 'node:path';
 
 import { rewriteCss } from '../lib/css/rewrite.js';
 import { request } from '../lib/request.js';
+import { PREPROCESSED_EXTENSIONS } from './style-tag.js';
 
 const META = 'scoped-css:colocated';
-
-/** File extensions that Vite can preprocess via its CSS preprocessor pipeline */
-const PREPROCESSED_EXTENSIONS = new Set([
-  '.scss',
-  '.sass',
-  '.less',
-  '.styl',
-  '.stylus',
-]);
 
 /**
  * Plugin for supporting colocated styles
