@@ -129,41 +129,53 @@ export function createPlugin(config) {
           /**
            * We only allow a scoped <style> at the root
            */
-          let styleTag = node.body.find(
-            (n) => n.type === 'ElementNode' && n.tag === 'style',
+          let styleTags = node.body.filter(
+            (n) =>
+              n.type === 'ElementNode' &&
+              n.tag === 'style' &&
+              hasScopedAttribute(n),
           );
 
-          if (hasScopedAttribute(styleTag)) {
-            let css = textContent(styleTag);
-            let lang = getLangAttribute(styleTag);
-            let info = getCSSContentInfo(css, lang);
-
-            addInfo(info);
-
-            if (hasInlineAttributeWithoutLang(styleTag)) {
-              /**
-               * This will be handled in ElementNode traversal
-               */
-              return;
-            }
-
-            if (lang) {
-              /**
-               * For <style scoped inline lang="..."> we cannot preprocess at Babel-time
-               * (preprocessing is async and requires Vite's ResolvedConfig).
-               * Remove the tag and inject via virtual CSS module and warn user.
-               */
-              console.warn(
-                `[ember-scoped-css] <style scoped inline lang="${lang}"> is not supported ` +
-                  `(preprocessing is async and cannot run at Babel-time). ` +
-                  `Downgrading to non-inline: the style tag will be removed and injected as a virtual CSS module.`,
-              );
-            }
-
-            let cssRequest = request.inline.create(info.id, postfix, css, lang);
-
-            env.meta.jsutils.importForSideEffect(cssRequest);
+          if (styleTags.length > 1) {
+            throw new Error(
+              'Only one <style scoped> is supported per template, ' +
+                `but ${styleTags.length} were found. Merge them into one.`,
+            );
           }
+
+          let styleTag = styleTags[0];
+
+          if (!styleTag) return;
+
+          let css = textContent(styleTag);
+          let lang = getLangAttribute(styleTag);
+          let info = getCSSContentInfo(css, lang);
+
+          addInfo(info);
+
+          if (hasInlineAttributeWithoutLang(styleTag)) {
+            /**
+             * This will be handled in ElementNode traversal
+             */
+            return;
+          }
+
+          if (lang) {
+            /**
+             * For <style scoped inline lang="..."> we cannot preprocess at Babel-time
+             * (preprocessing is async and requires Vite's ResolvedConfig).
+             * Remove the tag and inject via virtual CSS module and warn user.
+             */
+            console.warn(
+              `[ember-scoped-css] <style scoped inline lang="${lang}"> is not supported ` +
+                `(preprocessing is async and cannot run at Babel-time). ` +
+                `Downgrading to non-inline: the style tag will be removed and injected as a virtual CSS module.`,
+            );
+          }
+
+          let cssRequest = request.inline.create(info.id, postfix, css, lang);
+
+          env.meta.jsutils.importForSideEffect(cssRequest);
         },
 
         // Visitors broken out like this so we can conditionally

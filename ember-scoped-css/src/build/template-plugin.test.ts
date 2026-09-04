@@ -333,3 +333,54 @@ describe('lang attribute (SCSS preprocessor)', () => {
     `);
   });
 });
+
+/**
+ * https://github.com/auditboard/ember-scoped-css/issues/423
+ */
+describe('a scoped <style> is found regardless of what precedes it', () => {
+  it('extracts the scoped CSS when a global <style> comes first', async () => {
+    let output = await transform(`
+      export const Foo = <template>
+        <div class="scoped">hi</div>
+        <style>
+          .global { color: red; }
+        </style>
+        <style scoped>
+          .scoped { color: blue; }
+        </style>
+      </template>;
+    `);
+
+    expect(templateContentsOf(output)).toMatchInlineSnapshot(`
+      [
+        "<div class="scoped_e65d154a1">hi</div>
+      <style>
+        .global { color: red; }
+      </style>",
+      ]
+    `);
+    expect(virtualImportUrlsOf(output)).toMatchInlineSnapshot(`
+      [
+        "./e65d154a1___css-68ede36d709bfa7f8a2994e1702ef010.ember-scoped.css?css=%0A%20%20%20%20%20%20%20%20%20%20.scoped%20%7B%20color%3A%20blue%3B%20%7D%0A%20%20%20%20%20%20%20%20",
+      ]
+    `);
+  });
+
+  it('refuses a second <style scoped> rather than dropping its CSS', async () => {
+    let build = transform(`
+      export const Foo = <template>
+        <div class="first second">hi</div>
+        <style scoped>
+          .first { color: blue; }
+        </style>
+        <style scoped>
+          .second { color: green; }
+        </style>
+      </template>;
+    `);
+
+    await expect(build).rejects.toThrow(
+      /Only one <style scoped> is supported per template, but 2 were found/,
+    );
+  });
+});
