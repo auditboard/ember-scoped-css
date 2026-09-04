@@ -125,12 +125,6 @@ matching the build, which already rejects a nested one.
 - **A CSS syntax error in one block stops the others from being linted.** One
   document is parsed per file, so the first unparseable block fails the file.
   The reported position does point at the right line in the `.gts`.
-- **The build only emits CSS for the first `<style>` element in a template.**
-  If a global `<style>` precedes a `<style scoped>`, or if a template has two
-  `<style scoped>` blocks, the build drops the later block's CSS while this
-  syntax still lints it -- so you can get warnings, and `--fix` edits, on CSS
-  that never ships. That asymmetry is a build bug rather than a linting one;
-  see [#423](https://github.com/auditboard/ember-scoped-css/issues/423).
 
 ## List of rules
 
