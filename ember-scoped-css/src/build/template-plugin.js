@@ -127,12 +127,7 @@ export function createPlugin(config) {
          */
         Template(node) {
           /**
-           * We only allow a scoped <style> at the root.
-           *
-           * Selecting by tag alone used to pick a global <style> sitting
-           * earlier in the template, which skipped this whole branch --
-           * while the ElementNode visitor still removed the scoped tag.
-           * The CSS was emitted nowhere and nothing said so.
+           * We only allow a scoped <style> at the root
            */
           let styleTags = node.body.filter(
             (n) =>
@@ -141,11 +136,6 @@ export function createPlugin(config) {
               hasScopedAttribute(n),
           );
 
-          /**
-           * Only the first scoped block is ever extracted, and the rest are
-           * removed by the ElementNode visitor, so a second one silently lost
-           * its CSS the same way. Refuse it out loud instead.
-           */
           if (styleTags.length > 1) {
             throw new Error(
               'Only one <style scoped> is supported per template, ' +
