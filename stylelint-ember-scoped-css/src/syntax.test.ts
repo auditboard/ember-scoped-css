@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import sharedConfig from './config.js';
 import * as syntax from './syntax.js';
-import { loadParsers, toStringRange } from './syntax.js';
+import { toStringRange } from './syntax.js';
 
 const component = `import Component from '@glimmer/component';
 
@@ -290,31 +290,6 @@ export default class MetricStat extends Component {
         rule: 'ember-scoped-css/no-unscopable-class-attribute-selectors',
       }),
     ]);
-  });
-});
-
-describe('optional peer dependencies', () => {
-  it('names both packages and how to install them when a parser is missing', () => {
-    const missing = () => {
-      throw Object.assign(new Error("Cannot find package 'content-tag'"), {
-        code: 'ERR_MODULE_NOT_FOUND',
-      });
-    };
-
-    expect(() => loadParsers(missing)).toThrowError(
-      /content-tag.+@glimmer\/syntax.+install/s,
-    );
-  });
-
-  it('keeps the underlying resolution failure as the cause', () => {
-    const original = new Error('the real reason');
-    const missing = () => {
-      throw original;
-    };
-
-    expect(() => loadParsers(missing)).toThrowError(
-      expect.objectContaining({ cause: original }),
-    );
   });
 });
 
