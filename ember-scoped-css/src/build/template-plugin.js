@@ -127,7 +127,12 @@ export function createPlugin(config) {
          */
         Template(node) {
           /**
-           * We only allow a scoped <style> at the root
+           * We only allow a scoped <style> at the root.
+           *
+           * Selecting by tag alone used to pick a global <style> sitting
+           * earlier in the template, which skipped this whole branch --
+           * while the ElementNode visitor still removed the scoped tag.
+           * The CSS was emitted nowhere and nothing said so.
            */
           let styleTags = node.body.filter(
             (n) =>
@@ -135,15 +140,6 @@ export function createPlugin(config) {
               n.tag === 'style' &&
               hasScopedAttribute(n),
           );
-
-          /**
-           * Selecting by tag alone used to pick a global <style> sitting
-           * earlier in the template, which made hasScopedAttribute below false
-           * and skipped this whole branch -- while the ElementNode visitor
-           * still removed the scoped tag. The CSS was emitted nowhere and
-           * nothing said so.
-           */
-          let styleTag = styleTags[0];
 
           /**
            * Only the first scoped block is ever extracted, and the rest are
@@ -157,37 +153,39 @@ export function createPlugin(config) {
             );
           }
 
-          if (hasScopedAttribute(styleTag)) {
-            let css = textContent(styleTag);
-            let lang = getLangAttribute(styleTag);
-            let info = getCSSContentInfo(css, lang);
+          let styleTag = styleTags[0];
 
-            addInfo(info);
+          if (!styleTag) return;
 
-            if (hasInlineAttributeWithoutLang(styleTag)) {
-              /**
-               * This will be handled in ElementNode traversal
-               */
-              return;
-            }
+          let css = textContent(styleTag);
+          let lang = getLangAttribute(styleTag);
+          let info = getCSSContentInfo(css, lang);
 
-            if (lang) {
-              /**
-               * For <style scoped inline lang="..."> we cannot preprocess at Babel-time
-               * (preprocessing is async and requires Vite's ResolvedConfig).
-               * Remove the tag and inject via virtual CSS module and warn user.
-               */
-              console.warn(
-                `[ember-scoped-css] <style scoped inline lang="${lang}"> is not supported ` +
-                  `(preprocessing is async and cannot run at Babel-time). ` +
-                  `Downgrading to non-inline: the style tag will be removed and injected as a virtual CSS module.`,
-              );
-            }
+          addInfo(info);
 
-            let cssRequest = request.inline.create(info.id, postfix, css, lang);
-
-            env.meta.jsutils.importForSideEffect(cssRequest);
+          if (hasInlineAttributeWithoutLang(styleTag)) {
+            /**
+             * This will be handled in ElementNode traversal
+             */
+            return;
           }
+
+          if (lang) {
+            /**
+             * For <style scoped inline lang="..."> we cannot preprocess at Babel-time
+             * (preprocessing is async and requires Vite's ResolvedConfig).
+             * Remove the tag and inject via virtual CSS module and warn user.
+             */
+            console.warn(
+              `[ember-scoped-css] <style scoped inline lang="${lang}"> is not supported ` +
+                `(preprocessing is async and cannot run at Babel-time). ` +
+                `Downgrading to non-inline: the style tag will be removed and injected as a virtual CSS module.`,
+            );
+          }
+
+          let cssRequest = request.inline.create(info.id, postfix, css, lang);
+
+          env.meta.jsutils.importForSideEffect(cssRequest);
         },
 
         // Visitors broken out like this so we can conditionally
