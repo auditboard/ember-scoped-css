@@ -340,7 +340,7 @@ describe('fix offsets', () => {
     expect(applied).toBe(component.replace('#fff', '#ffffff'));
   });
 
-  it('anchors the range on the CSS, not on the component preamble', async () => {
+  it('produces the corrected component when an editor applies the range', async () => {
     const { results } = await stylelint.lint({
       code: component,
       codeFilename: 'demo.gts',
@@ -349,9 +349,14 @@ describe('fix offsets', () => {
       config: { rules: { 'color-hex-length': 'long' } },
     });
 
-    const [start] = results[0]!.warnings[0]!.fix!.range;
+    const fix = results[0]?.warnings[0]?.fix;
+    const [start, end] = fix?.range ?? [0, 0];
+    const applied =
+      component.slice(0, start) + (fix?.text ?? '') + component.slice(end);
 
-    expect(component.slice(start)).toMatch(/^color: #fff;/);
+    // The whole point of the range: an LSP "fix this problem" action has to
+    // land on the hex and nowhere else in the file.
+    expect(applied).toBe(component.replace('#fff', '#ffffff'));
   });
 });
 
@@ -495,6 +500,25 @@ describe('lang attributes the build treats as plain CSS', () => {
     expect(results[0]?.warnings).toEqual([
       expect.objectContaining({ line: 3, rule: 'color-no-hex' }),
     ]);
+  });
+});
+
+describe('block input', () => {
+  it('gives a block an input that its own offsets index into', () => {
+    const doc = syntax.parse(component);
+    const root = doc.nodes[0];
+    const rule = root?.first;
+    const decl = rule?.type === 'rule' ? rule.first : undefined;
+
+    const input = root?.source?.input.css ?? '';
+    const start = decl?.source?.start?.offset ?? 0;
+    const end = decl?.source?.end?.offset ?? 0;
+
+    // postcss answers a `word`-based warning position by slicing the input
+    // with these offsets. Reposition makes them absolute, so an input holding
+    // only the block reads the wrong bytes and the position silently falls
+    // back to the start of the node.
+    expect(input.slice(start, end)).toBe('color: #fff;');
   });
 });
 

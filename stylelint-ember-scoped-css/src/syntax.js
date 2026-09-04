@@ -153,12 +153,19 @@ function findStyleBlocks(source) {
  * range against the whole file. Leaving it block-relative makes an LSP "fix
  * this problem" action write into unrelated source.
  *
+ * The block's `input` moves with its positions. postcss answers a `word`-based
+ * warning position by slicing `source.input.css` between the node's offsets,
+ * so an input holding only the block would be indexed by .gts offsets that run
+ * past its end: the slice comes back empty, the word is not found in it, and
+ * the position silently falls back to the start of the whole node.
+ *
  * @param {import('postcss').Root} root
  * @param {number} lineOffset lines of .gts preceding the block
  * @param {number} columnOffset columns preceding the block on its opening line
  * @param {number} offsetShift characters of .gts preceding the block
+ * @param {import('postcss').Input} input the whole .gts
  */
-function reposition(root, lineOffset, columnOffset, offsetShift) {
+function reposition(root, lineOffset, columnOffset, offsetShift, input) {
   /** @param {import('postcss').Position | undefined} pos */
   const shift = (pos) => {
     if (!pos) return;
@@ -168,12 +175,16 @@ function reposition(root, lineOffset, columnOffset, offsetShift) {
     if (typeof pos.offset === 'number') pos.offset += offsetShift;
   };
 
-  shift(root.source?.start);
-  shift(root.source?.end);
-  root.walk((node) => {
-    shift(node.source?.start);
-    shift(node.source?.end);
-  });
+  /** @param {import('postcss').NodeSource | undefined} source */
+  const retarget = (source) => {
+    if (!source) return;
+    shift(source.start);
+    shift(source.end);
+    source.input = input;
+  };
+
+  retarget(root.source);
+  root.walk((node) => retarget(node.source));
 }
 
 /**
@@ -212,6 +223,31 @@ function shiftSyntaxError(error, lineOffset, columnOffset, offsetShift) {
 }
 
 /**
+ * The input every block is positioned against.
+ *
+ * `css` has to be the exact string the block offsets index, BOM included.
+ * postcss strips a leading BOM into `hasBOM` and its stringifier re-emits one
+ * for any root whose input carries the flag, which would write a BOM into the
+ * middle of the file once per block. The BOM is put back into `css` so offsets
+ * line up, and the flag cleared because the first block's `codeBefore` already
+ * carries the real one.
+ *
+ * @param {string} source
+ * @param {import('postcss').ProcessOptions} [opts]
+ * @returns {import('postcss').Input}
+ */
+function blockInput(source, opts) {
+  const input = new postcss.Input(source, opts);
+
+  if (input.hasBOM) {
+    input.css = source;
+    input.hasBOM = false;
+  }
+
+  return input;
+}
+
+/**
  * @param {string} source
  * @param {import('postcss').ProcessOptions} [opts]
  * @returns {import('postcss').Document}
@@ -222,7 +258,7 @@ export function parse(source, opts) {
   // Built before the no-blocks branch below, so both paths hand stylelint the
   // same shape. It reads source.input.css to detect the file's line endings.
   doc.source = {
-    input: new postcss.Input(source, opts),
+    input: blockInput(source, opts),
     start: { line: 1, column: 1, offset: 0 },
   };
 
@@ -245,7 +281,7 @@ export function parse(source, opts) {
       throw shiftSyntaxError(error, lineOffset, columnOffset, start);
     }
 
-    reposition(root, lineOffset, columnOffset, start);
+    reposition(root, lineOffset, columnOffset, start, doc.source.input);
 
     // The .gts around each block rides along verbatim so --fix cannot corrupt it.
     root.raws.codeBefore = source.slice(cursor, start);
