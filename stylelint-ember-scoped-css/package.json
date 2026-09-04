@@ -38,7 +38,8 @@
   },
   "dependencies": {
     "@glimmer/syntax": "^0.94.8",
-    "content-tag": "^3.1.1 || ^4.0.0",
+    "content-tag": "^4.2.0",
+    "content-tag-utils": "^0.7.0",
     "postcss": "^8.4.0",
     "postcss-less": "^6.0.0",
     "postcss-scss": "^4.0.9",

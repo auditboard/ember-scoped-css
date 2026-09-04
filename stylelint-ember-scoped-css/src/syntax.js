@@ -1,6 +1,7 @@
 import { preprocess as parseTemplate } from '@glimmer/syntax';
 
 import { Preprocessor } from 'content-tag';
+import { coordinatesOf } from 'content-tag-utils';
 import {
   getLangAttribute,
   hasScopedAttribute,
@@ -60,58 +61,6 @@ function syntaxForLang(lang) {
 }
 
 /**
- * content-tag reports UTF-8 byte offsets, but we slice JS strings, which are
- * indexed by code unit. Converting is only a no-op for pure-ASCII files.
- *
- * @param {Buffer} buffer the source, as UTF-8 bytes
- * @param {number} byteOffset
- * @returns {number} the equivalent index into the source string
- */
-function toStringIndex(buffer, byteOffset) {
-  // Byte length equals code-unit length exactly when the prefix is ASCII, and
-  // component sources usually are, so skip the copy and the decode.
-  if (buffer.length === byteOffset) return byteOffset;
-
-  const prefix = buffer.subarray(0, byteOffset);
-
-  return prefix.every((byte) => byte < 0x80)
-    ? byteOffset
-    : prefix.toString('utf8').length;
-}
-
-/**
- * Normalise a content-tag range to string indices. v3 reports byte offsets
- * under `start`/`end`; v4 renamed those to `startByte`/`endByte`. Reading one
- * spelling blindly across the major bump yields `undefined`, which collapses
- * the parse window to nothing and lints every file clean rather than failing,
- * so the shape is checked rather than assumed.
- *
- * v4 also reports ready-made char offsets, but converting its byte offsets
- * gives the same answer, so there is no branch for them.
- *
- * @param {{ start?: number, end?: number, startByte?: number, endByte?: number }} range
- * @param {Buffer} buffer the source, as UTF-8 bytes
- * @returns {{ start: number, end: number }} indices into the source string
- */
-export function toStringRange(range, buffer) {
-  const startByte = range.start ?? range.startByte;
-  const endByte = range.end ?? range.endByte;
-
-  if (typeof startByte !== 'number' || typeof endByte !== 'number') {
-    throw new Error(
-      'stylelint-ember-scoped-css/syntax could not read a template range from ' +
-        `content-tag (got ${JSON.stringify(Object.keys(range))}). This usually ` +
-        'means an unsupported content-tag version; supported ranges are ^3 and ^4.',
-    );
-  }
-
-  return {
-    start: toStringIndex(buffer, startByte),
-    end: toStringIndex(buffer, endByte),
-  };
-}
-
-/**
  * A .gts that does not parse has no styles we can trust. Its real error comes
  * from glint or the template compiler, so we neither report it as a CSS
  * problem nor let it abort the whole stylelint run.
@@ -154,16 +103,18 @@ function parseTemplateContents(contents) {
  * @returns {Array<{ start: number, end: number, lang: string | null }>}
  */
 function findStyleBlocks(source) {
-  // content-tag reports offsets into a BOM-stripped source, so a leading BOM
-  // has to be added back or the whole parse window shifts left and the file
-  // silently lints clean.
+  // content-tag reports offsets into a BOM-stripped source, and coordinatesOf
+  // indexes whatever string it is handed, so both are given the stripped body
+  // and the BOM is added back afterwards. Handing either the raw source instead
+  // shifts the whole parse window left by the BOM's three UTF-8 bytes and the
+  // file silently lints clean.
   const bomLength = source.charCodeAt(0) === 0xfeff ? 1 : 0;
   const body = source.slice(bomLength);
-  const buffer = Buffer.from(body, 'utf8');
   const blocks = [];
 
   for (const template of parseTemplates(body)) {
-    const range = toStringRange(template.contentRange, buffer);
+    // Byte offsets to string indices, which is what we slice by.
+    const range = coordinatesOf(body, template);
     const contentsStart = range.start + bomLength;
     const contentsEnd = range.end + bomLength;
     const ast = parseTemplateContents(source.slice(contentsStart, contentsEnd));

@@ -89,9 +89,10 @@ per package behind its own cleanup ticket.
 
 ### What gets linted
 
-The syntax parses the component with `content-tag` and the template with
-`@glimmer/syntax`, then walks the resulting AST, so it only ever picks up real
-style blocks. A `<style>` written inside a plain JS string is left alone.
+The syntax parses the component with `content-tag`, locates each template with
+`content-tag-utils`, and parses it with `@glimmer/syntax`, then walks the
+resulting AST, so it only ever picks up real style blocks. A `<style>` written
+inside a plain JS string is left alone.
 
 Which blocks count as scoped CSS is not decided here: the `scoped` and `lang`
 attributes are read with `ember-scoped-css`'s own helpers, so the blocks this

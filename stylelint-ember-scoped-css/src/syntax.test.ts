@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 
 import sharedConfig from './config.js';
 import * as syntax from './syntax.js';
-import { toStringRange } from './syntax.js';
 
 const component = `import Component from '@glimmer/component';
 
@@ -350,34 +349,6 @@ export default class MetricStat extends Component {
         rule: 'ember-scoped-css/no-unscopable-class-attribute-selectors',
       }),
     ]);
-  });
-});
-
-describe('content-tag range shapes', () => {
-  // 'こんにちは' is 5 characters but 15 bytes, so char 31 is byte 41 here.
-  const buffer = Buffer.from(
-    "const GREETING = 'こんにちは';\n<template>x</template>",
-    'utf8',
-  );
-
-  it('converts the byte offsets content-tag v3 reports', () => {
-    expect(toStringRange({ start: 41, end: 42 }, buffer)).toEqual({
-      start: 31,
-      end: 32,
-    });
-  });
-
-  it('converts the byte offsets content-tag v4 reports under new names', () => {
-    // v4 renamed start/end; reading only the v3 names yields undefined.
-    const v4 = { startByte: 41, endByte: 42, startChar: 31, endChar: 32 };
-
-    expect(toStringRange(v4, buffer)).toEqual({ start: 31, end: 32 });
-  });
-
-  it('throws a named error rather than silently linting nothing', () => {
-    expect(() => toStringRange({ begin: 41 }, buffer)).toThrowError(
-      /could not read a template range from content-tag/,
-    );
   });
 });
 
