@@ -2,12 +2,49 @@ import { preprocess as parseTemplate } from '@glimmer/syntax';
 
 import { Preprocessor } from 'content-tag';
 import {
+  getLangAttribute,
   hasScopedAttribute,
-  isPreprocessed,
 } from 'ember-scoped-css/__private_do_not_use_are_you_serious__/style-tag';
 import postcss from 'postcss';
+import less from 'postcss-less';
+import scss from 'postcss-scss';
+import styl from 'postcss-styl';
 
 const preprocessor = new Preprocessor();
+
+/** Plain CSS. `lang` absent, empty, or naming no preprocessor lands here. */
+const CSS_SYNTAX = { parse: postcss.parse, stringify: postcss.stringify };
+
+/**
+ * The parser each `lang` needs. Every one of these round-trips its dialect
+ * byte-exact, which is the property `--fix` depends on: a block is written
+ * back out by the same syntax that read it, so fixing one hex value cannot
+ * move a byte anywhere else in the block.
+ *
+ * `sass` is missing on purpose. Indented Sass parses only under postcss-sass,
+ * which drops trailing newlines when it stringifies, so a fixed block would
+ * come back a byte short. See parse.
+ */
+const SYNTAXES = new Map([
+  ['scss', scss],
+  ['less', less],
+  ['styl', styl],
+  ['stylus', styl],
+]);
+
+/**
+ * Resolving by the stored `lang` rather than by a stored function keeps parse
+ * and stringify reading one table, so a block cannot be written back out by a
+ * different syntax than read it.
+ *
+ * @param {string | null} lang lowercased `lang`, or null for plain CSS
+ * @returns {{ parse: Function, stringify: Function }}
+ */
+function syntaxForLang(lang) {
+  if (lang === null) return CSS_SYNTAX;
+
+  return SYNTAXES.get(lang) ?? CSS_SYNTAX;
+}
 
 /**
  * content-tag reports UTF-8 byte offsets, but we slice JS strings, which are
@@ -96,11 +133,12 @@ function parseTemplateContents(contents) {
 }
 
 /**
- * The CSS text of every root-level plain `<style scoped>` element in the file,
- * as absolute offsets into `source`.
+ * The CSS text of every root-level `<style scoped>` element in the file, as
+ * absolute offsets into `source`, each tagged with the `lang` that decides
+ * which parser reads it.
  *
  * @param {string} source contents of a .gts/.gjs file
- * @returns {Array<{ start: number, end: number }>}
+ * @returns {Array<{ start: number, end: number, lang: string | null }>}
  */
 function findStyleBlocks(source) {
   // content-tag reports offsets into a BOM-stripped source, so a leading BOM
@@ -120,9 +158,15 @@ function findStyleBlocks(source) {
     if (!ast) continue;
 
     for (const node of ast.body) {
-      // Both questions are answered by ember-scoped-css itself, so a block
-      // this lints is exactly a block it scopes.
-      if (!hasScopedAttribute(node) || isPreprocessed(node)) continue;
+      // Whether the build scopes this block is ember-scoped-css's question to
+      // answer, so it answers it.
+      if (!hasScopedAttribute(node)) continue;
+
+      const lang = getLangAttribute(node)?.toLowerCase() ?? null;
+
+      // The one dialect with no byte-exact parser. Skipped rather than linted
+      // with a stringifier that would eat the block's trailing newline.
+      if (lang === 'sass') continue;
 
       // `<style scoped inline>` supports interpolation, and a mustache is not
       // CSS postcss can parse. Taking only children[0] would silently truncate
@@ -137,6 +181,7 @@ function findStyleBlocks(source) {
       blocks.push({
         start: contentsStart + text.loc.getStart().offset,
         end: contentsStart + text.loc.getEnd().offset,
+        lang,
       });
     }
   }
@@ -266,7 +311,7 @@ export function parse(source, opts) {
 
   let cursor = 0;
 
-  for (const { start, end } of findStyleBlocks(source)) {
+  for (const { start, end, lang } of findStyleBlocks(source)) {
     const before = source.slice(0, start);
     const lineOffset = before.split('\n').length - 1;
     const columnOffset = start - (before.lastIndexOf('\n') + 1);
@@ -274,7 +319,7 @@ export function parse(source, opts) {
     let root;
 
     try {
-      root = postcss.parse(source.slice(start, end), opts);
+      root = syntaxForLang(lang).parse(source.slice(start, end), opts);
     } catch (error) {
       // Thrown before reposition could run, so the error still carries
       // block-relative coordinates and would point at the wrong .gts line.
@@ -285,6 +330,7 @@ export function parse(source, opts) {
 
     // The .gts around each block rides along verbatim so --fix cannot corrupt it.
     root.raws.codeBefore = source.slice(cursor, start);
+    root.raws.scopedCssLang = lang;
     root.parent = doc;
     roots.push(root);
     cursor = end;
@@ -322,7 +368,7 @@ export function stringify(node, builder) {
 
   node.each((root) => {
     if (root.raws.codeBefore) builder(root.raws.codeBefore);
-    postcss.stringify(root, builder);
+    syntaxForLang(root.raws.scopedCssLang ?? null).stringify(root, builder);
     if (root.raws.codeAfter) builder(root.raws.codeAfter);
   });
 }

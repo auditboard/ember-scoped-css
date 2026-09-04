@@ -84,20 +84,3 @@ export const PREPROCESSED_LANGS = new Set([
 export const PREPROCESSED_EXTENSIONS = new Set(
   [...PREPROCESSED_LANGS].map((lang) => `.${lang}`),
 );
-
-/**
- * Whether this block's contents are a preprocessor dialect rather than CSS.
- *
- * `lang` is not the same question as "did the build touch it": unplugin-inline
- * routes any `lang` through Vite, but `lang="css"` comes out the other side as
- * the CSS it already was. Anything reading the contents as CSS has to skip
- * only the dialects postcss cannot parse.
- *
- * @param {object} [node]
- * @returns {boolean}
- */
-export function isPreprocessed(node) {
-  const lang = getLangAttribute(node);
-
-  return lang !== null && PREPROCESSED_LANGS.has(lang.toLowerCase());
-}

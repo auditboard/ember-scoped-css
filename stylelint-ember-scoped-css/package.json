@@ -39,7 +39,10 @@
   "dependencies": {
     "@glimmer/syntax": "^0.94.8",
     "content-tag": "^3.1.1 || ^4.0.0",
-    "postcss": "^8.4.0"
+    "postcss": "^8.4.0",
+    "postcss-less": "^6.0.0",
+    "postcss-scss": "^4.0.9",
+    "postcss-styl": "^0.12.3"
   },
   "devDependencies": {
     "@glimmer/env": "^0.1.7",

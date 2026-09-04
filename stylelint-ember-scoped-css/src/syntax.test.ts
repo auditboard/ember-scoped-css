@@ -73,20 +73,61 @@ describe('which blocks are exposed', () => {
 });
 
 describe('preprocessed blocks', () => {
-  it('does not lint a <style scoped lang="scss"> block', async () => {
+  it('reads scss the default parser would report an error on', async () => {
+    // A `//` comment is swallowed into the following selector by postcss's own
+    // parser, so the dialect parser is what keeps this from being reported.
     const code = `<template>
   <style scoped lang="scss">
-    .a { color: #fff; }
+    // the brand colour
+    $brand: #fff;
+    .a { color: $brand; &:hover { color: red } }
   </style>
 </template>
 `;
 
     const { results } = await lint(code, { 'color-no-hex': true });
 
-    expect(results[0]?.warnings).toEqual([]);
+    expect(results[0]?.parseErrors).toEqual([]);
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 4, column: 13, rule: 'color-no-hex' }),
+    ]);
   });
 
-  it('does not fail the file when lang="sass" uses indented syntax postcss cannot parse', async () => {
+  it('lints a <style scoped lang="less"> block', async () => {
+    const code = `<template>
+  <style scoped lang="less">
+    .a { color: #fff; .mixin(); }
+    .mixin() { padding: 0; }
+  </style>
+</template>
+`;
+
+    const { results } = await lint(code, { 'color-no-hex': true });
+
+    expect(results[0]?.parseErrors).toEqual([]);
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 3, column: 17, rule: 'color-no-hex' }),
+    ]);
+  });
+
+  it('lints an indented <style scoped lang="stylus"> block', async () => {
+    const code = `<template>
+  <style scoped lang="stylus">
+    .a
+      color: #fff
+  </style>
+</template>
+`;
+
+    const { results } = await lint(code, { 'color-no-hex': true });
+
+    expect(results[0]?.parseErrors).toEqual([]);
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 4, column: 14, rule: 'color-no-hex' }),
+    ]);
+  });
+
+  it('does not fail the file when lang="sass" uses indented syntax no parser round-trips', async () => {
     const code = `<template>
   <style scoped lang="sass">
     .a
@@ -216,7 +257,7 @@ export default class Demo extends Component {
 
   it('preserves a skipped lang block while fixing a plain block in the same file', async () => {
     const source = `<template>
-  <style scoped lang="scss">
+  <style scoped lang="sass">
     .a
       color: #fff
   </style>
@@ -231,6 +272,25 @@ export default class Demo extends Component {
     expect(code).toBe(
       source.replace('.b { color: #fff; }', '.b { color: #ffffff; }'),
     );
+  });
+
+  it('fixes a scss block and a plain block in the same file', async () => {
+    const source = `<template>
+  <style scoped lang="scss">
+    // brand
+    .a { color: #fff; }
+  </style>
+  <style scoped>
+    .b { color: #fff; }
+  </style>
+</template>
+`;
+
+    const { code } = await lint(source, { 'color-hex-length': 'long' }, true);
+
+    // The `//` comment survives only if this block is written back out by the
+    // scss stringifier rather than postcss's.
+    expect(code).toBe(source.replaceAll('#fff;', '#ffffff;'));
   });
 
   it('preserves the source between two fixed blocks', async () => {
@@ -462,22 +522,59 @@ describe('CSS syntax errors', () => {
 });
 
 describe('lang attributes naming a preprocessor dialect', () => {
-  it.each([['scss'], ['sass'], ['less'], ['styl'], ['stylus'], ['SCSS']])(
-    'skips a block with lang="%s"',
-    async (lang) => {
-      // Not CSS, so postcss would report a bogus syntax error on valid source.
-      const code = `<template>
-  <style scoped lang="${lang}">
-    .a { .b { color: #fff; } }
+  // Each body below is rejected by postcss's own parser, so a passing
+  // assertion is evidence the dialect's parser ran and not merely that the
+  // block stopped being skipped.
+  it('matches lang case-insensitively', async () => {
+    const code = `<template>
+  <style scoped lang="SCSS">
+    // brand
+    $brand: #fff;
+    .a { color: $brand; }
   </style>
 </template>
 `;
 
-      const { results } = await lint(code, { 'color-no-hex': true });
+    const { results } = await lint(code, { 'color-no-hex': true });
 
-      expect(results[0]?.warnings).toEqual([]);
-    },
-  );
+    expect(results[0]?.parseErrors).toEqual([]);
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 4, rule: 'color-no-hex' }),
+    ]);
+  });
+
+  it('reads lang="styl" with the same parser as lang="stylus"', async () => {
+    const code = `<template>
+  <style scoped lang="styl">
+    .a
+      color: #fff
+  </style>
+</template>
+`;
+
+    const { results } = await lint(code, { 'color-no-hex': true });
+
+    expect(results[0]?.parseErrors).toEqual([]);
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 4, rule: 'color-no-hex' }),
+    ]);
+  });
+
+  it('skips lang="sass", the one dialect no parser round-trips byte-exact', () => {
+    // postcss-sass drops trailing newlines on stringify, so linting it would
+    // mean --fix silently rewriting a byte outside the reported warning.
+    const source = `<template>
+  <style scoped lang="sass">
+    .a
+      color: #fff
+  </style>
+</template>
+`;
+
+    const doc = syntax.parse(source);
+
+    expect(doc.nodes).toEqual([]);
+  });
 });
 
 describe('lang attributes the build treats as plain CSS', () => {

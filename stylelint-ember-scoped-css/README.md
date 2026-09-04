@@ -94,18 +94,33 @@ The syntax parses the component with `content-tag` and the template with
 style blocks. A `<style>` written inside a plain JS string is left alone.
 
 Which blocks count as scoped CSS is not decided here: the `scoped` and `lang`
-attributes are read with `ember-scoped-css`'s own helpers, so a block this
-lints is exactly a block the build scopes.
+attributes are read with `ember-scoped-css`'s own helpers, so the blocks this
+lints are the blocks the build scopes, minus the one exception below.
+
+A `lang` naming a preprocessor dialect is read by that dialect's parser rather
+than skipped, so inline SCSS, Less and Stylus are linted like any other block:
+
+| `lang`             | parser         |
+| ------------------ | -------------- |
+| absent, `""`, `css` | postcss        |
+| `scss`             | `postcss-scss` |
+| `less`             | `postcss-less` |
+| `styl`, `stylus`   | `postcss-styl` |
+
+Matching is case-insensitive, and each parser is a dependency of this package,
+so there is nothing extra to install. A `lang` this table does not list is
+parsed as plain CSS, which is what the build does with it too.
 
 Four kinds of block are skipped:
 
 - **`<style>` without `scoped`.** That is intentionally global CSS, so
   `no-unscoped-selectors` must not fire on it. Global inline styles stay
   unlinted.
-- **`<style scoped lang="...">` naming a preprocessor dialect** (`scss`, `sass`,
-  `less`, `styl`, `stylus`). Vite preprocesses these at build time and
-  postcss's default parser cannot read them. `lang="css"` names no
-  preprocessor, so it is still linted.
+- **`<style scoped lang="sass">`.** Indented Sass parses only under
+  `postcss-sass`, which drops trailing newlines when it writes a block back
+  out, so linting it would mean `--fix` silently changing a byte outside the
+  warning it is fixing. `lang="scss"` is unaffected; this is only the
+  indented dialect.
 - **Blocks containing a `{{mustache}}`.** `<style scoped inline>` supports
   interpolation, which is not CSS postcss can parse. Linting part of such a
   block would report a syntax error on valid source.
