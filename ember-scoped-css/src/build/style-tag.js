@@ -67,20 +67,11 @@ export function getLangAttribute(node) {
   return null;
 }
 
-/**
- * The dialects Vite can preprocess into CSS. Named by `lang` on a `<style>`
- * block, and by extension on a colocated file, so both spellings are derived
- * from this one list.
- */
-export const PREPROCESSED_LANGS = new Set([
-  'scss',
-  'sass',
-  'less',
-  'styl',
-  'stylus',
-]);
-
 /** File extensions that Vite can preprocess via its CSS preprocessor pipeline */
-export const PREPROCESSED_EXTENSIONS = new Set(
-  [...PREPROCESSED_LANGS].map((lang) => `.${lang}`),
-);
+export const PREPROCESSED_EXTENSIONS = new Set([
+  '.scss',
+  '.sass',
+  '.less',
+  '.styl',
+  '.stylus',
+]);
