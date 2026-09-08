@@ -94,6 +94,10 @@ The syntax parses the component with `content-tag`, locates each template with
 resulting AST, so it only ever picks up real style blocks. A `<style>` written
 inside a plain JS string is left alone.
 
+`content-tag` is required at `>= 4.2.0`, because `content-tag-utils` reads the
+byte offset names v4 introduced and misreads a v3 range rather than rejecting
+it. A project pinned to `content-tag@3` will resolve a second copy.
+
 Which blocks count as scoped CSS is not decided here: the `scoped` and `lang`
 attributes are read with `ember-scoped-css`'s own helpers, so the blocks this
 lints are the blocks the build scopes, minus the one exception below.
