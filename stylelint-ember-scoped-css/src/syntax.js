@@ -103,18 +103,16 @@ function parseTemplateContents(contents) {
  * @returns {Array<{ start: number, end: number, lang: string | null }>}
  */
 function findStyleBlocks(source) {
-  // content-tag reports offsets into a BOM-stripped source, and coordinatesOf
-  // indexes whatever string it is handed, so both are given the stripped body
-  // and the BOM is added back afterwards. Handing either the raw source instead
-  // shifts the whole parse window left by the BOM's three UTF-8 bytes and the
-  // file silently lints clean.
+  // content-tag and content-tag-utils both strip a leading BOM, so the offsets
+  // they report are relative to the stripped source. Every index here has to
+  // land in the original, BOM and all, because that is what the block offsets
+  // and `codeBefore` slice, so the BOM's one code unit is added back.
   const bomLength = source.charCodeAt(0) === 0xfeff ? 1 : 0;
-  const body = source.slice(bomLength);
   const blocks = [];
 
-  for (const template of parseTemplates(body)) {
+  for (const template of parseTemplates(source)) {
     // Byte offsets to string indices, which is what we slice by.
-    const range = coordinatesOf(body, template);
+    const range = coordinatesOf(source, template);
     const contentsStart = range.start + bomLength;
     const contentsEnd = range.end + bomLength;
     const ast = parseTemplateContents(source.slice(contentsStart, contentsEnd));

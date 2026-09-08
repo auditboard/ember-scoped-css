@@ -19,8 +19,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       content-tag-utils:
-        specifier: ^0.7.0
-        version: 0.7.0
+        specifier: ^0.7.2
+        version: 0.7.2
       postcss:
         specifier: ^8.4.0
         version: 8.5.26
@@ -1207,8 +1207,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  content-tag-utils@0.7.0:
-    resolution: {integrity: sha512-7ItBNbt70vrbTOs5rdmmsya7V/bJL6vqv5NN8kgZgfaiDtWd9gItP0MtVE9lNO03AQZirKUy9hOC/PfZoN4lHQ==}
+  content-tag-utils@0.7.2:
+    resolution: {integrity: sha512-AzwVxu1R16PBabix6Rq4+wChC4q5G4bUwL7MSUyoWSUi2JHYEQN+YQCPkoWauoRdGVUO3rdIkUy0wIVMH7NE2A==}
     engines: {node: ^20.19.0 || >=22.12.0}
 
   content-tag@2.0.3:
@@ -3873,7 +3873,7 @@ snapshots:
       tree-kill: 1.2.2
       yargs: 17.7.2
 
-  content-tag-utils@0.7.0:
+  content-tag-utils@0.7.2:
     dependencies:
       content-tag: 4.2.0
       ember-estree: 0.8.1

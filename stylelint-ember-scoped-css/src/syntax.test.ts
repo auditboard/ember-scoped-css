@@ -453,6 +453,22 @@ describe('byte order mark', () => {
     ]);
   });
 
+  it('lints a BOM component whose template ends without trailing space', async () => {
+    // The window's last character is the `>` of </style>, so a window one
+    // short of the BOM cannot parse and the block is dropped with no warning
+    // and no error. The looser fixtures above end in whitespace, where losing
+    // a character is harmless, so they cannot catch that.
+    const code =
+      '\uFEFF<template><style scoped>.a{color:#fff}</style></template>\n';
+
+    const { results } = await lint(code, { 'color-no-hex': true });
+
+    expect(results[0]?.parseErrors).toEqual([]);
+    expect(results[0]?.warnings).toEqual([
+      expect.objectContaining({ line: 1, column: 35, rule: 'color-no-hex' }),
+    ]);
+  });
+
   it('round-trips a BOM component under --fix', async () => {
     const source = `\uFEFF<template>
   <style scoped>
