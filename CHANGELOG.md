@@ -1,5 +1,25 @@
 # Changelog
 
+## Release (2026-09-09)
+
+* ember-scoped-css 3.5.2 (patch)
+* stylelint-ember-scoped-css 2.2.0 (minor)
+
+#### :rocket: Enhancement
+* `stylelint-ember-scoped-css`
+  * [#422](https://github.com/auditboard/ember-scoped-css/pull/422) Lint inline <style scoped> blocks with a postcss custom syntax ([@tylerturdenpants](https://github.com/tylerturdenpants))
+
+#### :bug: Bug Fix
+* `ember-scoped-css`
+  * [#424](https://github.com/auditboard/ember-scoped-css/pull/424) Find a scoped <style> regardless of what precedes it ([@tylerturdenpants](https://github.com/tylerturdenpants))
+
+#### :house: Internal
+* `ember-scoped-css`
+  * [#426](https://github.com/auditboard/ember-scoped-css/pull/426) Move the <style> attribute helpers into style-tag.js ([@tylerturdenpants](https://github.com/tylerturdenpants))
+
+#### Committers: 1
+- Ryan Mark ([@tylerturdenpants](https://github.com/tylerturdenpants))
+
 ## Release (2026-09-01)
 
 * ember-scoped-css 3.5.1 (patch)

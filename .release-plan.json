@@ -2,20 +2,34 @@
   "solution": {
     "ember-scoped-css": {
       "impact": "patch",
-      "oldVersion": "3.5.0",
-      "newVersion": "3.5.1",
+      "oldVersion": "3.5.1",
+      "newVersion": "3.5.2",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "patch",
           "reason": "Appears in changelog section :bug: Bug Fix"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./ember-scoped-css/package.json"
     },
     "stylelint-ember-scoped-css": {
-      "oldVersion": "2.1.0"
+      "impact": "minor",
+      "oldVersion": "2.1.0",
+      "newVersion": "2.2.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        }
+      ],
+      "pkgJSONPath": "./stylelint-ember-scoped-css/package.json"
     }
   },
-  "description": "## Release (2026-09-01)\n\n* ember-scoped-css 3.5.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#420](https://github.com/auditboard/ember-scoped-css/pull/420) Don't scope the An+B argument of positional pseudo-classes ([@wagenet](https://github.com/wagenet))\n\n#### Committers: 1\n- Peter Wagenet ([@wagenet](https://github.com/wagenet))\n"
+  "description": "## Release (2026-09-09)\n\n* ember-scoped-css 3.5.2 (patch)\n* stylelint-ember-scoped-css 2.2.0 (minor)\n\n#### :rocket: Enhancement\n* `stylelint-ember-scoped-css`\n  * [#422](https://github.com/auditboard/ember-scoped-css/pull/422) Lint inline <style scoped> blocks with a postcss custom syntax ([@tylerturdenpants](https://github.com/tylerturdenpants))\n\n#### :bug: Bug Fix\n* `ember-scoped-css`\n  * [#424](https://github.com/auditboard/ember-scoped-css/pull/424) Find a scoped <style> regardless of what precedes it ([@tylerturdenpants](https://github.com/tylerturdenpants))\n\n#### :house: Internal\n* `ember-scoped-css`\n  * [#426](https://github.com/auditboard/ember-scoped-css/pull/426) Move the <style> attribute helpers into style-tag.js ([@tylerturdenpants](https://github.com/tylerturdenpants))\n\n#### Committers: 1\n- Ryan Mark ([@tylerturdenpants](https://github.com/tylerturdenpants))\n"
 }
