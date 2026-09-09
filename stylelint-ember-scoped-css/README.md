@@ -86,43 +86,23 @@ backlog at once, so adopt it one package at a time.
 
 ### What gets linted
 
-The syntax finds each `<template>` with `content-tag-utils`, parses it with
-`@glimmer/syntax`, and walks the AST. Only real `<style>` elements count. A
-`<style>` inside a JS string is left alone.
+Every `<style scoped>` at the root of a `<template>`. A `<style>` inside a JS
+string is left alone. The build already rejects a `<style scoped>` nested
+deeper than the template root.
 
-`content-tag-utils` requires `content-tag >= 4.2.0`. A project pinned to
-`content-tag@3` will resolve a second copy.
+`lang` picks the dialect, case-insensitively. `scss`, `less`, `styl`, and
+`stylus` work with nothing extra to install. Any other value, or no `lang`, is
+plain CSS, which is what the build does too.
 
-The `scoped` and `lang` attributes are read with the same helpers the
-`ember-scoped-css` build uses, so the linted blocks are the scoped blocks, with
-one exception below.
-
-`lang` selects the parser. Matching is case-insensitive, and every parser is a
-dependency of this package:
-
-| `lang`              | parser         |
-| ------------------- | -------------- |
-| absent, `""`, `css` | postcss        |
-| `scss`              | `postcss-scss` |
-| `less`              | `postcss-less` |
-| `styl`, `stylus`    | `postcss-styl` |
-
-A `lang` not in the table is parsed as plain CSS. The build does the same.
-
-Four kinds of block are skipped:
+Skipped:
 
 - `<style>` without `scoped`. That is global CSS, and `no-unscoped-selectors`
   must not fire on it.
-- `<style scoped lang="sass">`. No available parser reads indented Sass
-  correctly. `postcss-styl` reports errors on valid Sass, and `postcss-sass`
-  drops rules from the AST. `lang="scss"` is not affected.
-- Blocks that contain a `{{mustache}}`. `<style scoped inline>` supports
-  interpolation, and postcss cannot parse a mustache.
+- `<style scoped lang="sass">`. No parser reads indented Sass reliably.
+  `lang="scss"` is not affected.
+- Blocks that contain a `{{mustache}}`. Interpolated CSS cannot be parsed.
 - Blocks in a component whose template does not parse. Glint or the template
   compiler already reports that error.
-
-Only a `<style scoped>` at the root of a `<template>` is extracted. The build
-rejects a nested one.
 
 ### Known limitations
 
@@ -130,10 +110,8 @@ rejects a nested one.
   file-level `/* stylelint-disable */` at the top of a `.gts` has no effect.
   `stylelint-disable-next-line` inside the block works.
 - A CSS syntax error in one block stops linting for the whole file, the same
-  as a syntax error in a `.css` file. Stylelint reports it as a single
-  `CssSyntaxError` at its line in the `.gts` and moves on to the next file.
-- `--fix` drops a leading UTF-8 byte order mark. Every parser in the chain
-  strips it, and putting it back is not worth the offset bookkeeping.
+  as in a `.css` file. The error is reported at its line in the `.gts`.
+- `--fix` drops a leading UTF-8 byte order mark.
 
 ## List of rules
 
