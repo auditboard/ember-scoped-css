@@ -73,8 +73,8 @@ describe('which blocks are exposed', () => {
 
 describe('preprocessed blocks', () => {
   it('reads scss the default parser would report an error on', async () => {
-    // A `//` comment is swallowed into the following selector by postcss's own
-    // parser, so the dialect parser is what keeps this from being reported.
+    // postcss's own parser folds a `//` comment into the next selector, so only
+    // the scss parser keeps this clean.
     const code = `<template>
   <style scoped lang="scss">
     // the brand colour
@@ -208,8 +208,8 @@ export const Two = <template>
   });
 
   it('keeps positions correct when multi-byte characters precede the template', async () => {
-    // content-tag reports byte offsets. Enough non-ASCII ahead of the template
-    // and the byte/char gap slices the <style> tag out of the window entirely.
+    // content-tag reports byte offsets, so enough non-ASCII before the template
+    // would slice the <style> tag out of the window.
     const code = `const GREETING = 'こんにちは、世界！ようこそ';
 
 <template>
@@ -385,8 +385,7 @@ describe('fix offsets', () => {
     const applied =
       component.slice(0, start) + (fix?.text ?? '') + component.slice(end);
 
-    // The whole point of the range: an LSP "fix this problem" action has to
-    // land on the hex and nowhere else in the file.
+    // An LSP "fix this problem" action must land on the hex and nowhere else.
     expect(applied).toBe(component.replace('#fff', '#ffffff'));
   });
 });
@@ -454,10 +453,9 @@ describe('byte order mark', () => {
   });
 
   it('lints a BOM component whose template ends without trailing space', async () => {
-    // The window's last character is the `>` of </style>, so a window one
-    // short of the BOM cannot parse and the block is dropped with no warning
-    // and no error. The looser fixtures above end in whitespace, where losing
-    // a character is harmless, so they cannot catch that.
+    // The window ends on the `>` of </style>, so a window one short of the BOM
+    // drops the block with no error. The fixtures above end in whitespace and
+    // cannot catch that.
     const code =
       '\uFEFF<template><style scoped>.a{color:#fff}</style></template>\n';
 
@@ -498,7 +496,6 @@ describe('CSS syntax errors', () => {
     const { results } = await lint(code, { 'color-no-hex': true });
     const [warning] = results[0]!.warnings;
 
-    // The unclosed @media is on line 5 of the .gts.
     expect(warning).toEqual(
       expect.objectContaining({
         line: 5,
@@ -509,9 +506,8 @@ describe('CSS syntax errors', () => {
 });
 
 describe('lang attributes naming a preprocessor dialect', () => {
-  // Each body below is rejected by postcss's own parser, so a passing
-  // assertion is evidence the dialect's parser ran and not merely that the
-  // block stopped being skipped.
+  // postcss's own parser rejects each body below, so a pass proves the dialect
+  // parser ran.
   it('matches lang case-insensitively', async () => {
     const code = `<template>
   <style scoped lang="SCSS">
@@ -548,8 +544,8 @@ describe('lang attributes naming a preprocessor dialect', () => {
   });
 
   it('skips lang="sass", the one dialect no parser round-trips byte-exact', () => {
-    // postcss-sass drops trailing newlines on stringify, so linting it would
-    // mean --fix silently rewriting a byte outside the reported warning.
+    // postcss-sass drops trailing newlines on stringify, so --fix would rewrite
+    // a byte outside the warning.
     const source = `<template>
   <style scoped lang="sass">
     .a
@@ -598,10 +594,8 @@ describe('block input', () => {
     const start = decl?.source?.start?.offset ?? 0;
     const end = decl?.source?.end?.offset ?? 0;
 
-    // postcss answers a `word`-based warning position by slicing the input
-    // with these offsets. Reposition makes them absolute, so an input holding
-    // only the block reads the wrong bytes and the position silently falls
-    // back to the start of the node.
+    // postcss slices the input by these absolute offsets to find a `word`, so
+    // a block-only input gives the wrong position.
     expect(input.slice(start, end)).toBe('color: #fff;');
   });
 });

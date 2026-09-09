@@ -10,31 +10,19 @@ import less from 'postcss-less';
 import scss from 'postcss-scss';
 import styl from 'postcss-styl';
 
-/** Plain CSS. `lang` absent, empty, or naming no preprocessor lands here. */
 const CSS_SYNTAX = { parse: postcss.parse, stringify: postcss.stringify };
 
 /**
- * The parser each `lang` needs. Every one of these round-trips its dialect
- * byte-exact, which is the property `--fix` depends on: a block is written
- * back out by the same syntax that read it, so fixing one hex value cannot
- * move a byte anywhere else in the block.
+ * Every parser here round-trips its dialect byte-exact, and parse and
+ * stringify both resolve through syntaxForLang, so `--fix` writes a block back
+ * with the syntax that read it.
  *
- * `sass` is missing on purpose: indented Sass has no parser that reads it
- * correctly, and both candidates were tried.
- *
- * postcss-styl is close, being indentation-based, but Stylus assigns with `=`
- * where Sass uses `:`, so it reads `$brand: #fff` as a selector rather than a
- * declaration and the file comes back with two `Cannot parse selector` errors
- * on ordinary Sass. It also throws a raw TypeError on `=mixin`, which surfaces
- * to the user as `Cannot read properties of undefined (reading 'op')`.
- *
- * postcss-sass reads the syntax but loses source: `=mixin`/`+include` returns
- * an empty AST, and `@extend %placeholder` silently drops a rule. A block
- * using either would lint clean forever, and `--fix` would write back less
- * than it read.
- *
- * Skipping is the only option that neither invents errors on valid source nor
- * quietly discards it. See findStyleBlocks.
+ * `sass` is absent because no parser reads indented Sass correctly.
+ * postcss-styl reads `$brand: #fff` as a selector, since Stylus assigns with
+ * `=`, and throws a TypeError on `=mixin`. postcss-sass returns an empty AST
+ * for `=mixin` and `+include` and drops the rule from `@extend %placeholder`,
+ * so a block using either lints clean and `--fix` writes back less than it
+ * read.
  */
 const SYNTAXES = new Map([
   ['scss', scss],
@@ -44,10 +32,6 @@ const SYNTAXES = new Map([
 ]);
 
 /**
- * Resolving by the stored `lang` rather than by a stored function keeps parse
- * and stringify reading one table, so a block cannot be written back out by a
- * different syntax than read it.
- *
  * @param {string | null} lang lowercased `lang`, or null for plain CSS
  * @returns {{ parse: Function, stringify: Function }}
  */
@@ -58,9 +42,8 @@ function syntaxForLang(lang) {
 }
 
 /**
- * A .gts that does not parse has no styles we can trust. Its real error comes
- * from glint or the template compiler, so we neither report it as a CSS
- * problem nor let it abort the whole stylelint run.
+ * A .gts that does not parse has no styles. Glint already reports that error,
+ * so it is not a CSS problem and must not abort the stylelint run.
  *
  * @param {string} source
  * @returns {Array<{ start: number, end: number }>} each template's contents,
@@ -72,8 +55,7 @@ function findTemplates(source) {
   try {
     transformer = new Transformer(source);
   } catch (error) {
-    // A TypeError here is our bug or a parser API change, not bad user source.
-    // Swallowing it would turn the whole feature into a silent no-op.
+    // A TypeError is our bug or a parser API change, not bad source.
     if (error instanceof TypeError) throw error;
 
     return [];
@@ -104,18 +86,12 @@ function parseTemplateContents(contents) {
 }
 
 /**
- * The CSS text of every root-level `<style scoped>` element in the file, as
- * absolute offsets into `source`, each tagged with the `lang` that decides
- * which parser reads it.
- *
  * @param {string} source contents of a .gts/.gjs file
  * @returns {Array<{ start: number, end: number, lang: string | null }>}
  */
 function findStyleBlocks(source) {
-  // content-tag-utils strips a leading BOM before parsing, so the offsets it
-  // reports are relative to the stripped source. Every index here has to land
-  // in the original, BOM and all, because that is what the block offsets and
-  // `codeBefore` slice, so the BOM's one code unit is added back.
+  // content-tag-utils reports offsets into a BOM-stripped source, but the
+  // block offsets and `codeBefore` slice the original.
   const bomLength = source.charCodeAt(0) === 0xfeff ? 1 : 0;
   const blocks = [];
 
@@ -127,27 +103,21 @@ function findStyleBlocks(source) {
     if (!ast) continue;
 
     for (const node of ast.body) {
-      // Whether the build scopes this block is ember-scoped-css's question to
-      // answer, so it answers it.
+      // The build decides what counts as scoped, so its helper decides here too.
       if (!hasScopedAttribute(node)) continue;
 
       const lang = getLangAttribute(node)?.toLowerCase() ?? null;
 
-      // The one dialect with no parser that reads it correctly. Linting it
-      // would mean either inventing syntax errors on valid Sass or silently
-      // dropping rules from it. See SYNTAXES.
+      // No parser reads indented Sass correctly. See SYNTAXES.
       if (lang === 'sass') continue;
 
-      // `<style scoped inline>` supports interpolation, and a mustache is not
-      // CSS postcss can parse. Taking only children[0] would silently truncate
-      // the block and report a bogus syntax error on valid source, so a block
-      // is only linted when its entire content is one text node.
+      // `<style scoped inline>` allows mustaches, which postcss cannot parse.
+      // Linting only the text around one reports a syntax error on valid source.
       const [text, ...rest] = node.children;
 
       if (!text || rest.length > 0 || text.type !== 'TextNode') continue;
 
-      // Slicing by offset rather than reading `chars` keeps the CSS byte-exact,
-      // so a `--fix` that touches one block cannot rewrite another.
+      // Offsets, not `chars`, so `--fix` writes back the exact bytes it read.
       blocks.push({
         start: contentsStart + text.loc.getStart().offset,
         end: contentsStart + text.loc.getEnd().offset,
@@ -160,19 +130,12 @@ function findStyleBlocks(source) {
 }
 
 /**
- * Move a parsed block from positions relative to the block onto positions
- * relative to the file, so warnings point at real .gts lines.
+ * stylelint builds an editor fix range from `node.source.start.offset`, so a
+ * block-relative offset makes an LSP fix write into unrelated source.
  *
- * `offset` matters as much as line/column: stylelint builds a fix range from
- * `node.source.start.offset` for `computeEditInfo`, and an editor applies that
- * range against the whole file. Leaving it block-relative makes an LSP "fix
- * this problem" action write into unrelated source.
- *
- * The block's `input` moves with its positions. postcss answers a `word`-based
- * warning position by slicing `source.input.css` between the node's offsets,
- * so an input holding only the block would be indexed by .gts offsets that run
- * past its end: the slice comes back empty, the word is not found in it, and
- * the position silently falls back to the start of the whole node.
+ * `input` must be the whole .gts. postcss finds a `word` warning position by
+ * slicing `input.css` between the node's offsets, and a block-only input has
+ * nothing at .gts offsets, so the position falls back to the node start.
  *
  * @param {import('postcss').Root} root
  * @param {number} lineOffset lines of .gts preceding the block
@@ -184,7 +147,7 @@ function reposition(root, lineOffset, columnOffset, offsetShift, input) {
   /** @param {import('postcss').Position | undefined} pos */
   const shift = (pos) => {
     if (!pos) return;
-    // Only the opening line is indented by the tag; later lines start at column 1.
+    // The tag indents only the opening line.
     if (pos.line === 1) pos.column += columnOffset;
     pos.line += lineOffset;
     if (typeof pos.offset === 'number') pos.offset += offsetShift;
@@ -203,9 +166,8 @@ function reposition(root, lineOffset, columnOffset, offsetShift, input) {
 }
 
 /**
- * A CssSyntaxError from a block carries coordinates relative to that block.
- * Left alone it points at whatever happens to sit at that line in the .gts,
- * which is the first thing a user sees when adopting this.
+ * A CssSyntaxError from a block has block-relative coordinates, which point at
+ * the wrong .gts line.
  *
  * @param {unknown} error
  * @param {number} lineOffset
@@ -238,14 +200,11 @@ function shiftSyntaxError(error, lineOffset, columnOffset, offsetShift) {
 }
 
 /**
- * The input every block is positioned against.
- *
- * `css` has to be the exact string the block offsets index, BOM included.
- * postcss strips a leading BOM into `hasBOM` and its stringifier re-emits one
- * for any root whose input carries the flag, which would write a BOM into the
- * middle of the file once per block. The BOM is put back into `css` so offsets
- * line up, and the flag cleared because the first block's `codeBefore` already
- * carries the real one.
+ * The input every block is positioned against, so `css` must be the exact
+ * string the offsets index, BOM included. postcss strips the BOM into
+ * `hasBOM`, and its stringifier emits one per root with that flag, which would
+ * put a BOM before every block. The first block's `codeBefore` already holds
+ * the real one.
  *
  * @param {string} source
  * @param {import('postcss').ProcessOptions} [opts]
@@ -270,8 +229,8 @@ function blockInput(source, opts) {
 export function parse(source, opts) {
   const doc = postcss.document();
 
-  // Built before the no-blocks branch below, so both paths hand stylelint the
-  // same shape. It reads source.input.css to detect the file's line endings.
+  // Set before the no-blocks return so both paths give stylelint the same
+  // shape. It reads source.input.css for the file's line endings.
   doc.source = {
     input: blockInput(source, opts),
     start: { line: 1, column: 1, offset: 0 },
@@ -291,14 +250,13 @@ export function parse(source, opts) {
     try {
       root = syntaxForLang(lang).parse(source.slice(start, end), opts);
     } catch (error) {
-      // Thrown before reposition could run, so the error still carries
-      // block-relative coordinates and would point at the wrong .gts line.
+      // Thrown before reposition ran, so the coordinates are still block-relative.
       throw shiftSyntaxError(error, lineOffset, columnOffset, start);
     }
 
     reposition(root, lineOffset, columnOffset, start, doc.source.input);
 
-    // The .gts around each block rides along verbatim so --fix cannot corrupt it.
+    // The .gts around each block is kept verbatim so --fix cannot corrupt it.
     root.raws.codeBefore = source.slice(cursor, start);
     root.raws.scopedCssLang = lang;
     root.parent = doc;
@@ -307,7 +265,6 @@ export function parse(source, opts) {
   }
 
   if (roots.length === 0) {
-    // A component with no styles is not an error, just an empty document.
     doc.raws.codeBefore = source;
 
     return doc;

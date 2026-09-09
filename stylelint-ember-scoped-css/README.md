@@ -48,11 +48,11 @@ This adds ember-scoped-css specific rules to your existing stylelint config.
 
 ## Linting inline `<style scoped>` blocks
 
-By default stylelint only sees `.css` files, so a component that keeps all of
-its CSS in an inline `<style scoped>` block is silently unlinted. This package
-ships a PostCSS syntax that exposes those blocks to stylelint.
+Stylelint reads only `.css` files by default, so CSS in an inline
+`<style scoped>` block is never linted. This package ships a PostCSS custom
+syntax that exposes those blocks to stylelint.
 
-Point it at your `.gts`/`.gjs` files with an override, so `.css` files keep the
+Add an override for your `.gts` and `.gjs` files. `.css` files keep the
 default syntax:
 
 ```json
@@ -71,86 +71,66 @@ default syntax:
 }
 ```
 
-Then widen the glob your `lint:css` script passes to stylelint:
+Then widen the glob in your `lint:css` script:
 
 ```json
 "lint:css": "stylelint 'app/**/*.{css,gts,gjs}'"
 ```
 
-Warnings report the line and column the CSS occupies in the `.gts` itself, and
-`--fix` rewrites only the CSS, leaving the surrounding component source
-byte-for-byte.
+Warnings report the line and column in the `.gts` file. `--fix` rewrites only
+the CSS and leaves the rest of the file byte-for-byte.
 
-This is opt-in on purpose. It is not part of the shipped config, and nothing
-changes for an existing setup until you both add `customSyntax` and widen your
-glob to include `.gts`/`.gjs`. On a large codebase that has never linted its
-inline styles, turning it on will surface a backlog all at once, so adopt it
-per package behind its own cleanup ticket.
+The syntax is opt-in. Nothing changes until you add `customSyntax` and widen
+the glob. A codebase that has never linted its inline styles will get the whole
+backlog at once, so adopt it one package at a time.
 
 ### What gets linted
 
-The syntax locates each template with `content-tag-utils`, which parses the
-component with `content-tag`, and parses the template with `@glimmer/syntax`,
-then walks the resulting AST, so it only ever picks up real style blocks. A
-`<style>` written inside a plain JS string is left alone.
+The syntax finds each `<template>` with `content-tag-utils`, parses it with
+`@glimmer/syntax`, and walks the AST. Only real `<style>` elements count. A
+`<style>` inside a JS string is left alone.
 
-`content-tag-utils` pins its own `content-tag` at `>= 4.2.0`, because it reads
-the byte offset names v4 introduced and misreads a v3 range rather than
-rejecting it. A project pinned to `content-tag@3` will resolve a second copy.
+`content-tag-utils` requires `content-tag >= 4.2.0`. A project pinned to
+`content-tag@3` will resolve a second copy.
 
-Which blocks count as scoped CSS is not decided here: the `scoped` and `lang`
-attributes are read with `ember-scoped-css`'s own helpers, so the blocks this
-lints are the blocks the build scopes, minus the one exception below.
+The `scoped` and `lang` attributes are read with the same helpers the
+`ember-scoped-css` build uses, so the linted blocks are the scoped blocks, with
+one exception below.
 
-A `lang` naming a preprocessor dialect is read by that dialect's parser rather
-than skipped, so inline SCSS, Less and Stylus are linted like any other block:
+`lang` selects the parser. Matching is case-insensitive, and every parser is a
+dependency of this package:
 
-| `lang`             | parser         |
-| ------------------ | -------------- |
+| `lang`              | parser         |
+| ------------------- | -------------- |
 | absent, `""`, `css` | postcss        |
-| `scss`             | `postcss-scss` |
-| `less`             | `postcss-less` |
-| `styl`, `stylus`   | `postcss-styl` |
+| `scss`              | `postcss-scss` |
+| `less`              | `postcss-less` |
+| `styl`, `stylus`    | `postcss-styl` |
 
-Matching is case-insensitive, and each parser is a dependency of this package,
-so there is nothing extra to install. A `lang` this table does not list is
-parsed as plain CSS, which is what the build does with it too.
+A `lang` not in the table is parsed as plain CSS. The build does the same.
 
 Four kinds of block are skipped:
 
-- **`<style>` without `scoped`.** That is intentionally global CSS, so
-  `no-unscoped-selectors` must not fire on it. Global inline styles stay
-  unlinted.
-- **`<style scoped lang="sass">`.** Indented Sass has no parser that reads it
-  correctly, and both candidates were tried. `postcss-styl` reads
-  `$brand: #fff` as a selector, because Stylus assigns with `=` where Sass
-  uses `:`, so an ordinary Sass block comes back with two `Cannot parse
-  selector` errors; it also throws a raw `TypeError` on `=mixin`.
-  `postcss-sass` reads the syntax but loses source, returning an empty AST for
-  `=mixin`/`+include` and dropping a rule from `@extend %placeholder`, so a
-  block using either would lint clean forever and `--fix` would write back
-  less than it read. Skipping is the only option that neither invents errors
-  on valid source nor quietly discards it. `lang="scss"` is unaffected; this
-  is only the indented dialect.
-- **Blocks containing a `{{mustache}}`.** `<style scoped inline>` supports
-  interpolation, which is not CSS postcss can parse. Linting part of such a
-  block would report a syntax error on valid source.
-- **Blocks in a component whose template does not parse.** The real error comes
-  from glint or the template compiler; reporting it again as a CSS problem, or
-  letting it abort the whole stylelint run, would not help.
+- `<style>` without `scoped`. That is global CSS, and `no-unscoped-selectors`
+  must not fire on it.
+- `<style scoped lang="sass">`. No available parser reads indented Sass
+  correctly. `postcss-styl` reports errors on valid Sass, and `postcss-sass`
+  drops rules from the AST. `lang="scss"` is not affected.
+- Blocks that contain a `{{mustache}}`. `<style scoped inline>` supports
+  interpolation, and postcss cannot parse a mustache.
+- Blocks in a component whose template does not parse. Glint or the template
+  compiler already reports that error.
 
-Note that only a `<style scoped>` at the root of a `<template>` is extracted,
-matching the build, which already rejects a nested one.
+Only a `<style scoped>` at the root of a `<template>` is extracted. The build
+rejects a nested one.
 
 ### Known limitations
 
-- **`stylelint-disable` comments must sit inside the `<style>` block.** The
-  component source around a block belongs to no stylesheet, so a file-level
-  `/* stylelint-disable */` at the top of a `.gts` has no effect.
-  `stylelint-disable-next-line` inside the block works normally.
-- **A CSS syntax error in one block stops the others from being linted.** One
-  document is parsed per file, so the first unparseable block fails the file.
-  The reported position does point at the right line in the `.gts`.
+- `stylelint-disable` comments must sit inside the `<style>` block. A
+  file-level `/* stylelint-disable */` at the top of a `.gts` has no effect.
+  `stylelint-disable-next-line` inside the block works.
+- A CSS syntax error in one block stops linting for the whole file. The
+  reported position points at the right line in the `.gts`.
 
 ## List of rules
 
