@@ -47,7 +47,7 @@ function syntaxForLang(lang) {
  *
  * @param {string} source
  * @returns {Array<{ start: number, end: number }>} each template's contents,
- *   as indices into `source` with any leading BOM stripped
+ *   as indices into `source`
  */
 function findTemplates(source) {
   let transformer;
@@ -90,14 +90,11 @@ function parseTemplateContents(contents) {
  * @returns {Array<{ start: number, end: number, lang: string | null }>}
  */
 function findStyleBlocks(source) {
-  // content-tag-utils reports offsets into a BOM-stripped source, but the
-  // block offsets and `codeBefore` slice the original.
-  const bomLength = source.charCodeAt(0) === 0xfeff ? 1 : 0;
   const blocks = [];
 
-  for (const template of findTemplates(source)) {
-    const contentsStart = template.start + bomLength;
-    const contentsEnd = template.end + bomLength;
+  for (const { start: contentsStart, end: contentsEnd } of findTemplates(
+    source,
+  )) {
     const ast = parseTemplateContents(source.slice(contentsStart, contentsEnd));
 
     if (!ast) continue;
@@ -200,39 +197,21 @@ function shiftSyntaxError(error, lineOffset, columnOffset, offsetShift) {
 }
 
 /**
- * The input every block is positioned against, so `css` must be the exact
- * string the offsets index, BOM included. postcss strips the BOM into
- * `hasBOM`, and its stringifier emits one per root with that flag, which would
- * put a BOM before every block. The first block's `codeBefore` already holds
- * the real one.
- *
- * @param {string} source
- * @param {import('postcss').ProcessOptions} [opts]
- * @returns {import('postcss').Input}
- */
-function blockInput(source, opts) {
-  const input = new postcss.Input(source, opts);
-
-  if (input.hasBOM) {
-    input.css = source;
-    input.hasBOM = false;
-  }
-
-  return input;
-}
-
-/**
  * @param {string} source
  * @param {import('postcss').ProcessOptions} [opts]
  * @returns {import('postcss').Document}
  */
 export function parse(source, opts) {
+  // content-tag-utils and postcss both strip a leading BOM before parsing, so
+  // the offsets they report only line up with a source that has none.
+  source = source.replace(/^\uFEFF+/, '');
+
   const doc = postcss.document();
 
   // Set before the no-blocks return so both paths give stylelint the same
   // shape. It reads source.input.css for the file's line endings.
   doc.source = {
-    input: blockInput(source, opts),
+    input: new postcss.Input(source, opts),
     start: { line: 1, column: 1, offset: 0 },
   };
 

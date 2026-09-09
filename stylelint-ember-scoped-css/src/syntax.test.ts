@@ -453,9 +453,9 @@ describe('byte order mark', () => {
   });
 
   it('lints a BOM component whose template ends without trailing space', async () => {
-    // The window ends on the `>` of </style>, so a window one short of the BOM
-    // drops the block with no error. The fixtures above end in whitespace and
-    // cannot catch that.
+    // The window ends on the `>` of </style>, so a window one short drops the
+    // block with no error. The fixtures above end in whitespace and cannot
+    // catch that.
     const code =
       '\uFEFF<template><style scoped>.a{color:#fff}</style></template>\n';
 
@@ -463,21 +463,25 @@ describe('byte order mark', () => {
 
     expect(results[0]?.parseErrors).toEqual([]);
     expect(results[0]?.warnings).toEqual([
-      expect.objectContaining({ line: 1, column: 35, rule: 'color-no-hex' }),
+      expect.objectContaining({ line: 1, column: 34, rule: 'color-no-hex' }),
     ]);
   });
 
-  it('round-trips a BOM component under --fix', async () => {
-    const source = `\uFEFF<template>
+  it('drops the BOM under --fix', async () => {
+    const body = `<template>
   <style scoped>
     .a { color: #fff; }
   </style>
 </template>
 `;
 
-    const { code } = await lint(source, { 'color-hex-length': 'long' }, true);
+    const { code } = await lint(
+      `\uFEFF${body}`,
+      { 'color-hex-length': 'long' },
+      true,
+    );
 
-    expect(code).toBe(source.replace('#fff', '#ffffff'));
+    expect(code).toBe(body.replace('#fff', '#ffffff'));
   });
 });
 
