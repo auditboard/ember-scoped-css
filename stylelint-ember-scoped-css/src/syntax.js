@@ -6,39 +6,40 @@ import {
   hasScopedAttribute,
 } from 'ember-scoped-css/__private_do_not_use_are_you_serious__/style-tag';
 import postcss from 'postcss';
-import less from 'postcss-less';
-import scss from 'postcss-scss';
-import styl from 'postcss-styl';
+
+import { loadParser, parserPackage } from './parsers.js';
 
 const CSS_SYNTAX = { parse: postcss.parse, stringify: postcss.stringify };
 
 /**
- * Every parser here round-trips its dialect byte-exact, and parse and
- * stringify both resolve through syntaxForLang, so `--fix` writes a block back
- * with the syntax that read it.
+ * parse and stringify both resolve through here, so `--fix` writes a block
+ * back with the syntax that read it.
  *
- * `sass` is absent because no parser reads indented Sass correctly.
- * postcss-styl reads `$brand: #fff` as a selector, since Stylus assigns with
- * `=`, and throws a TypeError on `=mixin`. postcss-sass returns an empty AST
- * for `=mixin` and `+include` and drops the rule from `@extend %placeholder`,
- * so a block using either lints clean and `--fix` writes back less than it
- * read.
- */
-const SYNTAXES = new Map([
-  ['scss', scss],
-  ['less', less],
-  ['styl', styl],
-  ['stylus', styl],
-]);
-
-/**
  * @param {string | null} lang lowercased `lang`, or null for plain CSS
- * @returns {{ parse: Function, stringify: Function }}
+ * @returns {{ parse: Function, stringify: Function } | null} null when the
+ *   dialect's parser is not installed
  */
 function syntaxForLang(lang) {
-  if (lang === null) return CSS_SYNTAX;
+  if (lang === null || parserPackage(lang) === null) return CSS_SYNTAX;
 
-  return SYNTAXES.get(lang) ?? CSS_SYNTAX;
+  return loadParser(lang);
+}
+
+/**
+ * @param {import('postcss').Input} input the whole .gts
+ * @param {string} lang
+ * @param {number} line
+ * @param {number} column
+ * @returns {Error}
+ */
+function missingParserError(input, lang, line, column) {
+  const pkg = parserPackage(lang);
+
+  return input.error(
+    `lang="${lang}" needs the ${pkg} package, which is not installed. Run: npm add -D ${pkg}`,
+    line,
+    column,
+  );
 }
 
 /**
@@ -104,9 +105,6 @@ function findStyleBlocks(source) {
       if (!hasScopedAttribute(node)) continue;
 
       const lang = getLangAttribute(node)?.toLowerCase() ?? null;
-
-      // No parser reads indented Sass correctly. See SYNTAXES.
-      if (lang === 'sass') continue;
 
       // `<style scoped inline>` allows mustaches, which postcss cannot parse.
       // Linting only the text around one reports a syntax error on valid source.
@@ -224,10 +222,21 @@ export function parse(source, opts) {
     const lineOffset = before.split('\n').length - 1;
     const columnOffset = start - (before.lastIndexOf('\n') + 1);
 
+    const dialect = syntaxForLang(lang);
+
+    if (dialect === null) {
+      throw missingParserError(
+        doc.source.input,
+        lang,
+        lineOffset + 1,
+        columnOffset + 1,
+      );
+    }
+
     let root;
 
     try {
-      root = syntaxForLang(lang).parse(source.slice(start, end), opts);
+      root = dialect.parse(source.slice(start, end), opts);
     } catch (error) {
       // Thrown before reposition ran, so the coordinates are still block-relative.
       throw shiftSyntaxError(error, lineOffset, columnOffset, start);

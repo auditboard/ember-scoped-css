@@ -39,10 +39,7 @@
   "dependencies": {
     "@glimmer/syntax": "^0.94.8",
     "content-tag-utils": "^0.7.2",
-    "postcss": "^8.4.0",
-    "postcss-less": "^6.0.0",
-    "postcss-scss": "^4.0.9",
-    "postcss-styl": "^0.12.3"
+    "postcss": "^8.4.0"
   },
   "devDependencies": {
     "@glimmer/env": "^0.1.7",
@@ -51,16 +48,38 @@
     "concurrently": "^9.2.1",
     "ember-scoped-css": "workspace:*",
     "eslint": "^9.36.0",
+    "postcss-less": "^6.0.0",
+    "postcss-scss": "^4.0.9",
     "postcss-selector-parser": "^6.1.0",
+    "postcss-styl": "^0.12.3",
     "prettier": "^3.6.2",
     "stylelint": "^17.0.0",
+    "sugarss": "^5.0.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
     "vitest-stylelint-utils": "^2.0.0"
   },
   "peerDependencies": {
     "ember-scoped-css": ">= 3.6.0",
-    "stylelint": "^16.0.0 || ^17.0.0"
+    "postcss-less": "^6.0.0",
+    "postcss-scss": "^4.0.9",
+    "postcss-styl": "^0.12.3",
+    "stylelint": "^16.0.0 || ^17.0.0",
+    "sugarss": "^5.0.1"
+  },
+  "peerDependenciesMeta": {
+    "postcss-less": {
+      "optional": true
+    },
+    "postcss-scss": {
+      "optional": true
+    },
+    "postcss-styl": {
+      "optional": true
+    },
+    "sugarss": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">= 22.16"

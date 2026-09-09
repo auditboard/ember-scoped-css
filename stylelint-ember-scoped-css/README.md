@@ -90,16 +90,28 @@ Every `<style scoped>` at the root of a `<template>`. A `<style>` inside a JS
 string is left alone. The build already rejects a `<style scoped>` nested
 deeper than the template root.
 
-`lang` picks the dialect, case-insensitively. `scss`, `less`, `styl`, and
-`stylus` work with nothing extra to install. Any other value, or no `lang`, is
-plain CSS, which is what the build does too.
+`lang` picks the dialect, case-insensitively. Any other value, or no `lang`, is
+plain CSS, which is what the build does too. Each dialect needs its parser
+installed, the same way Vite needs the preprocessor:
+
+```sh
+# lang="scss"
+npm add -D postcss-scss
+# lang="sass"
+npm add -D sugarss
+# lang="less"
+npm add -D postcss-less
+# lang="styl" or lang="stylus"
+npm add -D postcss-styl
+```
+
+A block whose parser is missing is reported at its `<style>` tag with the
+package to install.
 
 Skipped:
 
 - `<style>` without `scoped`. That is global CSS, and `no-unscoped-selectors`
   must not fire on it.
-- `<style scoped lang="sass">`. No parser reads indented Sass reliably.
-  `lang="scss"` is not affected.
 - Blocks that contain a `{{mustache}}`. Interpolated CSS cannot be parsed.
 - Blocks in a component whose template does not parse. Glint or the template
   compiler already reports that error.
@@ -112,6 +124,9 @@ Skipped:
 - A CSS syntax error in one block stops linting for the whole file, the same
   as in a `.css` file. The error is reported at its line in the `.gts`.
 - `--fix` drops a leading UTF-8 byte order mark.
+- In indented Sass, the `=mixin` and `+include` shorthand is reported as a
+  syntax error. Use `@mixin` and `@include`. Nested properties such as `font:`
+  with indented children are read as a rule, so selector rules may report them.
 
 ## List of rules
 
