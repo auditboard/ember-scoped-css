@@ -129,8 +129,9 @@ rejects a nested one.
 - `stylelint-disable` comments must sit inside the `<style>` block. A
   file-level `/* stylelint-disable */` at the top of a `.gts` has no effect.
   `stylelint-disable-next-line` inside the block works.
-- A CSS syntax error in one block stops linting for the whole file. The
-  reported position points at the right line in the `.gts`.
+- A CSS syntax error in one block stops linting for the whole file, the same
+  as a syntax error in a `.css` file. Stylelint reports it as a single
+  `CssSyntaxError` at its line in the `.gts` and moves on to the next file.
 - `--fix` drops a leading UTF-8 byte order mark. Every parser in the chain
   strips it, and putting it back is not worth the offset bookkeeping.
 
