@@ -1,7 +1,6 @@
 import { preprocess as parseTemplate } from '@glimmer/syntax';
 
-import { Preprocessor } from 'content-tag';
-import { coordinatesOf } from 'content-tag-utils';
+import { Transformer } from 'content-tag-utils';
 import {
   getLangAttribute,
   hasScopedAttribute,
@@ -10,8 +9,6 @@ import postcss from 'postcss';
 import less from 'postcss-less';
 import scss from 'postcss-scss';
 import styl from 'postcss-styl';
-
-const preprocessor = new Preprocessor();
 
 /** Plain CSS. `lang` absent, empty, or naming no preprocessor lands here. */
 const CSS_SYNTAX = { parse: postcss.parse, stringify: postcss.stringify };
@@ -66,11 +63,14 @@ function syntaxForLang(lang) {
  * problem nor let it abort the whole stylelint run.
  *
  * @param {string} source
- * @returns {Array<{ contentRange: { start: number, end: number } }>}
+ * @returns {Array<{ start: number, end: number }>} each template's contents,
+ *   as indices into `source` with any leading BOM stripped
  */
-function parseTemplates(source) {
+function findTemplates(source) {
+  let transformer;
+
   try {
-    return preprocessor.parse(source);
+    transformer = new Transformer(source);
   } catch (error) {
     // A TypeError here is our bug or a parser API change, not bad user source.
     // Swallowing it would turn the whole feature into a silent no-op.
@@ -78,6 +78,15 @@ function parseTemplates(source) {
 
     return [];
   }
+
+  /** @type {Array<{ start: number, end: number }>} */
+  const templates = [];
+
+  transformer.each((_contents, { start, end }) => {
+    templates.push({ start, end });
+  });
+
+  return templates;
 }
 
 /**
@@ -103,18 +112,16 @@ function parseTemplateContents(contents) {
  * @returns {Array<{ start: number, end: number, lang: string | null }>}
  */
 function findStyleBlocks(source) {
-  // content-tag and content-tag-utils both strip a leading BOM, so the offsets
-  // they report are relative to the stripped source. Every index here has to
-  // land in the original, BOM and all, because that is what the block offsets
-  // and `codeBefore` slice, so the BOM's one code unit is added back.
+  // content-tag-utils strips a leading BOM before parsing, so the offsets it
+  // reports are relative to the stripped source. Every index here has to land
+  // in the original, BOM and all, because that is what the block offsets and
+  // `codeBefore` slice, so the BOM's one code unit is added back.
   const bomLength = source.charCodeAt(0) === 0xfeff ? 1 : 0;
   const blocks = [];
 
-  for (const template of parseTemplates(source)) {
-    // Byte offsets to string indices, which is what we slice by.
-    const range = coordinatesOf(source, template);
-    const contentsStart = range.start + bomLength;
-    const contentsEnd = range.end + bomLength;
+  for (const template of findTemplates(source)) {
+    const contentsStart = template.start + bomLength;
+    const contentsEnd = template.end + bomLength;
     const ast = parseTemplateContents(source.slice(contentsStart, contentsEnd));
 
     if (!ast) continue;
